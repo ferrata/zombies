@@ -3,11 +3,16 @@ import { Event } from "../scenes/Event";
 import Flashlight from "./Flashlight";
 import SpineContainer from "../types/SpineContainer";
 
-enum Weapon {
+enum PlayerWeapon {
   HANDGUN = "handgun",
   SHOTGUN = "shotgun",
   RIFLE = "rifle",
   KNIFE = "knife",
+}
+
+enum PlayerState {
+  IDLE = "idle",
+  MOVE = "move",
 }
 
 export default class Player extends SpineContainer {
@@ -19,10 +24,20 @@ export default class Player extends SpineContainer {
 
   private flashlight: Flashlight;
   private shadow: Phaser.FX.Shadow;
-  private currentWeapon: Weapon = Weapon.HANDGUN;
+  private currentState: PlayerState = PlayerState.IDLE;
+  private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN;
 
   constructor(scene: GameScene, x: number, y: number) {
-    super(scene, x, y, "player", `idle_${Weapon.HANDGUN}`, true);
+    super(
+      scene,
+      x,
+      y,
+      "player",
+      `${PlayerState.IDLE}_${PlayerWeapon.HANDGUN}`,
+      true
+    );
+
+    this.name = "player";
 
     this.setScale(0.5, 0.5);
 
@@ -35,36 +50,23 @@ export default class Player extends SpineContainer {
       .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
       .setSize(bounds.size.x, bounds.size.y)
       .setCollideWorldBounds(true);
+
+    this.setCurrentState(PlayerState.IDLE);
+    this.selectWeapon(PlayerWeapon.HANDGUN);
   }
 
   public preUpdate(time: number, delta: number) {
-    let { left, right, up, down, space, keys } = this.scene.inputs;
+    let { left, right, up, down, keys } = this.scene.inputs;
     if (up) {
-      this.scene.physics.velocityFromRotation(
-        this.rotation,
-        this.walkingSpeed,
-        this.body.velocity
-      );
+      this.moveForward();
     } else if (down) {
-      this.scene.physics.velocityFromRotation(
-        this.rotation,
-        -this.walkingSpeed,
-        this.body.velocity
-      );
+      this.moveBackward();
     } else if (left) {
-      this.scene.physics.velocityFromRotation(
-        this.rotation + 0.5 * Math.PI,
-        -this.strafeSpeed,
-        this.body.velocity
-      );
+      this.strafeLeft();
     } else if (right) {
-      this.scene.physics.velocityFromRotation(
-        this.rotation + 0.5 * Math.PI,
-        this.strafeSpeed,
-        this.body.velocity
-      );
+      this.strafeRight();
     } else {
-      this.body.setVelocity(0);
+      this.stop();
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.F)) {
@@ -89,19 +91,19 @@ export default class Player extends SpineContainer {
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.one)) {
-      this.setWeapon(Weapon.KNIFE);
+      this.selectWeapon(PlayerWeapon.KNIFE);
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.two)) {
-      this.setWeapon(Weapon.HANDGUN);
+      this.selectWeapon(PlayerWeapon.HANDGUN);
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.three)) {
-      this.setWeapon(Weapon.SHOTGUN);
+      this.selectWeapon(PlayerWeapon.SHOTGUN);
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.four)) {
-      this.setWeapon(Weapon.RIFLE);
+      this.selectWeapon(PlayerWeapon.RIFLE);
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.space)) {
@@ -109,17 +111,68 @@ export default class Player extends SpineContainer {
     }
   }
 
-  public setWeapon(weapon: Weapon) {
+  private setCurrentState(currentState: PlayerState) {
+    if (this.currentState === currentState) {
+      return;
+    }
+
+    this.currentState = currentState;
+    const animation = `${currentState}_${this.currentWeapon}`;
+    this.spine.setAnimation(0, animation, true);
+  }
+
+  private stop() {
+    this.setCurrentState(PlayerState.IDLE);
+    this.body.setVelocity(0);
+  }
+
+  private strafeRight() {
+    this.setCurrentState(PlayerState.MOVE);
+    this.scene.physics.velocityFromRotation(
+      this.rotation + 0.5 * Math.PI,
+      this.strafeSpeed,
+      this.body.velocity
+    );
+  }
+
+  private strafeLeft() {
+    this.setCurrentState(PlayerState.MOVE);
+    this.scene.physics.velocityFromRotation(
+      this.rotation + 0.5 * Math.PI,
+      -this.strafeSpeed,
+      this.body.velocity
+    );
+  }
+
+  private moveBackward() {
+    this.setCurrentState(PlayerState.MOVE);
+    this.scene.physics.velocityFromRotation(
+      this.rotation,
+      -this.walkingSpeed,
+      this.body.velocity
+    );
+  }
+
+  private moveForward() {
+    this.setCurrentState(PlayerState.MOVE);
+    this.scene.physics.velocityFromRotation(
+      this.rotation,
+      this.walkingSpeed,
+      this.body.velocity
+    );
+  }
+
+  public selectWeapon(weapon: PlayerWeapon) {
     if (this.currentWeapon === weapon) {
       return;
     }
 
     this.currentWeapon = weapon;
-    this.spine.setAnimation(0, `idle_${weapon}`, true);
+    this.spine.setAnimation(0, `${this.currentState}_${weapon}`, true);
   }
 
   public attack() {
-    if (this.currentWeapon === Weapon.KNIFE) {
+    if (this.currentWeapon === PlayerWeapon.KNIFE) {
       this.spine.setAnimation(0, `meleeattack_${this.currentWeapon}`, false);
       return;
     }
