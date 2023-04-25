@@ -16,14 +16,8 @@ export default class GameScene extends Phaser.Scene {
     return this._inputs;
   }
 
-  public preload() {
-    this.load.image("flashlight", "assets/images/flashlight.png");
-    this.load.image("target", "assets/images/pointer.png");
-    this.load.image("background", "assets/images/floor.png");
-
-    this.load.setPath("assets/spine/");
-    // @ts-ignore
-    this.load.spine("player", "player.json", "player.atlas");
+  constructor() {
+    super("GameScene");
   }
 
   public closestObject(): Phaser.GameObjects.GameObject {

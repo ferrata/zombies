@@ -1,6 +1,7 @@
 import "phaser";
 import "phaser/plugins/spine/dist/SpinePlugin";
 import DebugScreenPlugin from "./plugins/DebugScreenPlugin";
+import PreloadScene from "./scenes/PreloadScene";
 import GameScene from "./scenes/GameScene";
 
 const config: Phaser.Types.Core.GameConfig = {
@@ -29,7 +30,7 @@ const config: Phaser.Types.Core.GameConfig = {
       },
     },
   },
-  scene: [GameScene],
+  scene: [PreloadScene, GameScene],
   plugins: {
     scene: [
       { key: "DebugScreen", plugin: DebugScreenPlugin, start: true },
