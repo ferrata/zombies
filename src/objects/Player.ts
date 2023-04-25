@@ -29,7 +29,8 @@ export default class Player extends SpineContainer {
 
   private readonly runningSpeed: number = 500;
   private readonly walkingSpeed: number = 230;
-  private readonly strafeSpeed: number = 130;
+  private readonly strafeSpeed: number = 230;
+  private readonly strafeFastSpeed: number = 500;
 
   // @ts-ignore
   private legs: SpineGameObject;
@@ -74,7 +75,11 @@ export default class Player extends SpineContainer {
   public preUpdate(time: number, delta: number) {
     const { up, down, left, right, keys } = this.scene.inputs;
 
-    if (up) {
+    if (left) {
+      this.strafeLeft(keys.shift.isDown);
+    } else if (right) {
+      this.strafeRight(keys.shift.isDown);
+    } else if (up) {
       if (keys.shift.isDown) {
         this.runForward();
       } else {
@@ -86,10 +91,6 @@ export default class Player extends SpineContainer {
       } else {
         this.runBackward();
       }
-    } else if (left) {
-      this.strafeLeft();
-    } else if (right) {
-      this.strafeRight();
     } else {
       this.stop();
     }
@@ -157,20 +158,20 @@ export default class Player extends SpineContainer {
     this.body.setVelocity(0);
   }
 
-  private strafeRight() {
+  private strafeRight(fast: boolean = false) {
     this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_RIGHT);
     this.scene.physics.velocityFromRotation(
       this.rotation + 0.5 * Math.PI,
-      this.strafeSpeed,
+      fast ? this.strafeFastSpeed : this.strafeSpeed,
       this.body.velocity
     );
   }
 
-  private strafeLeft() {
+  private strafeLeft(fast: boolean = false) {
     this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_LEFT);
     this.scene.physics.velocityFromRotation(
       this.rotation + 0.5 * Math.PI,
-      -this.strafeSpeed,
+      -(fast ? this.strafeFastSpeed : this.strafeSpeed),
       this.body.velocity
     );
   }
