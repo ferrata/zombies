@@ -112,6 +112,10 @@ export default class Player extends SpineContainer {
       }
     }
 
+    if (Phaser.Input.Keyboard.JustDown(keys.R)) {
+      this.reload();
+    }
+
     if (Phaser.Input.Keyboard.JustDown(keys.one)) {
       this.selectWeapon(PlayerWeapon.KNIFE);
     }
@@ -220,6 +224,17 @@ export default class Player extends SpineContainer {
     }
 
     this.spine.setAnimation(0, `shoot_${this.currentWeapon}`, false);
+  }
+
+  private reload() {
+    if (this.currentWeapon === PlayerWeapon.KNIFE) {
+      return;
+    }
+
+    this.spine.setAnimation(0, `reload_${this.currentWeapon}`, false);
+
+    // TODO: add reload time for shotgun
+    // this.spine.addAnimation(0, `reload_${this.currentWeapon}`, false);
   }
 
   public useItem(item: Phaser.GameObjects.GameObject) {
