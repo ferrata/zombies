@@ -15,16 +15,28 @@ enum PlayerState {
   MOVE = "move",
 }
 
+enum PlayerLegsState {
+  IDLE = "idle",
+  WALK = "walk",
+  STRAFE_LEFT = "strafe_left",
+  STRAFE_RIGHT = "strafe_right",
+  RUN = "run",
+}
+
 export default class Player extends SpineContainer {
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
+  private readonly runningSpeed: number = 530;
   private readonly walkingSpeed: number = 230;
   private readonly strafeSpeed: number = 130;
 
+  // @ts-ignore
+  private legs: SpineGameObject;
   private flashlight: Flashlight;
   private shadow: Phaser.FX.Shadow;
   private currentState: PlayerState = PlayerState.IDLE;
+  private currentLegsState: PlayerLegsState = PlayerLegsState.IDLE;
   private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN;
 
   constructor(scene: GameScene, x: number, y: number) {
@@ -41,6 +53,10 @@ export default class Player extends SpineContainer {
 
     this.setScale(0.5, 0.5);
 
+    // @ts-ignore
+    this.legs = scene.add.spine(0, 0, "player-legs", PlayerState.IDLE, true);
+    this.addSpine(this.legs, 0);
+
     this.scene.add.existing(this);
     this.scene.physics.world.enable(this);
     this.shadow = this.postFX.addShadow(0, 0, 0.1, 0.3, 0x000000, 2, 3);
@@ -51,14 +67,20 @@ export default class Player extends SpineContainer {
       .setSize(bounds.size.x, bounds.size.y)
       .setCollideWorldBounds(true);
 
-    this.setCurrentState(PlayerState.IDLE);
+    this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
     this.selectWeapon(PlayerWeapon.HANDGUN);
   }
 
   public preUpdate(time: number, delta: number) {
-    let { left, right, up, down, keys } = this.scene.inputs;
-    if (up) {
+    const { up, down, left, right, upShift, downShift, keys } =
+      this.scene.inputs;
+
+    if (upShift) {
+      this.runForward();
+    } else if (up) {
       this.moveForward();
+    } else if (downShift) {
+      this.runBackward();
     } else if (down) {
       this.moveBackward();
     } else if (left) {
@@ -111,23 +133,25 @@ export default class Player extends SpineContainer {
     }
   }
 
-  private setCurrentState(currentState: PlayerState) {
-    if (this.currentState === currentState) {
-      return;
+  private setCurrentState(state: PlayerState, legsState: PlayerLegsState) {
+    if (this.currentState !== state) {
+      this.currentState = state;
+      this.spine.setAnimation(0, `${state}_${this.currentWeapon}`, true);
     }
 
-    this.currentState = currentState;
-    const animation = `${currentState}_${this.currentWeapon}`;
-    this.spine.setAnimation(0, animation, true);
+    if (this.currentLegsState !== legsState) {
+      this.currentLegsState = legsState;
+      this.legs.setAnimation(0, legsState, true);
+    }
   }
 
   private stop() {
-    this.setCurrentState(PlayerState.IDLE);
+    this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
     this.body.setVelocity(0);
   }
 
   private strafeRight() {
-    this.setCurrentState(PlayerState.MOVE);
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_RIGHT);
     this.scene.physics.velocityFromRotation(
       this.rotation + 0.5 * Math.PI,
       this.strafeSpeed,
@@ -136,7 +160,7 @@ export default class Player extends SpineContainer {
   }
 
   private strafeLeft() {
-    this.setCurrentState(PlayerState.MOVE);
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_LEFT);
     this.scene.physics.velocityFromRotation(
       this.rotation + 0.5 * Math.PI,
       -this.strafeSpeed,
@@ -145,7 +169,7 @@ export default class Player extends SpineContainer {
   }
 
   private moveBackward() {
-    this.setCurrentState(PlayerState.MOVE);
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.WALK);
     this.scene.physics.velocityFromRotation(
       this.rotation,
       -this.walkingSpeed,
@@ -154,10 +178,28 @@ export default class Player extends SpineContainer {
   }
 
   private moveForward() {
-    this.setCurrentState(PlayerState.MOVE);
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.WALK);
     this.scene.physics.velocityFromRotation(
       this.rotation,
       this.walkingSpeed,
+      this.body.velocity
+    );
+  }
+
+  private runBackward() {
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.RUN);
+    this.scene.physics.velocityFromRotation(
+      this.rotation,
+      -this.runningSpeed,
+      this.body.velocity
+    );
+  }
+
+  private runForward() {
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.RUN);
+    this.scene.physics.velocityFromRotation(
+      this.rotation,
+      this.runningSpeed,
       this.body.velocity
     );
   }

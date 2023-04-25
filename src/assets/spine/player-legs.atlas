@@ -1,0 +1,27 @@
+
+player-legs.png
+size: 235, 88
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+foot
+  rotate: false
+  xy: 162, 3
+  size: 71, 37
+  orig: 96, 64
+  offset: 13, 12
+  index: -1
+leg
+  rotate: false
+  xy: 162, 42
+  size: 69, 44
+  orig: 96, 64
+  offset: 13, 10
+  index: -1
+torso
+  rotate: true
+  xy: 2, 2
+  size: 84, 158
+  orig: 96, 192
+  offset: 4, 15
+  index: -1

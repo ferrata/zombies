@@ -2,10 +2,12 @@ import "phaser";
 
 export default class SpineContainer extends Phaser.GameObjects.Container {
   // @ts-ignore
-  private spineGameObject: SpineGameObject;
+  private mainSpine: SpineGameObject;
+  // @ts-ignore
+  private spines: { [key: string]: SpineGameObject } = {};
 
   get spine() {
-    return this.spineGameObject;
+    return this.mainSpine;
   }
 
   constructor(
@@ -19,24 +21,34 @@ export default class SpineContainer extends Phaser.GameObjects.Container {
     super(scene, x, y);
 
     // @ts-ignore
-    this.spineGameObject = scene.add.spine(0, 0, key, anim, loop);
+    this.mainSpine = scene.add.spine(0, 0, key, anim, loop);
 
     scene.physics.add.existing(this);
 
-    const bounds = this.spineGameObject.getBounds();
+    const bounds = this.mainSpine.getBounds();
     const width = bounds.size.x;
     const height = bounds.size.y;
     this.setPhysicsSize(width, height);
 
-    this.add(this.spineGameObject);
+    this.add(this.mainSpine);
+  }
+
+  // @ts-ignore
+  public addSpine(spine: SpineGameObject, index?: number) {
+    this.addAt(spine, index);
+    this.spines[spine.key] = spine;
+  }
+
+  public getSpine(key: string) {
+    return this.spines[key];
   }
 
   faceDirection(dir: 1 | -1) {
-    if (this.spineGameObject.scaleX === dir) {
+    if (this.mainSpine.scaleX === dir) {
       return;
     }
 
-    this.spineGameObject.scaleX = dir;
+    this.mainSpine.scaleX = dir;
   }
 
   setPhysicsSize(width: number, height: number) {
