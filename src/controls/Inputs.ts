@@ -27,6 +27,7 @@ export interface Keys {
   seven: Phaser.Input.Keyboard.Key;
   eight: Phaser.Input.Keyboard.Key;
   nine: Phaser.Input.Keyboard.Key;
+  shift: Phaser.Input.Keyboard.Key;
 }
 
 export default class Inputs {
@@ -37,7 +38,7 @@ export default class Inputs {
   constructor(input: Phaser.Input.InputPlugin) {
     this._input = input;
     this._keys = this._input.keyboard.addKeys(
-      "W,A,S,D,Z,X,C,F,E,R,up,left,down,right,space,enter,comma,period,zero,one,two,three,four,five,six,seven,eight,nine"
+      "W,A,S,D,Z,X,C,F,E,R,up,left,down,right,space,enter,comma,period,zero,one,two,three,four,five,six,seven,eight,nine,shift"
     ) as Keys;
   }
 
@@ -53,22 +54,8 @@ export default class Inputs {
     return this.keys.up.isDown || this.keys.W.isDown || this.padAxisV === -1;
   }
 
-  public get upShift() {
-    return (
-      (this.keys.up.isDown && this.keys.up.shiftKey) ||
-      (this.keys.W.isDown && this.keys.W.shiftKey)
-    );
-  }
-
   public get down() {
     return this.keys.down.isDown || this.keys.S.isDown || this.padAxisV === 1;
-  }
-
-  public get downShift() {
-    return (
-      (this.keys.down.isDown && this.keys.down.shiftKey) ||
-      (this.keys.S.isDown && this.keys.S.shiftKey)
-    );
   }
 
   public get space() {

@@ -27,7 +27,7 @@ export default class Player extends SpineContainer {
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
-  private readonly runningSpeed: number = 530;
+  private readonly runningSpeed: number = 500;
   private readonly walkingSpeed: number = 230;
   private readonly strafeSpeed: number = 130;
 
@@ -72,17 +72,20 @@ export default class Player extends SpineContainer {
   }
 
   public preUpdate(time: number, delta: number) {
-    const { up, down, left, right, upShift, downShift, keys } =
-      this.scene.inputs;
+    const { up, down, left, right, keys } = this.scene.inputs;
 
-    if (upShift) {
-      this.runForward();
-    } else if (up) {
-      this.moveForward();
-    } else if (downShift) {
-      this.runBackward();
+    if (up) {
+      if (keys.shift.isDown) {
+        this.runForward();
+      } else {
+        this.moveForward();
+      }
     } else if (down) {
-      this.moveBackward();
+      if (!keys.shift.isDown) {
+        this.moveBackward();
+      } else {
+        this.runBackward();
+      }
     } else if (left) {
       this.strafeLeft();
     } else if (right) {
