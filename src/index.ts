@@ -1,11 +1,13 @@
 import "phaser";
+import "phaser/plugins/spine/dist/SpinePlugin";
 import GameScene from "./scenes/GameScene";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: "game",
-  width: 800,
-  height: 600,
+  width: window.innerWidth - 10,
+  height: window.innerHeight - 10,
+  autoCenter: Phaser.Scale.CENTER_BOTH,
   zoom: 1,
   input: {
     keyboard: true,
@@ -27,6 +29,11 @@ const config: Phaser.Types.Core.GameConfig = {
     },
   },
   scene: [GameScene],
+  plugins: {
+    scene: [
+      { key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" },
+    ],
+  },
 };
 
 window.addEventListener("load", () => new Phaser.Game(config));

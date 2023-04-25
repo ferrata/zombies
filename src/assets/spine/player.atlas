@@ -1,0 +1,153 @@
+
+player.png
+size: 374, 258
+format: RGBA8888
+filter: Linear, Linear
+repeat: none
+ammo_clip_empty
+  rotate: true
+  xy: 143, 131
+  size: 38, 21
+  orig: 64, 32
+  offset: 14, 5
+  index: -1
+ammo_clip_full
+  rotate: false
+  xy: 334, 6
+  size: 38, 21
+  orig: 64, 32
+  offset: 14, 4
+  index: -1
+arm
+  rotate: false
+  xy: 103, 190
+  size: 72, 45
+  orig: 96, 64
+  offset: 12, 7
+  index: -1
+backpack
+  rotate: true
+  xy: 232, 129
+  size: 127, 114
+  orig: 160, 128
+  offset: 17, 6
+  index: -1
+flashlight
+  rotate: false
+  xy: 289, 6
+  size: 43, 27
+  orig: 64, 64
+  offset: 10, 18
+  index: -1
+foot
+  rotate: true
+  xy: 263, 56
+  size: 71, 37
+  orig: 96, 64
+  offset: 13, 12
+  index: -1
+forearm
+  rotate: true
+  xy: 177, 131
+  size: 59, 37
+  orig: 64, 64
+  offset: 1, 13
+  index: -1
+hand_fist
+  rotate: false
+  xy: 93, 6
+  size: 43, 35
+  orig: 64, 64
+  offset: 7, 11
+  index: -1
+hand_flashlight
+  rotate: false
+  xy: 183, 10
+  size: 56, 31
+  orig: 64, 64
+  offset: 7, 16
+  index: -1
+hand_grab_ammo
+  rotate: true
+  xy: 177, 192
+  size: 43, 40
+  orig: 64, 64
+  offset: 7, 10
+  index: -1
+hand_hold_knife
+  rotate: false
+  xy: 138, 7
+  size: 43, 34
+  orig: 64, 64
+  offset: 7, 12
+  index: -1
+hand_holding_gun
+  rotate: false
+  xy: 241, 2
+  size: 46, 31
+  orig: 64, 64
+  offset: 7, 14
+  index: -1
+hand_steadying_gun
+  rotate: false
+  xy: 103, 131
+  size: 38, 38
+  orig: 64, 64
+  offset: 14, 13
+  index: -1
+head
+  rotate: false
+  xy: 2, 3
+  size: 89, 61
+  orig: 96, 96
+  offset: 3, 17
+  index: -1
+knife
+  rotate: false
+  xy: 263, 35
+  size: 73, 19
+  orig: 96, 32
+  offset: 11, 6
+  index: -1
+leg
+  rotate: true
+  xy: 302, 58
+  size: 69, 44
+  orig: 96, 64
+  offset: 13, 10
+  index: -1
+muzzle_flash_01
+  rotate: true
+  xy: 2, 66
+  size: 169, 99
+  orig: 256, 256
+  offset: 26, 83
+  index: -1
+pistol
+  rotate: false
+  xy: 103, 171
+  size: 66, 17
+  orig: 96, 32
+  offset: 20, 6
+  index: -1
+rifle
+  rotate: false
+  xy: 2, 237
+  size: 228, 19
+  orig: 256, 32
+  offset: 10, 7
+  index: -1
+shotgun
+  rotate: true
+  xy: 348, 29
+  size: 227, 22
+  orig: 256, 32
+  offset: 11, 5
+  index: -1
+torso
+  rotate: true
+  xy: 103, 43
+  size: 84, 158
+  orig: 96, 192
+  offset: 4, 15
+  index: -1

@@ -1,5 +1,7 @@
 import PlayerInputs from "../controls/PlayerInputs";
+import Flashlight from "../objects/Flashlight";
 import Player from "../objects/Player";
+import { Event } from "./Event";
 
 export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
@@ -7,7 +9,7 @@ export default class GameScene extends Phaser.Scene {
   private field: Phaser.GameObjects.TileSprite;
   private reticle: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private player: Player;
-  private flashlight: Phaser.GameObjects.Light;
+  private objects: any[] = [];
   private isDark: boolean;
 
   public get inputs(): PlayerInputs {
@@ -15,30 +17,32 @@ export default class GameScene extends Phaser.Scene {
   }
 
   public preload() {
-    this.load.spritesheet("player", "assets/images/player.png", {
-      frameWidth: 258,
-      frameHeight: 220,
-    });
-
+    this.load.image("flashlight", "assets/images/flashlight.png");
     this.load.image("target", "assets/images/pointer.png");
     this.load.image("background", "assets/images/floor.png");
+
+    this.load.setPath("assets/spine/");
+    // @ts-ignore
+    this.load.spine("player", "player.json", "player.atlas");
+  }
+
+  public closestObject(): Phaser.GameObjects.GameObject {
+    return this.physics.closest(
+      this.player,
+      this.physics.world.bodies.entries.filter(
+        (body) => this.objects.indexOf(body.gameObject) > -1
+      )
+    )?.gameObject;
   }
 
   create() {
     this.physics.world.setBounds(0, 0, 1600, 1200);
-
     this.field = this.add.tileSprite(800, 600, 1600, 1200, "background");
+    this.field.setPipeline("Light2D");
 
-    this.flashlight = this.lights
-      .addLight(180, 80, 200)
-      .setColor(0xffffff)
-      .setIntensity(0);
+    this.objects.push(new Flashlight(this, 100, 100));
 
-    this.player = new Player(this, 800, 600, this.flashlight);
-    this.player
-      .setOrigin(0.5, 0.5)
-      .setDisplaySize(132, 120)
-      .setCollideWorldBounds(true);
+    this.player = new Player(this, 800, 600);
 
     this.reticle = this.physics.add.sprite(800, 700, "target");
     this.reticle
@@ -46,7 +50,22 @@ export default class GameScene extends Phaser.Scene {
       .setDisplaySize(25, 25)
       .setCollideWorldBounds(true);
 
-    this.lighten();
+    this.lights.enable();
+
+    const redLight = this.lights.addLight(0, 100, 600, 0xff0000);
+    this.time.addEvent({
+      delay: 1000,
+      callback: () => {
+        if (redLight.intensity == 0) {
+          redLight.setIntensity(3);
+        } else {
+          redLight.setIntensity(0);
+        }
+      },
+      loop: true,
+    });
+
+    this.darken();
 
     // Set camera zoom
     this.cameras.main.zoom = 1;
@@ -69,21 +88,33 @@ export default class GameScene extends Phaser.Scene {
     );
 
     this._inputs = new PlayerInputs(this.input);
+
+    this.events.on(Event.FLASHLIGHT_MISSING, () => {
+      console.error("Flashlight is missing");
+    });
+
+    this.events.on(Event.ITEM_PICKED_UP, (item: any) => {
+      console.info("Picked up", item.name);
+    });
+
+    this.events.on(Event.UNKNOWN_ITEM, (item: any) => {
+      console.error("Unknown item", item.name);
+    });
+
+    this.events.on(Event.NO_ITEM_IN_RANGE, () => {
+      console.error("No item in range");
+    });
   }
 
   darken() {
     this.isDark = true;
-    this.lights.enable().setAmbientColor(0x333333);
-    this.field.setPipeline("Light2D");
-    this.player.setPipeline("Light2D");
+    this.lights.setAmbientColor(0x333333);
     this.player.onDark();
   }
 
   lighten() {
     this.isDark = false;
-    this.lights.disable();
-    this.field.resetPipeline();
-    this.player.resetPipeline();
+    this.lights.setAmbientColor(0xffffff);
     this.player.onLight();
   }
 
@@ -96,14 +127,20 @@ export default class GameScene extends Phaser.Scene {
       }
     }
 
+    const distance = Phaser.Math.Distance.Between(
+      this.player.x,
+      this.player.y,
+      this.reticle.x,
+      this.reticle.y
+    );
+
     // Rotates player to face towards reticle
-    this.player.rotation =
-      Phaser.Math.Angle.Between(
-        this.player.x,
-        this.player.y,
-        this.reticle.x,
-        this.reticle.y
-      ) - 0.25;
+    this.player.rotation = Phaser.Math.Angle.Between(
+      this.player.x,
+      this.player.y,
+      this.reticle.x,
+      this.reticle.y
+    );
 
     // Camera follows player ( can be set in create )
     this.cameras.main.startFollow(this.player);
@@ -118,8 +155,7 @@ export default class GameScene extends Phaser.Scene {
     // Constrain position of reticle
     this.constrainReticle(this.reticle);
 
-    this.flashlight.x = this.reticle.x;
-    this.flashlight.y = this.reticle.y;
+    this.player.onUpdateReticle(this.reticle, distance);
   }
 
   constrainVelocity(player: Player, maxVelocity: number) {

@@ -1,0 +1,2373 @@
+{
+"skeleton": {
+	"hash": "kkASXBveJXU",
+	"spine": "3.8-from-4.0-from-4.1.20",
+	"x": -99.41,
+	"y": -102.85,
+	"width": 289.37,
+	"height": 202.85,
+	"images": "./images/",
+	"audio": "C:/work/games/_art/zombies"
+},
+"bones": [
+	{ "name": "root" },
+	{ "name": "head", "parent": "root", "length": 38.85 },
+	{ "name": "torso", "parent": "root", "length": 87.86, "rotation": 180 },
+	{ "name": "l_arm", "parent": "torso", "length": 49.43, "rotation": -164, "x": -7, "y": -58 },
+	{ "name": "r_arm", "parent": "torso", "length": 48.41, "rotation": 164, "x": -7, "y": 58 },
+	{ "name": "l_forearm", "parent": "l_arm", "length": 48.94, "rotation": 334, "x": 50, "y": 0.22 },
+	{ "name": "r_forearm", "parent": "r_arm", "length": 53.35, "rotation": -334, "x": 50, "y": -0.22 },
+	{ "name": "l_hand", "parent": "l_forearm", "length": 26.66, "x": 47.68, "y": 0.29 },
+	{ "name": "r_hand", "parent": "r_forearm", "length": 22.59, "x": 47.68, "y": -0.29 },
+	{ "name": "weapon", "parent": "r_hand", "length": 49.01, "rotation": -9.46, "x": 16.85, "y": -0.66 },
+	{ "name": "muzzle", "parent": "weapon", "rotation": -0.54, "x": 59.87, "y": -0.07 }
+],
+"slots": [
+	{ "name": "torso", "bone": "torso", "attachment": "torso" },
+	{ "name": "backpack", "bone": "torso", "attachment": "backpack" },
+	{ "name": "l_arm", "bone": "l_arm", "attachment": "arm" },
+	{ "name": "l_hand", "bone": "l_hand", "attachment": "hand_steadying_gun" },
+	{ "name": "l_forearm", "bone": "l_forearm", "attachment": "forearm" },
+	{ "name": "r_hand", "bone": "r_hand", "attachment": "hand_holding_gun" },
+	{ "name": "r_arm", "bone": "r_arm", "attachment": "arm" },
+	{ "name": "r_forearm", "bone": "r_forearm", "attachment": "forearm" },
+	{ "name": "weapon", "bone": "weapon", "attachment": "pistol" },
+	{ "name": "muzzle_flash", "bone": "muzzle", "blend": "additive" },
+	{ "name": "head", "bone": "head", "attachment": "head" }
+],
+"skins": [
+	{
+		"name": "default",
+		"attachments": {
+			"backpack": {
+				"backpack": { "x": 19.41, "rotation": -180, "width": 160, "height": 128 }
+			},
+			"head": {
+				"head": { "width": 96, "height": 96 }
+			},
+			"l_arm": {
+				"arm": { "x": 27.75, "y": 2.44, "rotation": -16, "width": 96, "height": 64 }
+			},
+			"l_forearm": {
+				"forearm": { "x": 25.31, "y": 0.41, "rotation": 10, "width": 64, "height": 64 }
+			},
+			"l_hand": {
+				"hand_fist": { "x": 16.69, "y": 1.77, "rotation": 10, "width": 64, "height": 64 },
+				"hand_grab_ammo": { "x": 13.06, "y": -5.82, "rotation": 10, "width": 64, "height": 64 },
+				"hand_steadying_gun": { "x": 13.06, "y": -5.82, "rotation": 10, "width": 64, "height": 64 }
+			},
+			"muzzle_flash": {
+				"muzzle_flash_01": { "x": 49.25, "y": -3.88, "scaleX": 0.5, "scaleY": 0.5, "width": 256, "height": 256 }
+			},
+			"r_arm": {
+				"arm": { "x": 28.54, "y": -5.19, "scaleY": -1, "rotation": 16, "width": 96, "height": 64 }
+			},
+			"r_forearm": {
+				"forearm": { "x": 24.82, "y": -3.22, "scaleY": -1, "rotation": -10, "width": 64, "height": 64 }
+			},
+			"r_hand": {
+				"hand_flashlight": { "x": 15.67, "y": -4.06, "scaleY": -1, "rotation": -10, "width": 64, "height": 64 },
+				"hand_holding_gun": { "x": 15.67, "y": -4.06, "scaleY": -1, "rotation": -10, "width": 64, "height": 64 },
+				"hand_hold_knife": { "x": 15.67, "y": -4.06, "scaleY": -1, "rotation": -10, "width": 64, "height": 64 }
+			},
+			"torso": {
+				"torso": { "rotation": -180, "width": 96, "height": 192 }
+			},
+			"weapon": {
+				"knife": { "x": 2.17, "y": -18.97, "rotation": -89.6, "width": 96, "height": 32 },
+				"pistol": { "x": 23.13, "y": 1.6, "width": 96, "height": 32 },
+				"rifle": { "x": 23.12, "y": 0.57, "width": 256, "height": 32 },
+				"shotgun": { "x": 23.12, "y": 0.57, "width": 256, "height": 32 }
+			}
+		}
+	}
+],
+"animations": {
+	"idle_flashlight": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "name": "hand_fist" },
+					{ "time": 0.6667, "name": "hand_fist" }
+				]
+			},
+			"r_hand": {
+				"attachment": [
+					{ "name": "hand_flashlight" },
+					{ "time": 0.6667, "name": "hand_flashlight" }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": null },
+					{ "time": 0.6667, "name": null }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -297.83 },
+					{ "time": 0.3333, "angle": -300.57 },
+					{ "time": 0.6667, "angle": -297.83 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -1.45 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -50.76 },
+					{ "time": 0.3333, "angle": -45.4 },
+					{ "time": 0.6667, "angle": -50.76 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 368.81 },
+					{ "time": 0.3333, "angle": 366.58 },
+					{ "time": 0.6667, "angle": 368.81 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -19.53, "curve": "stepped" },
+					{ "time": 0.6667, "angle": -19.53 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -427.6 },
+					{ "time": 0.3333, "angle": -425.79 },
+					{ "time": 0.6667, "angle": -427.6 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 16.09 },
+					{ "time": 0.3333, "angle": 18.29 },
+					{ "time": 0.6667, "angle": 16.09 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": -10.6, "curve": "stepped" },
+					{ "time": 0.6667, "angle": -10.6 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": -31.03, "y": -1.4, "curve": "stepped" },
+					{ "time": 0.6667, "x": -31.03, "y": -1.4 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.3333, "angle": -2.12 },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -2.54, "y": -1.09 },
+					{ "time": 0.6667 }
+				]
+			}
+		}
+	},
+	"idle_handgun": {
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -52.48 },
+					{ "time": 0.3333, "angle": -54.29 },
+					{ "time": 0.6667, "angle": -52.48 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -1.08, "y": 1.08 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -306.69 },
+					{ "time": 0.3333, "angle": -302.53 },
+					{ "time": 0.6667, "angle": -306.69 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -0.37, "y": -0.69 },
+					{ "time": 0.6667 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 15.52 },
+					{ "time": 0.3333, "angle": 19.85 },
+					{ "time": 0.6667, "angle": 15.52 }
+				],
+				"translate": [
+					{ "x": 13.21, "y": 7.84 },
+					{ "time": 0.3333, "x": 12.58, "y": 6.96 },
+					{ "time": 0.6667, "x": 13.21, "y": 7.84 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -412.81 },
+					{ "time": 0.3333, "angle": -419.38 },
+					{ "time": 0.6667, "angle": -412.81 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 64.9 },
+					{ "time": 0.3333, "angle": 67.32 },
+					{ "time": 0.6667, "angle": 64.9 }
+				],
+				"translate": [
+					{ "x": 0.01, "y": -4.59, "curve": "stepped" },
+					{ "time": 0.6667, "x": 0.01, "y": -4.59 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{ "curve": "stepped" },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -2.87, "y": 2.87 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{},
+					{ "time": 0.3333, "angle": -4.48 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -1.27 },
+					{ "time": 0.3333, "angle": 1.59 },
+					{ "time": 0.6667, "angle": -1.27 }
+				]
+			}
+		}
+	},
+	"idle_knife": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "name": "hand_fist" },
+					{ "time": 0.6667, "name": "hand_fist" }
+				]
+			},
+			"r_hand": {
+				"attachment": [
+					{ "name": "hand_hold_knife" },
+					{ "time": 0.6667, "name": "hand_hold_knife" }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": "knife" },
+					{ "time": 0.6667, "name": "knife" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -327.73 },
+					{ "time": 0.3333, "angle": -321.54 },
+					{ "time": 0.6667, "angle": -327.73 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -4.21, "y": 0.6 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -22.23 },
+					{ "time": 0.3333, "angle": -31.14 },
+					{ "time": 0.6667, "angle": -22.23 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 423.81 },
+					{ "time": 0.3333, "angle": 423.96 },
+					{ "time": 0.6667, "angle": 423.81 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 2.83 },
+					{ "time": 0.3333, "angle": 7.78 },
+					{ "time": 0.6667, "angle": 2.83 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -420.7 },
+					{ "time": 0.3333, "angle": -419.41 },
+					{ "time": 0.6667, "angle": -420.7 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.3333, "angle": 3.74 },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -2.41, "y": 3.01 },
+					{ "time": 0.6667 }
+				]
+			}
+		},
+		"drawOrder": [
+			{
+				"offsets": [
+					{ "slot": "weapon", "offset": -3 }
+				]
+			},
+			{
+				"time": 0.6667,
+				"offsets": [
+					{ "slot": "weapon", "offset": -3 }
+				]
+			}
+		]
+	},
+	"idle_rifle": {
+		"slots": {
+			"weapon": {
+				"attachment": [
+					{ "name": "rifle" },
+					{ "time": 0.6667, "name": "rifle" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.3333, "angle": -64.13 },
+					{ "time": 0.6667, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -1.89, "y": 1.42 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76 },
+					{ "time": 0.3333, "angle": -307.39 },
+					{ "time": 0.6667, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.6667, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 45.37 },
+					{ "time": 0.3333, "angle": 52.35 },
+					{ "time": 0.6667, "angle": 45.14 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.6667, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -386.06 },
+					{ "time": 0.3333, "angle": -395.25 },
+					{ "time": 0.6667, "angle": -386.29 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 55.47 },
+					{ "time": 0.3333, "angle": 59.99 },
+					{ "time": 0.6667, "angle": 55.24 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16, "curve": "stepped" },
+					{ "time": 0.6667, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13 },
+					{ "time": 0.3333, "angle": 381.41 },
+					{ "time": 0.6667, "angle": 376.13 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49 },
+					{ "time": 0.3333, "angle": -10.29 },
+					{ "time": 0.6667, "angle": -8.49 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04 }
+				]
+			},
+			"head": {
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -3.31, "y": 3.31 },
+					{ "time": 0.6667 }
+				]
+			}
+		}
+	},
+	"idle_shotgun": {
+		"slots": {
+			"weapon": {
+				"attachment": [
+					{ "name": "shotgun" },
+					{ "time": 0.6667, "name": "shotgun" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.3333, "angle": -64.13 },
+					{ "time": 0.6667, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -1.89, "y": 1.42 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76 },
+					{ "time": 0.3333, "angle": -307.39 },
+					{ "time": 0.6667, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.6667, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 49.94 },
+					{ "time": 0.3333, "angle": 56.53 },
+					{ "time": 0.6667, "angle": 50.09 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.6667, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.3333, "angle": -399.89 },
+					{ "time": 0.6667, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04, "curve": "stepped" },
+					{ "time": 0.6667, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16, "curve": "stepped" },
+					{ "time": 0.6667, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13 },
+					{ "time": 0.3333, "angle": 381.41 },
+					{ "time": 0.6667, "angle": 376.13 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49 },
+					{ "time": 0.3333, "angle": -10.29 },
+					{ "time": 0.6667, "angle": -8.49 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04 }
+				]
+			},
+			"head": {
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -3.31, "y": 3.31 },
+					{ "time": 0.6667 }
+				]
+			}
+		}
+	},
+	"meleeattack_flashlight": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "name": "hand_fist" },
+					{ "time": 0.5, "name": "hand_fist" }
+				]
+			},
+			"r_hand": {
+				"attachment": [
+					{ "name": "hand_flashlight" },
+					{ "time": 0.5, "name": "hand_flashlight" }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": null },
+					{ "time": 0.5, "name": null }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -297.83 },
+					{ "time": 0.1667, "angle": -288.61 },
+					{ "time": 0.2333, "angle": -392.04 },
+					{ "time": 0.3333, "angle": -403.65 },
+					{ "time": 0.5, "angle": -297.83 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -6.73 },
+					{ "time": 0.2333, "x": 13.98 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -50.76 },
+					{ "time": 0.1667, "angle": -61.54 },
+					{ "time": 0.2333, "angle": 44.04 },
+					{ "time": 0.3333, "angle": 41.7 },
+					{ "time": 0.5, "angle": -50.76 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 368.81, "curve": "stepped" },
+					{ "time": 0.1667, "angle": 368.81 },
+					{ "time": 0.2333, "angle": 371.51 },
+					{ "time": 0.5, "angle": 368.81 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -19.53, "curve": "stepped" },
+					{ "time": 0.5, "angle": -19.53 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -427.6 },
+					{ "time": 0.1667, "angle": -447.59 },
+					{ "time": 0.2333, "angle": -361.19 },
+					{ "time": 0.3333, "angle": -367.4 },
+					{ "time": 0.5, "angle": -427.6 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 16.09 },
+					{ "time": 0.1667, "angle": 35.49 },
+					{ "time": 0.3333, "angle": -0.29 },
+					{ "time": 0.5, "angle": 16.09 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": -10.6, "curve": "stepped" },
+					{ "time": 0.5, "angle": -10.6 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": -31.03, "y": -1.4, "curve": "stepped" },
+					{ "time": 0.5, "x": -31.03, "y": -1.4 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.1667, "angle": 8.54 },
+					{ "time": 0.3333, "angle": 0.6 },
+					{ "time": 0.5 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -10.84, "y": 1.05 },
+					{ "time": 0.3333, "x": 10.01, "y": 7.17 },
+					{ "time": 0.5 }
+				]
+			}
+		}
+	},
+	"meleeattack_handgun": {
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -52.48 },
+					{ "time": 0.1667, "angle": -71.16 },
+					{ "time": 0.3, "angle": 31.5 },
+					{ "time": 0.5, "angle": -52.48 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -10.92, "y": -2.73 },
+					{ "time": 0.3, "x": 12.11, "y": -1.41 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -306.69 },
+					{ "time": 0.1667, "angle": -374.29 },
+					{ "time": 0.2, "angle": -362.13 },
+					{ "time": 0.2333, "angle": -326.99 },
+					{ "time": 0.3, "angle": -327.23 },
+					{ "time": 0.3667, "angle": -316.52 },
+					{ "time": 0.5, "angle": -306.69 }
+				],
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.1667 },
+					{ "time": 0.2333, "x": -7.49, "y": -1.02 },
+					{ "time": 0.3, "curve": "stepped" },
+					{ "time": 0.5 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 15.52 },
+					{ "time": 0.1667, "angle": -47.01 },
+					{ "time": 0.2, "angle": -44.2 },
+					{ "time": 0.2333, "angle": -34.69 },
+					{ "time": 0.3, "angle": -36.05 },
+					{ "time": 0.3667, "angle": -5.36 },
+					{ "time": 0.5, "angle": 15.52 }
+				],
+				"translate": [
+					{ "x": 13.21, "y": 7.84 },
+					{ "time": 0.1667, "x": 10.49, "y": 1.53 },
+					{ "time": 0.2333, "x": -0.11, "y": 0.96 },
+					{ "time": 0.3, "x": 5.31, "y": 2.28 },
+					{ "time": 0.5, "x": 13.21, "y": 7.84 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -412.81 },
+					{ "time": 0.1667, "angle": -367.91 },
+					{ "time": 0.2333, "angle": -351.11 },
+					{ "time": 0.3, "angle": -349.82 },
+					{ "time": 0.3667, "angle": -396.29 },
+					{ "time": 0.5, "angle": -412.81 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 64.9 },
+					{ "time": 0.3, "angle": 51.49 },
+					{ "time": 0.5, "angle": 64.9 }
+				],
+				"translate": [
+					{ "x": 0.01, "y": -4.59, "curve": "stepped" },
+					{ "time": 0.5, "x": 0.01, "y": -4.59 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.1667, "angle": -8.57 },
+					{ "time": 0.3, "angle": 8.29 },
+					{ "time": 0.5 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -11.37, "y": 1.36 },
+					{ "time": 0.3, "x": 8.69, "y": 5.25 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{},
+					{ "time": 0.1667, "angle": 79.67 },
+					{ "time": 0.2, "angle": 56.04 },
+					{ "time": 0.2333, "angle": -0.23 },
+					{ "time": 0.3, "angle": -2.97 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -1.27, "curve": "stepped" },
+					{ "time": 0.1667, "angle": -1.27 },
+					{ "time": 0.3, "angle": 31.01 },
+					{ "time": 0.5, "angle": -1.27 }
+				]
+			}
+		}
+	},
+	"meleeattack_knife": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "name": "hand_fist" },
+					{ "time": 0.5, "name": "hand_fist" }
+				]
+			},
+			"r_hand": {
+				"attachment": [
+					{ "name": "hand_hold_knife" },
+					{ "time": 0.5, "name": "hand_hold_knife" }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": "knife" },
+					{ "time": 0.5, "name": "knife" }
+				]
+			}
+		},
+		"bones": {
+			"r_hand": {
+				"rotate": [
+					{},
+					{ "time": 0.1667, "angle": 22.53 },
+					{ "time": 0.3, "angle": 10.61 },
+					{ "time": 0.5 }
+				]
+			},
+			"torso": {
+				"rotate": [
+					{ "angle": -327.73 },
+					{ "time": 0.1667, "angle": -288.58 },
+					{ "time": 0.3, "angle": -340.63 },
+					{ "time": 0.5, "angle": -327.73 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -4.8 },
+					{ "time": 0.2333, "x": 10.55 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -22.23 },
+					{ "time": 0.1667, "angle": 9.18 },
+					{ "time": 0.2333, "angle": -31.41 },
+					{ "time": 0.3, "angle": -62.33 },
+					{ "time": 0.5, "angle": -22.23 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 423.81 },
+					{ "time": 0.1667, "angle": 440.8 },
+					{ "time": 0.2333, "angle": 351.93 },
+					{ "time": 0.3, "angle": 369.56 },
+					{ "time": 0.5, "angle": 423.81 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 2.83 },
+					{ "time": 0.1667, "angle": -14.3 },
+					{ "time": 0.3, "angle": 4.6 },
+					{ "time": 0.5, "angle": 2.83 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -420.7 },
+					{ "time": 0.1667, "angle": -419.61 },
+					{ "time": 0.3, "angle": -406.2 },
+					{ "time": 0.5, "angle": -420.7 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{ "curve": "stepped" },
+					{ "time": 0.5 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -6.85, "y": -2.05 },
+					{ "time": 0.2333, "x": 13.08, "y": 0.52 },
+					{ "time": 0.3333, "x": 13.62, "y": 2.37 },
+					{ "time": 0.5 }
+				]
+			}
+		},
+		"drawOrder": [
+			{
+				"offsets": [
+					{ "slot": "weapon", "offset": -3 }
+				]
+			},
+			{
+				"time": 0.5,
+				"offsets": [
+					{ "slot": "weapon", "offset": -3 }
+				]
+			}
+		]
+	},
+	"meleeattack_rifle": {
+		"slots": {
+			"weapon": {
+				"attachment": [
+					{ "name": "rifle" },
+					{ "time": 0.5, "name": "rifle" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.1667, "angle": -87.61 },
+					{ "time": 0.3333, "angle": 27.09 },
+					{ "time": 0.5, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -9.32 },
+					{ "time": 0.3333, "x": 19.14 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76 },
+					{ "time": 0.1667, "angle": -374.02 },
+					{ "time": 0.2, "angle": -369.13 },
+					{ "time": 0.2667, "angle": -327.77 },
+					{ "time": 0.3333, "angle": -315.15 },
+					{ "time": 0.4, "angle": -304.47 },
+					{ "time": 0.5, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
+					{ "time": 0.5, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.5, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 49 },
+					{ "time": 0.1667, "angle": 23 },
+					{ "time": 0.2, "angle": -24.99 },
+					{ "time": 0.2667, "angle": -8.82 },
+					{ "time": 0.3333, "angle": 29.64 },
+					{ "time": 0.4, "angle": 60.07 },
+					{ "time": 0.5, "angle": 49 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.5, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.1667, "angle": -399.53 },
+					{ "time": 0.2, "angle": -355.24 },
+					{ "time": 0.2667, "angle": -356.87 },
+					{ "time": 0.3333, "angle": -385.83 },
+					{ "time": 0.4, "angle": -403.82 },
+					{ "time": 0.5, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04, "curve": "stepped" },
+					{ "time": 0.5, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16, "curve": "stepped" },
+					{ "time": 0.5, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13 },
+					{ "time": 0.1667, "angle": 444.29 },
+					{ "time": 0.2667, "angle": 380.41 },
+					{ "time": 0.3333, "angle": 378.06 },
+					{ "time": 0.5, "angle": 376.13 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.5, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49, "curve": "stepped" },
+					{ "time": 0.5, "angle": -8.49 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04, "curve": "stepped" },
+					{ "time": 0.5, "x": 71.14, "y": 1.04 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.1667, "angle": -6.97 },
+					{ "time": 0.3333, "angle": 5.35 },
+					{ "time": 0.5 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -5.02, "y": 7.89 },
+					{ "time": 0.3333, "x": 18.08, "y": 5.29 },
+					{ "time": 0.5 }
+				]
+			}
+		}
+	},
+	"meleeattack_shotgun": {
+		"slots": {
+			"weapon": {
+				"attachment": [
+					{ "name": "shotgun" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.1667, "angle": -87.61 },
+					{ "time": 0.3333, "angle": 27.09 },
+					{ "time": 0.5, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -9.32 },
+					{ "time": 0.3333, "x": 19.14 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76 },
+					{ "time": 0.1667, "angle": -374.02 },
+					{ "time": 0.2, "angle": -369.13 },
+					{ "time": 0.2667, "angle": -327.77 },
+					{ "time": 0.3333, "angle": -315.15 },
+					{ "time": 0.4, "angle": -304.47 },
+					{ "time": 0.5, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
+					{ "time": 0.5, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.5, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 50 },
+					{ "time": 0.1667, "angle": 25 },
+					{ "time": 0.2, "angle": -20 },
+					{ "time": 0.2667, "angle": -8.82 },
+					{ "time": 0.3333, "angle": 31 },
+					{ "time": 0.4, "angle": 59 },
+					{ "time": 0.5, "angle": 50 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.5, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.1667, "angle": -399.53 },
+					{ "time": 0.2, "angle": -355.24 },
+					{ "time": 0.2667, "angle": -356.87 },
+					{ "time": 0.3333, "angle": -385.83 },
+					{ "time": 0.4, "angle": -403.82 },
+					{ "time": 0.5, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04, "curve": "stepped" },
+					{ "time": 0.5, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16, "curve": "stepped" },
+					{ "time": 0.5, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13 },
+					{ "time": 0.1667, "angle": 444.29 },
+					{ "time": 0.2667, "angle": 380.41 },
+					{ "time": 0.3333, "angle": 378.06 },
+					{ "time": 0.5, "angle": 376.13 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.5, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49, "curve": "stepped" },
+					{ "time": 0.5, "angle": -8.49 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04, "curve": "stepped" },
+					{ "time": 0.5, "x": 71.14, "y": 1.04 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.1667, "angle": -6.97 },
+					{ "time": 0.3333, "angle": 5.35 },
+					{ "time": 0.5 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -5.02, "y": 7.89 },
+					{ "time": 0.3333, "x": 18.08, "y": 5.29 },
+					{ "time": 0.5 }
+				]
+			}
+		}
+	},
+	"move_flashlight": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "name": "hand_fist" },
+					{ "time": 0.6667, "name": "hand_fist" }
+				]
+			},
+			"r_hand": {
+				"attachment": [
+					{ "name": "hand_flashlight" },
+					{ "time": 0.6667, "name": "hand_flashlight" }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": null },
+					{ "time": 0.6667, "name": null }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -302.25 },
+					{ "time": 0.3333, "angle": -296.23 },
+					{ "time": 0.6667, "angle": -302.25 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -1.45 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -36.08 },
+					{ "time": 0.3333, "angle": -48.55 },
+					{ "time": 0.6667, "angle": -36.08 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 353.27 },
+					{ "time": 0.3333, "angle": 358.74 },
+					{ "time": 0.6667, "angle": 353.27 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -14.99 },
+					{ "time": 0.3333, "angle": -14.17 },
+					{ "time": 0.6667, "angle": -14.99 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -427.6 },
+					{ "time": 0.1, "angle": -428.82 },
+					{ "time": 0.3333, "angle": -424.65 },
+					{ "time": 0.4333, "angle": -423.52 },
+					{ "time": 0.6667, "angle": -427.6 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 16.09 },
+					{ "time": 0.3333, "angle": 23.75 },
+					{ "time": 0.6667, "angle": 16.09 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": -10.6, "curve": "stepped" },
+					{ "time": 0.6667, "angle": -10.6 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": -31.03, "y": -1.4, "curve": "stepped" },
+					{ "time": 0.6667, "x": -31.03, "y": -1.4 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.3333, "angle": -2.12 },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -2.54, "y": -1.09 },
+					{ "time": 0.6667 }
+				]
+			}
+		}
+	},
+	"move_handgun": {
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -52.48 },
+					{ "time": 0.3333, "angle": -48.04 },
+					{ "time": 0.6667, "angle": -52.48 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -2.43, "y": -1.46 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -306.69 },
+					{ "time": 0.3333, "angle": -313.13 },
+					{ "time": 0.6667, "angle": -306.69 }
+				],
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.3333, "curve": "stepped" },
+					{ "time": 0.6667 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 15.52 },
+					{ "time": 0.3333, "angle": 7.62 },
+					{ "time": 0.6667, "angle": 15.52 }
+				],
+				"translate": [
+					{ "x": 13.21, "y": 7.84, "curve": "stepped" },
+					{ "time": 0.3333, "x": 13.21, "y": 7.84, "curve": "stepped" },
+					{ "time": 0.6667, "x": 13.21, "y": 7.84 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -412.81 },
+					{ "time": 0.3333, "angle": -404.76 },
+					{ "time": 0.6667, "angle": -412.81 }
+				],
+				"translate": [
+					{ "time": 0.3333 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 64.9, "curve": "stepped" },
+					{ "time": 0.3333, "angle": 64.9, "curve": "stepped" },
+					{ "time": 0.6667, "angle": 64.9 }
+				],
+				"translate": [
+					{ "x": 0.01, "y": -4.59, "curve": "stepped" },
+					{ "time": 0.3333, "x": 0.01, "y": -4.59, "curve": "stepped" },
+					{ "time": 0.6667, "x": 0.01, "y": -4.59 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{ "curve": "stepped" },
+					{ "time": 0.3333, "curve": "stepped" },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -1.7, "y": -1.7 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{},
+					{ "time": 0.3333, "angle": 7.84 },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{ "time": 0.3333 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -1.27 },
+					{ "time": 0.3333, "angle": -7 },
+					{ "time": 0.6667, "angle": -1.27 }
+				],
+				"translate": [
+					{ "time": 0.3333 }
+				]
+			},
+			"root": {
+				"rotate": [
+					{ "time": 0.3333 }
+				],
+				"translate": [
+					{ "time": 0.3333 }
+				]
+			},
+			"weapon": {
+				"rotate": [
+					{ "time": 0.3333 }
+				],
+				"translate": [
+					{ "time": 0.3333 }
+				]
+			},
+			"muzzle": {
+				"rotate": [
+					{ "time": 0.3333 }
+				],
+				"translate": [
+					{ "time": 0.3333 }
+				]
+			}
+		}
+	},
+	"move_knife": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "name": "hand_fist" },
+					{ "time": 0.6667, "name": "hand_fist" }
+				]
+			},
+			"r_hand": {
+				"attachment": [
+					{ "name": "hand_hold_knife" },
+					{ "time": 0.6667, "name": "hand_hold_knife" }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": "knife" },
+					{ "time": 0.6667, "name": "knife" }
+				]
+			}
+		},
+		"bones": {
+			"r_hand": {
+				"rotate": [
+					{},
+					{ "time": 0.3333, "angle": 17.73 },
+					{ "time": 0.6667 }
+				]
+			},
+			"torso": {
+				"rotate": [
+					{ "angle": -327.73 },
+					{ "time": 0.3333, "angle": -335.68 },
+					{ "time": 0.6667, "angle": -327.73 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -4.21, "y": 0.6 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -7.37 },
+					{ "time": 0.3333, "angle": -23.61 },
+					{ "time": 0.6667, "angle": -7.37 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 423.81 },
+					{ "time": 0.0667, "angle": 424.3 },
+					{ "time": 0.3333, "angle": 422.69 },
+					{ "time": 0.6667, "angle": 423.81 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 2.83 },
+					{ "time": 0.3333, "angle": -2.05 },
+					{ "time": 0.6667, "angle": 2.83 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -420.7 },
+					{ "time": 0.0667, "angle": -419.67 },
+					{ "time": 0.3333, "angle": -425.95 },
+					{ "time": 0.6667, "angle": -420.7 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.3333, "angle": 3.74 },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -2.41, "y": 3.01 },
+					{ "time": 0.6667 }
+				]
+			}
+		},
+		"drawOrder": [
+			{
+				"offsets": [
+					{ "slot": "weapon", "offset": -3 }
+				]
+			},
+			{
+				"time": 0.6667,
+				"offsets": [
+					{ "slot": "weapon", "offset": -3 }
+				]
+			}
+		]
+	},
+	"move_rifle": {
+		"slots": {
+			"weapon": {
+				"attachment": [
+					{ "name": "rifle" },
+					{ "time": 0.6667, "name": "rifle" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.3333, "angle": -66.65 },
+					{ "time": 0.6667, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -1.89, "y": 1.42 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76 },
+					{ "time": 0.3333, "angle": -308.89 },
+					{ "time": 0.6667, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.6667, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 50 },
+					{ "time": 0.3333, "angle": 53 },
+					{ "time": 0.6667, "angle": 50 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.6667, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.3333, "angle": -398.13 },
+					{ "time": 0.6667, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04, "curve": "stepped" },
+					{ "time": 0.6667, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16, "curve": "stepped" },
+					{ "time": 0.6667, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13 },
+					{ "time": 0.3333, "angle": 381.41 },
+					{ "time": 0.6667, "angle": 376.13 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49 },
+					{ "time": 0.3333, "angle": -10.29 },
+					{ "time": 0.6667, "angle": -8.49 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04 }
+				]
+			},
+			"head": {
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -3.31, "y": 3.31 },
+					{ "time": 0.6667 }
+				]
+			}
+		}
+	},
+	"move_shotgun": {
+		"slots": {
+			"weapon": {
+				"attachment": [
+					{ "name": "shotgun" },
+					{ "time": 0.6667, "name": "shotgun" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.3333, "angle": -66.65 },
+					{ "time": 0.6667, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -1.89, "y": 1.42 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76 },
+					{ "time": 0.3333, "angle": -308.89 },
+					{ "time": 0.6667, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.6667, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 50 },
+					{ "time": 0.3333, "angle": 53.66 },
+					{ "time": 0.6667, "angle": 50 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.6667, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.3333, "angle": -398.13 },
+					{ "time": 0.6667, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04, "curve": "stepped" },
+					{ "time": 0.6667, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16, "curve": "stepped" },
+					{ "time": 0.6667, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13 },
+					{ "time": 0.3333, "angle": 381.41 },
+					{ "time": 0.6667, "angle": 376.13 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49 },
+					{ "time": 0.3333, "angle": -10.29 },
+					{ "time": 0.6667, "angle": -8.49 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04 }
+				]
+			},
+			"head": {
+				"translate": [
+					{},
+					{ "time": 0.3333, "x": -3.31, "y": 3.31 },
+					{ "time": 0.6667 }
+				]
+			}
+		}
+	},
+	"reload_handgun": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "name": "hand_steadying_gun" },
+					{ "time": 0.1667, "name": "hand_grab_ammo" },
+					{ "time": 0.4333, "name": "hand_steadying_gun" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -52.48 },
+					{ "time": 0.1667, "angle": -44.97 },
+					{ "time": 0.4333, "angle": -52.48, "curve": "stepped" },
+					{ "time": 0.5, "angle": -52.48 }
+				],
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.4333, "curve": "stepped" },
+					{ "time": 0.5 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -306.69 },
+					{ "time": 0.2667, "angle": -332.34 },
+					{ "time": 0.4333, "angle": -306.69, "curve": "stepped" },
+					{ "time": 0.5, "angle": -306.69 }
+				],
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.4333, "curve": "stepped" },
+					{ "time": 0.5 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 15.52 },
+					{ "time": 0.1667, "angle": 54.89, "curve": "stepped" },
+					{ "time": 0.2667, "angle": 54.89 },
+					{ "time": 0.4333, "angle": 15.52, "curve": "stepped" },
+					{ "time": 0.5, "angle": 15.52 }
+				],
+				"translate": [
+					{ "x": 13.21, "y": 7.84, "curve": "stepped" },
+					{ "time": 0.4333, "x": 13.21, "y": 7.84, "curve": "stepped" },
+					{ "time": 0.5, "x": 13.21, "y": 7.84 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -412.81 },
+					{ "time": 0.1667, "angle": -475.61 },
+					{ "time": 0.2667, "angle": -472.91 },
+					{ "time": 0.4, "angle": -408.2 },
+					{ "time": 0.5, "angle": -412.81 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 64.9 },
+					{ "time": 0.1667, "angle": 1.01 },
+					{ "time": 0.2667, "angle": 9.46 },
+					{ "time": 0.4333, "angle": 73.4 },
+					{ "time": 0.5, "angle": 64.9 }
+				],
+				"translate": [
+					{ "x": 0.01, "y": -4.59 },
+					{ "time": 0.1667, "x": 0.75, "y": 1.39, "curve": "stepped" },
+					{ "time": 0.2667, "x": 0.75, "y": 1.39 },
+					{ "time": 0.3333, "x": -1.05, "y": 6.04 },
+					{ "time": 0.4333, "x": 0.01, "y": -4.59, "curve": "stepped" },
+					{ "time": 0.5, "x": 0.01, "y": -4.59 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{ "curve": "stepped" },
+					{ "time": 0.4333, "curve": "stepped" },
+					{ "time": 0.5 }
+				],
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.4333, "curve": "stepped" },
+					{ "time": 0.5 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{},
+					{ "time": 0.2667, "angle": 15.66 },
+					{ "time": 0.4333, "curve": "stepped" },
+					{ "time": 0.5 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -1.27, "curve": "stepped" },
+					{ "time": 0.4333, "angle": -1.27, "curve": "stepped" },
+					{ "time": 0.5, "angle": -1.27 }
+				]
+			},
+			"weapon": {
+				"translate": [
+					{ "time": 0.4333 },
+					{ "time": 0.4667, "x": -1.11, "y": 0.19 },
+					{ "time": 0.5 }
+				]
+			}
+		},
+		"drawOrder": [
+			{
+				"time": 0.1,
+				"offsets": [
+					{ "slot": "l_hand", "offset": -3 },
+					{ "slot": "l_forearm", "offset": -3 }
+				]
+			},
+			{ "time": 0.3333 }
+		]
+	},
+	"reload_rifle": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "time": 0.1667, "name": "hand_grab_ammo" },
+					{ "time": 0.4667, "name": "hand_steadying_gun" }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": "rifle" },
+					{ "time": 0.6667, "name": "rifle" }
+				]
+			}
+		},
+		"bones": {
+			"weapon": {
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.3333 },
+					{ "time": 0.4, "x": -1.52, "y": 0.25 },
+					{ "time": 0.6667 }
+				]
+			},
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.1667, "angle": -48.84 },
+					{ "time": 0.3333, "angle": -52.84 },
+					{ "time": 0.4333, "angle": -58.17 },
+					{ "time": 0.6667, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -2.22, "y": 2.96 },
+					{ "time": 0.3333, "x": -1.53, "y": 2.04 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76 },
+					{ "time": 0.1667, "angle": -320.86 },
+					{ "time": 0.3333, "angle": -316.58 },
+					{ "time": 0.4333, "angle": -318.36 },
+					{ "time": 0.6667, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.6667, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 49 },
+					{ "time": 0.1667, "angle": 63.74 },
+					{ "time": 0.3333, "angle": 42.28, "curve": "stepped" },
+					{ "time": 0.4333, "angle": 42.28 },
+					{ "time": 0.6667, "angle": 49 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.6667, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.1667, "angle": -474.01 },
+					{ "time": 0.3333, "angle": -402.3 },
+					{ "time": 0.4333, "angle": -408.36 },
+					{ "time": 0.6667, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04 },
+					{ "time": 0.1667, "angle": 6.41 },
+					{ "time": 0.3333, "angle": 2.79, "curve": "stepped" },
+					{ "time": 0.4333, "angle": 2.79 },
+					{ "time": 0.6667, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16 },
+					{ "time": 0.1667, "x": -0.74, "y": -2.49 },
+					{ "time": 0.3333, "x": 1.06, "y": 3.22, "curve": "stepped" },
+					{ "time": 0.4333, "x": 1.06, "y": 3.22 },
+					{ "time": 0.6667, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13 },
+					{ "time": 0.1667, "angle": 389.65 },
+					{ "time": 0.3333, "angle": 385.82 },
+					{ "time": 0.4333, "angle": 389.02 },
+					{ "time": 0.6667, "angle": 376.13 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49 },
+					{ "time": 0.1667, "angle": -15.17 },
+					{ "time": 0.3333, "angle": -9.14, "curve": "stepped" },
+					{ "time": 0.4333, "angle": -9.14 },
+					{ "time": 0.6667, "angle": -8.49 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04, "curve": "stepped" },
+					{ "time": 0.6667, "x": 71.14, "y": 1.04 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.1667, "angle": 9.3 },
+					{ "time": 0.3333, "angle": -6.82 },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -5.18, "y": 2.96 },
+					{ "time": 0.3333, "x": -0.98, "y": 4.79 },
+					{ "time": 0.6667 }
+				]
+			}
+		}
+	},
+	"reload_shotgun": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "time": 0.1667, "name": "hand_grab_ammo" },
+					{ "time": 0.4667, "name": "hand_steadying_gun" }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": "shotgun" },
+					{ "time": 0.6667, "name": "shotgun" }
+				]
+			}
+		},
+		"bones": {
+			"weapon": {
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.3333 },
+					{ "time": 0.4, "x": -1.52, "y": 0.25 },
+					{ "time": 0.6667 }
+				]
+			},
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.1667, "angle": -48.84 },
+					{ "time": 0.3333, "angle": -52.84 },
+					{ "time": 0.4333, "angle": -58.17 },
+					{ "time": 0.6667, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -2.22, "y": 2.96 },
+					{ "time": 0.3333, "x": -1.53, "y": 2.04 },
+					{ "time": 0.6667 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76 },
+					{ "time": 0.1667, "angle": -320.86 },
+					{ "time": 0.3333, "angle": -316.58 },
+					{ "time": 0.4333, "angle": -318.36 },
+					{ "time": 0.6667, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.6667, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 39.94 },
+					{ "time": 0.1667, "angle": 63.74 },
+					{ "time": 0.3333, "angle": 42.28, "curve": "stepped" },
+					{ "time": 0.4333, "angle": 42.28 },
+					{ "time": 0.6667, "angle": 49 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.6667, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.1667, "angle": -474.01 },
+					{ "time": 0.3333, "angle": -402.3 },
+					{ "time": 0.4333, "angle": -408.36 },
+					{ "time": 0.6667, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04 },
+					{ "time": 0.1667, "angle": 6.41 },
+					{ "time": 0.3333, "angle": 2.79, "curve": "stepped" },
+					{ "time": 0.4333, "angle": 2.79 },
+					{ "time": 0.6667, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16 },
+					{ "time": 0.1667, "x": -0.74, "y": -2.49 },
+					{ "time": 0.3333, "x": 1.06, "y": 3.22, "curve": "stepped" },
+					{ "time": 0.4333, "x": 1.06, "y": 3.22 },
+					{ "time": 0.6667, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13 },
+					{ "time": 0.1667, "angle": 389.65 },
+					{ "time": 0.3333, "angle": 385.82 },
+					{ "time": 0.4333, "angle": 389.02 },
+					{ "time": 0.6667, "angle": 376.13 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.6667, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49 },
+					{ "time": 0.1667, "angle": -15.17 },
+					{ "time": 0.3333, "angle": -9.14, "curve": "stepped" },
+					{ "time": 0.4333, "angle": -9.14 },
+					{ "time": 0.6667, "angle": -8.49 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04, "curve": "stepped" },
+					{ "time": 0.6667, "x": 71.14, "y": 1.04 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{},
+					{ "time": 0.1667, "angle": 9.3 },
+					{ "time": 0.3333, "angle": -6.82 },
+					{ "time": 0.6667 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.1667, "x": -5.18, "y": 2.96 },
+					{ "time": 0.3333, "x": -0.98, "y": 4.79 },
+					{ "time": 0.6667 }
+				]
+			}
+		}
+	},
+	"shoot_handgun": {
+		"slots": {
+			"muzzle_flash": {
+				"attachment": [
+					{ "name": "muzzle_flash_01" },
+					{ "time": 0.0333, "name": "muzzle_flash_01" },
+					{ "time": 0.0667, "name": "muzzle_flash_01" },
+					{ "time": 0.1, "name": null }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -52.48, "curve": "stepped" },
+					{ "time": 0.1, "angle": -52.48 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.0333, "x": -2 },
+					{ "time": 0.1 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -306.69, "curve": "stepped" },
+					{ "time": 0.1, "angle": -306.69 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.0333, "x": 0.77, "y": 1 },
+					{ "time": 0.1 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 15.52 },
+					{ "time": 0.0333, "angle": 14.96 },
+					{ "time": 0.1, "angle": 15.52 }
+				],
+				"translate": [
+					{ "x": 13.21, "y": 7.84, "curve": "stepped" },
+					{ "time": 0.1, "x": 13.21, "y": 7.84 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -412.81 },
+					{ "time": 0.0333, "angle": -417.06 },
+					{ "time": 0.1, "angle": -412.81 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 64.9, "curve": "stepped" },
+					{ "time": 0.1, "angle": 64.9 }
+				],
+				"translate": [
+					{ "x": 0.01, "y": -4.59, "curve": "stepped" },
+					{ "time": 0.1, "x": 0.01, "y": -4.59 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{ "curve": "stepped" },
+					{ "time": 0.1 }
+				],
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.0333 },
+					{ "time": 0.0667, "x": -1 },
+					{ "time": 0.1 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "curve": "stepped" },
+					{ "time": 0.1 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.0333, "x": -1.42, "y": -0.39 },
+					{ "time": 0.1 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -1.27, "curve": "stepped" },
+					{ "time": 0.1, "angle": -1.27 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.0333, "x": -1.09, "y": 0.21 },
+					{ "time": 0.1 }
+				]
+			},
+			"weapon": {
+				"translate": [
+					{},
+					{ "time": 0.0333, "x": -2.55, "y": 0.43 },
+					{ "time": 0.1 }
+				],
+				"scale": [
+					{},
+					{ "time": 0.0333, "x": 0.95 },
+					{ "time": 0.1 }
+				]
+			},
+			"muzzle": {
+				"scale": [
+					{ "x": 0.3, "y": 0.3 }
+				]
+			}
+		}
+	},
+	"shoot_rifle": {
+		"slots": {
+			"muzzle_flash": {
+				"attachment": [
+					{ "name": "muzzle_flash_01" },
+					{ "time": 0.0333, "name": "muzzle_flash_01" },
+					{ "time": 0.0667, "name": "muzzle_flash_01" },
+					{ "time": 0.1, "name": null }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": "rifle" },
+					{ "time": 0.1, "name": "rifle" }
+				]
+			}
+		},
+		"bones": {
+			"weapon": {
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.1 }
+				]
+			},
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.0333, "angle": -62.31 },
+					{ "time": 0.1, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.0333, "x": -1.63 },
+					{ "time": 0.1 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76, "curve": "stepped" },
+					{ "time": 0.1, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25 },
+					{ "time": 0.0333, "x": 2.43, "y": 4.53 },
+					{ "time": 0.1, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.1, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 49 },
+					{ "time": 0.0333, "angle": 52.95 },
+					{ "time": 0.1, "angle": 49 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.1, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.0333, "angle": -397.8 },
+					{ "time": 0.1, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04, "curve": "stepped" },
+					{ "time": 0.1, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16, "curve": "stepped" },
+					{ "time": 0.1, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13, "curve": "stepped" },
+					{ "time": 0.1, "angle": 376.13 }
+				],
+				"translate": [
+					{ "time": 0.0333, "x": -1.97, "y": -0.77 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.1, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49, "curve": "stepped" },
+					{ "time": 0.1, "angle": -8.49 }
+				],
+				"translate": [
+					{ "time": 0.0333, "x": -1.83, "y": 0.62 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 70.88, "y": 3.06 },
+					{ "time": 0.1, "x": 71.14, "y": 1.04 }
+				],
+				"scale": [
+					{ "x": 0.3, "y": 0.2 },
+					{ "time": 0.0667, "x": 0.19, "y": 0.2 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{ "curve": "stepped" },
+					{ "time": 0.1 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.0667, "x": -1.63 },
+					{ "time": 0.1 }
+				]
+			}
+		}
+	},
+	"shoot_shotgun": {
+		"slots": {
+			"muzzle_flash": {
+				"attachment": [
+					{ "name": "muzzle_flash_01" },
+					{ "time": 0.1, "name": null }
+				]
+			},
+			"weapon": {
+				"attachment": [
+					{ "name": "shotgun" },
+					{ "time": 0.1, "name": "shotgun" }
+				]
+			}
+		},
+		"bones": {
+			"weapon": {
+				"translate": [
+					{ "curve": "stepped" },
+					{ "time": 0.1 }
+				]
+			},
+			"torso": {
+				"rotate": [
+					{ "angle": -61.74 },
+					{ "time": 0.0333, "angle": -62.31 },
+					{ "time": 0.1, "angle": -61.74 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.0333, "x": -1.63 },
+					{ "time": 0.1 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -305.76, "curve": "stepped" },
+					{ "time": 0.1, "angle": -305.76 }
+				],
+				"translate": [
+					{ "x": 1.75, "y": 3.25 },
+					{ "time": 0.0333, "x": 2.43, "y": 4.53 },
+					{ "time": 0.1, "x": 1.75, "y": 3.25 }
+				],
+				"scale": [
+					{ "x": 0.9, "curve": "stepped" },
+					{ "time": 0.1, "x": 0.9 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 49 },
+					{ "time": 0.0333, "angle": 51.03 },
+					{ "time": 0.1, "angle": 49 }
+				],
+				"translate": [
+					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
+					{ "time": 0.1, "x": 4.6, "y": 4.11 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -391.49 },
+					{ "time": 0.0333, "angle": -397.8 },
+					{ "time": 0.1, "angle": -391.49 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 50.04, "curve": "stepped" },
+					{ "time": 0.1, "angle": 50.04 }
+				],
+				"translate": [
+					{ "x": -1.36, "y": -5.16, "curve": "stepped" },
+					{ "time": 0.1, "x": -1.36, "y": -5.16 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 376.13, "curve": "stepped" },
+					{ "time": 0.1, "angle": 376.13 }
+				],
+				"translate": [
+					{ "time": 0.0333, "x": -1.97, "y": -0.77 }
+				],
+				"scale": [
+					{ "x": 1.111, "curve": "stepped" },
+					{ "time": 0.1, "x": 1.111 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -8.49, "curve": "stepped" },
+					{ "time": 0.1, "angle": -8.49 }
+				],
+				"translate": [
+					{ "time": 0.0333, "x": -1.83, "y": 0.62 }
+				]
+			},
+			"muzzle": {
+				"translate": [
+					{ "x": 71.14, "y": 1.04, "curve": "stepped" },
+					{ "time": 0.1, "x": 71.14, "y": 1.04 }
+				],
+				"scale": [
+					{ "x": 0.5, "y": 0.3 },
+					{ "time": 0.0333, "x": 0.3, "y": 0.3 },
+					{ "time": 0.0667, "x": 0.1, "y": 0.2 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{ "curve": "stepped" },
+					{ "time": 0.1 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.0667, "x": -1.63 },
+					{ "time": 0.1 }
+				]
+			}
+		}
+	}
+}
+}

@@ -3,6 +3,8 @@ export interface Keys {
   A: Phaser.Input.Keyboard.Key;
   S: Phaser.Input.Keyboard.Key;
   D: Phaser.Input.Keyboard.Key;
+  E: Phaser.Input.Keyboard.Key;
+  R: Phaser.Input.Keyboard.Key;
   Z: Phaser.Input.Keyboard.Key;
   X: Phaser.Input.Keyboard.Key;
   C: Phaser.Input.Keyboard.Key;
@@ -35,7 +37,7 @@ export default class Inputs {
   constructor(input: Phaser.Input.InputPlugin) {
     this._input = input;
     this._keys = this._input.keyboard.addKeys(
-      "W,A,S,D,Z,X,C,F,up,left,down,right,space,enter,comma,period,zero,one,two,three,four,five,six,seven,eight,nine"
+      "W,A,S,D,Z,X,C,F,E,R,up,left,down,right,space,enter,comma,period,zero,one,two,three,four,five,six,seven,eight,nine"
     ) as Keys;
   }
 
@@ -53,6 +55,10 @@ export default class Inputs {
 
   public get down() {
     return this.keys.down.isDown || this.keys.S.isDown || this.padAxisV === 1;
+  }
+
+  public get space() {
+    return this.keys.space.isDown;
   }
 
   public get keys(): Keys {
