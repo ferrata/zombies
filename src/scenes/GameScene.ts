@@ -10,7 +10,11 @@ export default class GameScene extends Phaser.Scene {
   private reticle: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   private player: Player;
   private objects: any[] = [];
-  private isDark: boolean;
+  private _isDark: boolean;
+
+  public get isDark(): boolean {
+    return this._isDark;
+  }
 
   public get inputs(): PlayerInputs {
     return this._inputs;
@@ -59,7 +63,8 @@ export default class GameScene extends Phaser.Scene {
       loop: true,
     });
 
-    this.darken();
+    // this.darken();
+    this.lighten();
 
     // Set camera zoom
     this.cameras.main.zoom = 1;
@@ -101,15 +106,25 @@ export default class GameScene extends Phaser.Scene {
   }
 
   darken() {
-    this.isDark = true;
+    this._isDark = true;
     this.lights.setAmbientColor(0x333333);
     this.player.onDark();
+    this.objects.forEach((obj) => {
+      if (obj.onDark) {
+        obj.onDark();
+      }
+    });
   }
 
   lighten() {
-    this.isDark = false;
+    this._isDark = false;
     this.lights.setAmbientColor(0xffffff);
     this.player.onLight();
+    this.objects.forEach((obj) => {
+      if (obj.onLight) {
+        obj.onLight();
+      }
+    });
   }
 
   update(_time, _delta) {
