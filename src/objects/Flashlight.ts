@@ -32,11 +32,28 @@ export default class Flashlight extends Phaser.Physics.Arcade.Sprite {
   }
 
   public turnOn() {
-    this.beam.setIntensity(2);
+    const intensity = this.scene.isDark ? 1 : 0.5;
+    this.beam.setIntensity(intensity);
   }
 
   public pointTo(x: number, y: number, distance: number) {
     this.beam.setPosition(x, y);
     this.beam.radius = Math.max(100, (400 * distance) / 1000);
+  }
+
+  public onLight() {
+    if (this.isOff) {
+      return;
+    }
+
+    this.beam.setIntensity(0.3);
+  }
+
+  public onDark() {
+    if (this.isOff) {
+      return;
+    }
+
+    this.beam.setIntensity(2);
   }
 }
