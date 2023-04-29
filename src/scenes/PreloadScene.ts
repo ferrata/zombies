@@ -7,6 +7,11 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("flashlight", "assets/images/flashlight.png");
     this.load.image("target", "assets/images/pointer.png");
     this.load.image("background", "assets/images/floor.png");
+    this.load.atlas(
+      "bullet-casings",
+      "assets/particles/bullet-casings.png",
+      "assets/particles/bullet-casings.json"
+    );
 
     this.load.setPath("assets/spine/");
     // @ts-ignore

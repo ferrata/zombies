@@ -2,6 +2,7 @@ import GameScene from "../scenes/GameScene";
 import { Event } from "../scenes/Event";
 import Flashlight from "./Flashlight";
 import SpineContainer from "../types/SpineContainer";
+import { CasingEmitter } from "./CasingEmitter";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -31,6 +32,7 @@ export default class Player extends SpineContainer {
   private readonly walkingSpeed: number = 230;
   private readonly strafeSpeed: number = 230;
   private readonly strafeFastSpeed: number = 500;
+  private readonly casingEmitter: CasingEmitter;
 
   // @ts-ignore
   private legs: SpineGameObject;
@@ -70,6 +72,17 @@ export default class Player extends SpineContainer {
 
     this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
     this.selectWeapon(PlayerWeapon.HANDGUN);
+
+    this.casingEmitter = new CasingEmitter(
+      this.scene,
+      this.x,
+      this.y,
+      "bullet-casings",
+      { from: 0.4, to: 0.2 }
+    );
+
+    this.setDepth(1000);
+    this.casingEmitter.setDepth(500);
   }
 
   public preUpdate(time: number, delta: number) {
@@ -228,6 +241,7 @@ export default class Player extends SpineContainer {
     }
 
     this.spine.setAnimation(0, `shoot_${this.currentWeapon}`, false);
+    this.casingEmitter.emitOne(this.getCasingName(this.currentWeapon));
   }
 
   private reload() {
@@ -260,15 +274,45 @@ export default class Player extends SpineContainer {
     distance: number
   ) {
     this.flashlight?.pointTo(reticle.x, reticle.y, distance);
+    this.updateCasingEmitterPosition(this.currentWeapon);
   }
 
   public onDark() {
     this.postFX.clear();
     this.postFX.addColorMatrix().brightness(0.5);
+    this.casingEmitter.onDark();
   }
 
   public onLight() {
     this.postFX.clear();
     this.postFX.add(this.shadow);
+    this.casingEmitter.onLight();
+  }
+
+  private updateCasingEmitterPosition(weapon: PlayerWeapon) {
+    const adjustByWeapon = {
+      [PlayerWeapon.HANDGUN]: { length: 60, angle: -10 },
+      [PlayerWeapon.SHOTGUN]: { length: 50, angle: -5 },
+      [PlayerWeapon.RIFLE]: { length: 40, angle: 0 },
+      [PlayerWeapon.KNIFE]: { length: 0, angle: 0 },
+    };
+
+    const { length, angle } = adjustByWeapon[weapon];
+    this.casingEmitter.setEmitterPosition(
+      this.body.center,
+      length,
+      this.angle + angle
+    );
+
+    this.casingEmitter.setEmitterAngle(this.angle);
+  }
+
+  private getCasingName(weapon: PlayerWeapon) {
+    // names are based on the spritesheet "bullet-casings"
+    return {
+      [PlayerWeapon.HANDGUN]: "8mm-bullet-case",
+      [PlayerWeapon.SHOTGUN]: "12gauge-bullet-case",
+      [PlayerWeapon.RIFLE]: "ar-bullet-case",
+    }[weapon];
   }
 }
