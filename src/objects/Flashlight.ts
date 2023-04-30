@@ -1,6 +1,10 @@
 import GameScene from "../scenes/GameScene";
+import { Debuggable } from "../types/Debuggable";
 
-export default class Flashlight extends Phaser.Physics.Arcade.Sprite {
+export default class Flashlight
+  extends Phaser.Physics.Arcade.Sprite
+  implements Debuggable
+{
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
@@ -25,6 +29,18 @@ export default class Flashlight extends Phaser.Physics.Arcade.Sprite {
       .addLight(180, 80, 100)
       .setColor(0xffffff)
       .setIntensity(0);
+  }
+
+  public getDebugInfo(): object {
+    return {
+      name: this.name,
+      x: this.x,
+      y: this.y,
+      isOff: this.isOff,
+      rotation: this.rotation,
+      intensity: this.beam.intensity,
+      radius: this.beam.radius,
+    };
   }
 
   public turnOff() {
