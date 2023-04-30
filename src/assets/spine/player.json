@@ -1,13 +1,13 @@
 {
 "skeleton": {
-	"hash": "kkASXBveJXU",
+	"hash": "CRbVvTdtnIk",
 	"spine": "3.8-from-4.0-from-4.1.20",
 	"x": -99.41,
 	"y": -102.85,
 	"width": 289.37,
 	"height": 202.85,
 	"images": "./images/",
-	"audio": "C:/work/games/_art/zombies"
+	"audio": ""
 },
 "bones": [
 	{ "name": "root" },
@@ -2365,6 +2365,180 @@
 					{},
 					{ "time": 0.0667, "x": -1.63 },
 					{ "time": 0.1 }
+				]
+			}
+		}
+	},
+	"take_object_reach_handgun": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "time": 0.0667, "name": "hand_fist" },
+					{ "time": 0.2333, "name": "hand_fist" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -52.48 },
+					{ "time": 0.2333, "angle": -72.64 }
+				],
+				"translate": [
+					{}
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -306.69 }
+				],
+				"translate": [
+					{}
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 15.52 },
+					{ "time": 0.2333, "angle": 61.19 }
+				],
+				"translate": [
+					{ "x": 13.21, "y": 7.84 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -412.81 },
+					{ "time": 0.2333, "angle": -349.58 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 64.9 },
+					{ "time": 0.0667, "angle": 10.79 },
+					{ "time": 0.2333, "angle": 14.53 }
+				],
+				"translate": [
+					{ "x": 0.01, "y": -4.59 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{}
+				],
+				"translate": [
+					{}
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{},
+					{ "time": 0.2333, "angle": 18.31 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "angle": -1.27 }
+				]
+			}
+		}
+	},
+	"take_object_take_handgun": {
+		"slots": {
+			"l_hand": {
+				"attachment": [
+					{ "name": "hand_steadying_gun" },
+					{ "time": 0.0333, "name": "hand_steadying_gun" },
+					{ "time": 0.0667, "name": "hand_fist" },
+					{ "time": 0.1667, "name": "hand_fist" },
+					{ "time": 0.2667, "name": "hand_fist" },
+					{ "time": 0.4667, "name": "hand_steadying_gun" },
+					{ "time": 0.5, "name": "hand_steadying_gun" }
+				]
+			}
+		},
+		"bones": {
+			"torso": {
+				"rotate": [
+					{ "angle": -72.64 },
+					{ "time": 0.4333, "angle": -54.29 },
+					{ "time": 0.5, "angle": -52.48 }
+				],
+				"translate": [
+					{ "time": 0.4333, "x": -1.08, "y": 1.08 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_arm": {
+				"rotate": [
+					{ "angle": -306.69 },
+					{ "time": 0.4333, "angle": -302.53 },
+					{ "time": 0.5, "angle": -306.69 }
+				],
+				"translate": [
+					{},
+					{ "time": 0.4333, "x": -0.37, "y": -0.69 },
+					{ "time": 0.5 }
+				]
+			},
+			"l_arm": {
+				"rotate": [
+					{ "angle": 61.19 },
+					{ "time": 0.0333, "angle": 51.69 },
+					{ "time": 0.1, "angle": 50.29 },
+					{ "time": 0.2667, "angle": 27.76 },
+					{ "time": 0.3667, "angle": 38.14 },
+					{ "time": 0.4333, "angle": 19.85 },
+					{ "time": 0.5, "angle": 15.52 }
+				],
+				"translate": [
+					{ "x": 13.21, "y": 7.84 },
+					{ "time": 0.4333, "x": 12.58, "y": 6.96 },
+					{ "time": 0.5, "x": 13.21, "y": 7.84 }
+				]
+			},
+			"l_forearm": {
+				"rotate": [
+					{ "angle": -349.58 },
+					{ "time": 0.0333, "angle": -360.56 },
+					{ "time": 0.1, "angle": -448.01 },
+					{ "time": 0.2667, "angle": -464.46 },
+					{ "time": 0.3667, "angle": -443.88 },
+					{ "time": 0.4333, "angle": -419.38 },
+					{ "time": 0.5, "angle": -412.81 }
+				]
+			},
+			"l_hand": {
+				"rotate": [
+					{ "angle": 14.53 },
+					{ "time": 0.0333, "angle": 11.21 },
+					{ "time": 0.2667, "angle": 7.36 },
+					{ "time": 0.4333, "angle": 67.32 },
+					{ "time": 0.5, "angle": 64.9 }
+				],
+				"translate": [
+					{ "time": 0.5, "x": 0.01, "y": -4.59 }
+				]
+			},
+			"head": {
+				"rotate": [
+					{ "time": 0.5 }
+				],
+				"translate": [
+					{ "time": 0.4333, "x": -2.87, "y": 2.87 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_forearm": {
+				"rotate": [
+					{ "angle": 18.31 },
+					{ "time": 0.4333, "angle": -4.48 },
+					{ "time": 0.5 }
+				]
+			},
+			"r_hand": {
+				"rotate": [
+					{ "time": 0.4333, "angle": 1.59 },
+					{ "time": 0.5, "angle": -1.27 }
 				]
 			}
 		}

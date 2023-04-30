@@ -92,16 +92,25 @@ export default class GameScene extends Phaser.Scene {
       console.error("Flashlight is missing");
     });
 
-    this.events.on(Event.ITEM_PICKED_UP, (item: any) => {
+    this.events.on(Event.OBJECT_PICKED_UP, (item: any) => {
       console.info("Picked up", item.name);
     });
 
-    this.events.on(Event.UNKNOWN_ITEM, (item: any) => {
+    this.events.on(Event.UNKNOWN_OBJECT, (item: any) => {
       console.error("Unknown item", item.name);
     });
 
-    this.events.on(Event.NO_ITEM_IN_RANGE, () => {
+    this.events.on(Event.NO_OBJECT_IN_RANGE, () => {
       console.error("No item in range");
+    });
+
+    this.events.on(Event.INTERACT_WITH_OBJECT, () => {
+      const item = this.closestObject();
+      if (item) {
+        this.player.interactWithObject(item);
+      } else {
+        this.events.emit(Event.NO_OBJECT_IN_RANGE);
+      }
     });
   }
 

@@ -122,12 +122,7 @@ export default class Player extends SpineContainer implements Debuggable {
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.E)) {
-      const item = this.scene.closestObject();
-      if (item) {
-        this.useItem(item);
-      } else {
-        this.scene.events.emit(Event.NO_ITEM_IN_RANGE);
-      }
+      this.scene.events.emit(Event.INTERACT_WITH_OBJECT);
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.R)) {
@@ -256,18 +251,49 @@ export default class Player extends SpineContainer implements Debuggable {
     // this.spine.addAnimation(0, `reload_${this.currentWeapon}`, false);
   }
 
-  public useItem(item: Phaser.GameObjects.GameObject) {
+  public interactWithObject(item: Phaser.GameObjects.GameObject) {
     if (item instanceof Flashlight) {
-      this.scene.physics.world.remove(item.body);
-      this.scene.children.remove(item);
+      this.takeItem(() => {
+        this.scene.physics.world.remove(item.body);
+        this.scene.children.remove(item);
+        return item;
+      });
 
       this.flashlight = item as Flashlight;
       // this.addAt(this.flashlight, 0);
-
-      this.scene.events.emit(Event.ITEM_PICKED_UP, item);
     } else {
-      this.scene.events.emit(Event.UNKNOWN_ITEM, item);
+      this.scene.events.emit(Event.UNKNOWN_OBJECT, item);
     }
+  }
+
+  private takeItem(fn: Function) {
+    const listener = {
+      complete: (entry) => {
+        this.spine.state.removeListener(listener);
+
+        const item = fn();
+        this.spine.addAnimation(
+          0,
+          `take_object_take_${this.currentWeapon}`,
+          false
+        );
+        this.spine.addAnimation(
+          0,
+          `${this.currentState}_${this.currentWeapon}`,
+          true
+        );
+
+        this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
+      },
+    };
+
+    this.spine.state.addListener(listener);
+
+    this.spine.setAnimation(
+      0,
+      `take_object_reach_${this.currentWeapon}`,
+      false
+    );
   }
 
   public onUpdateReticle(
