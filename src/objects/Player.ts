@@ -3,6 +3,7 @@ import { Event } from "../scenes/Event";
 import Flashlight from "./Flashlight";
 import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
+import { Debuggable } from "../types/Debuggable";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -24,7 +25,7 @@ enum PlayerLegsState {
   RUN = "run",
 }
 
-export default class Player extends SpineContainer {
+export default class Player extends SpineContainer implements Debuggable {
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
@@ -287,6 +288,19 @@ export default class Player extends SpineContainer {
     this.postFX.clear();
     this.postFX.add(this.shadow);
     this.casingEmitter.onLight();
+  }
+
+  public getDebugInfo() {
+    return {
+      x: this.x,
+      y: this.y,
+      angle: this.angle,
+      velocity: this.body.velocity,
+      currentState: this.currentState,
+      currentLegsState: this.currentLegsState,
+      currentWeapon: this.currentWeapon,
+      flashlight: this.flashlight?.getDebugInfo(),
+    };
   }
 
   private updateCasingEmitterPosition(weapon: PlayerWeapon) {
