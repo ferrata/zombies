@@ -2,10 +2,12 @@ import { GameObjects } from "phaser";
 import { Debuggable, isDebuggable } from "../types/Debuggable";
 
 export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
-  private debugInfoEnabled: boolean = true;
+  private debugInfoEnabled: boolean = false;
   private help: DebugInfoWindow;
   private sceneDebugInfo: DebugInfoWindow;
   private debugObjects: { [key: string]: DebugInfoWindow } = {};
+
+  private readonly displayBorder: number = 10;
 
   constructor(
     scene: Phaser.Scene,
@@ -16,13 +18,20 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     this.scene.events.once("boot", () => {
       this.create();
     });
+
+    this.scene.events.once("ready", (event: Phaser.Scenes.Systems) => {
+      event.scene.physics.world.createDebugGraphic();
+      event.scene.physics.world.drawDebug = this.debugInfoEnabled;
+    });
   }
 
   public create() {
     this.sceneDebugInfo = new DebugInfoWindow(
       this.scene,
       `${this.scene.scene.key}`
-    ).setScrollFactor(0);
+    )
+      .setScrollFactor(0)
+      .setPosition(this.displayBorder, this.displayBorder);
 
     this.help = new DebugInfoWindow(this.scene, "Help")
       .setScrollFactor(0)
@@ -38,7 +47,10 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
         ].join("\n")
       );
 
-    this.help.setPosition(this.scene.game.canvas.width - this.help.width, 0);
+    this.help.setPosition(
+      this.scene.game.canvas.width - this.help.width - this.displayBorder,
+      this.displayBorder
+    );
 
     this.scene.events.on(
       "addedtoscene",
@@ -70,6 +82,8 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
         return;
       }
 
+      this.scene.physics.world.debugGraphic.update();
+
       this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene));
 
       for (const key in this.debugObjects) {
@@ -99,6 +113,9 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
 
     this.scene.input.keyboard.on("keydown-F9", () => {
       this.debugInfoEnabled = !this.debugInfoEnabled;
+
+      this.scene.physics.world.debugGraphic.clear();
+      this.scene.physics.world.drawDebug = this.debugInfoEnabled;
     });
   }
 
