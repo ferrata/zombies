@@ -1,6 +1,7 @@
 export enum Event {
   FLASHLIGHT_MISSING = "flashlight:missing",
-  UNKNOWN_ITEM = "item:unknown",
-  NO_ITEM_IN_RANGE = "item:none-in-range",
-  ITEM_PICKED_UP = "item:picked-up",
+  UNKNOWN_OBJECT = "object:unknown",
+  NO_OBJECT_IN_RANGE = "object:none-in-range",
+  OBJECT_PICKED_UP = "object:picked-up",
+  INTERACT_WITH_OBJECT = "interact",
 }
