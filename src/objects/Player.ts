@@ -79,7 +79,7 @@ export default class Player extends SpineContainer implements Debuggable {
       this.x,
       this.y,
       "bullet-casings",
-      { from: 0.4, to: 0.2 }
+      { from: 0.3, to: 0.2 }
     );
 
     this.setDepth(1000);
@@ -305,7 +305,7 @@ export default class Player extends SpineContainer implements Debuggable {
 
   private updateCasingEmitterPosition(weapon: PlayerWeapon) {
     const adjustByWeapon = {
-      [PlayerWeapon.HANDGUN]: { length: 60, angle: -10 },
+      [PlayerWeapon.HANDGUN]: { length: 60, angle: -5 },
       [PlayerWeapon.SHOTGUN]: { length: 50, angle: -5 },
       [PlayerWeapon.RIFLE]: { length: 40, angle: 0 },
       [PlayerWeapon.KNIFE]: { length: 0, angle: 0 },
