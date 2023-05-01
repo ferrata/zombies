@@ -274,7 +274,7 @@ export default class Player extends SpineContainer implements Debuggable {
         const item = fn();
         this.spine.addAnimation(
           0,
-          `take_object_take_${this.currentWeapon}`,
+          `interact_take_${this.currentWeapon}`,
           false
         );
         this.spine.addAnimation(
@@ -289,11 +289,7 @@ export default class Player extends SpineContainer implements Debuggable {
 
     this.spine.state.addListener(listener);
 
-    this.spine.setAnimation(
-      0,
-      `take_object_reach_${this.currentWeapon}`,
-      false
-    );
+    this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
   }
 
   public onUpdateReticle(
