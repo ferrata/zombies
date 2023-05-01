@@ -1,6 +1,6 @@
 {
 "skeleton": {
-	"hash": "cgSlXRS6oV8",
+	"hash": "ImzECPbuNgg",
 	"spine": "3.8-from-4.0-from-4.1.21",
 	"x": -99.41,
 	"y": -102.85,
@@ -2561,7 +2561,7 @@
 				"attachment": [
 					{ "name": "hand_steadying_gun" },
 					{ "time": 0.1667, "name": "hand_grab_ammo" },
-					{ "time": 0.4333, "name": "hand_steadying_gun" }
+					{ "time": 0.5333, "name": "hand_steadying_gun" }
 				]
 			}
 		},
@@ -2570,26 +2570,26 @@
 				"rotate": [
 					{ "angle": -52.48 },
 					{ "time": 0.1667, "angle": -44.97 },
-					{ "time": 0.4333, "angle": -52.48, "curve": "stepped" },
-					{ "time": 0.5, "angle": -52.48 }
+					{ "time": 0.5333, "angle": -52.48, "curve": "stepped" },
+					{ "time": 1, "angle": -52.48 }
 				],
 				"translate": [
 					{ "curve": "stepped" },
-					{ "time": 0.4333, "curve": "stepped" },
-					{ "time": 0.5 }
+					{ "time": 0.5333, "curve": "stepped" },
+					{ "time": 1 }
 				]
 			},
 			"r_arm": {
 				"rotate": [
 					{ "angle": -306.69 },
 					{ "time": 0.2667, "angle": -332.34 },
-					{ "time": 0.4333, "angle": -306.69, "curve": "stepped" },
-					{ "time": 0.5, "angle": -306.69 }
+					{ "time": 0.5333, "angle": -306.69, "curve": "stepped" },
+					{ "time": 1, "angle": -306.69 }
 				],
 				"translate": [
 					{ "curve": "stepped" },
-					{ "time": 0.4333, "curve": "stepped" },
-					{ "time": 0.5 }
+					{ "time": 0.5333, "curve": "stepped" },
+					{ "time": 1 }
 				]
 			},
 			"l_arm": {
@@ -2597,13 +2597,13 @@
 					{ "angle": 15.52 },
 					{ "time": 0.1667, "angle": 54.89, "curve": "stepped" },
 					{ "time": 0.2667, "angle": 54.89 },
-					{ "time": 0.4333, "angle": 15.52, "curve": "stepped" },
-					{ "time": 0.5, "angle": 15.52 }
+					{ "time": 0.5333, "angle": 15.52, "curve": "stepped" },
+					{ "time": 1, "angle": 15.52 }
 				],
 				"translate": [
 					{ "x": 13.21, "y": 7.84, "curve": "stepped" },
-					{ "time": 0.4333, "x": 13.21, "y": 7.84, "curve": "stepped" },
-					{ "time": 0.5, "x": 13.21, "y": 7.84 }
+					{ "time": 0.5333, "x": 13.21, "y": 7.84, "curve": "stepped" },
+					{ "time": 1, "x": 13.21, "y": 7.84 }
 				]
 			},
 			"l_forearm": {
@@ -2612,7 +2612,8 @@
 					{ "time": 0.1667, "angle": -475.61 },
 					{ "time": 0.2667, "angle": -472.91 },
 					{ "time": 0.4, "angle": -408.2 },
-					{ "time": 0.5, "angle": -412.81 }
+					{ "time": 0.7333, "angle": -412.81, "curve": "stepped" },
+					{ "time": 1, "angle": -412.81 }
 				]
 			},
 			"l_hand": {
@@ -2620,50 +2621,51 @@
 					{ "angle": 64.9 },
 					{ "time": 0.1667, "angle": 1.01 },
 					{ "time": 0.2667, "angle": 9.46 },
-					{ "time": 0.4333, "angle": 73.4 },
-					{ "time": 0.5, "angle": 64.9 }
+					{ "time": 0.5333, "angle": 73.4 },
+					{ "time": 0.7333, "angle": 64.9, "curve": "stepped" },
+					{ "time": 1, "angle": 64.9 }
 				],
 				"translate": [
 					{ "x": 0.01, "y": -4.59 },
 					{ "time": 0.1667, "x": 0.75, "y": 1.39, "curve": "stepped" },
 					{ "time": 0.2667, "x": 0.75, "y": 1.39 },
 					{ "time": 0.3333, "x": -1.05, "y": 6.04 },
-					{ "time": 0.4333, "x": 0.01, "y": -4.59, "curve": "stepped" },
-					{ "time": 0.5, "x": 0.01, "y": -4.59 }
+					{ "time": 0.5333, "x": 0.01, "y": -4.59, "curve": "stepped" },
+					{ "time": 0.7333, "x": 0.01, "y": -4.59, "curve": "stepped" },
+					{ "time": 1, "x": 0.01, "y": -4.59 }
 				]
 			},
 			"head": {
 				"rotate": [
 					{ "curve": "stepped" },
-					{ "time": 0.4333, "curve": "stepped" },
-					{ "time": 0.5 }
+					{ "time": 1 }
 				],
 				"translate": [
 					{ "curve": "stepped" },
-					{ "time": 0.4333, "curve": "stepped" },
-					{ "time": 0.5 }
+					{ "time": 1 }
 				]
 			},
 			"r_forearm": {
 				"rotate": [
 					{},
 					{ "time": 0.2667, "angle": 15.66 },
-					{ "time": 0.4333, "curve": "stepped" },
-					{ "time": 0.5 }
+					{ "time": 0.5333, "curve": "stepped" },
+					{ "time": 1 }
 				]
 			},
 			"r_hand": {
 				"rotate": [
 					{ "angle": -1.27, "curve": "stepped" },
-					{ "time": 0.4333, "angle": -1.27, "curve": "stepped" },
-					{ "time": 0.5, "angle": -1.27 }
+					{ "time": 0.5333, "angle": -1.27, "curve": "stepped" },
+					{ "time": 1, "angle": -1.27 }
 				]
 			},
 			"weapon": {
 				"translate": [
-					{ "time": 0.4333 },
-					{ "time": 0.4667, "x": -1.11, "y": 0.19 },
-					{ "time": 0.5 }
+					{ "time": 0.5333, "curve": "stepped" },
+					{ "time": 0.7333 },
+					{ "time": 0.9667, "x": -1.11, "y": 0.19 },
+					{ "time": 1 }
 				]
 			}
 		},
@@ -2683,13 +2685,15 @@
 			"l_hand": {
 				"attachment": [
 					{ "time": 0.1667, "name": "hand_grab_ammo" },
-					{ "time": 0.4667, "name": "hand_steadying_gun" }
+					{ "time": 0.4667, "name": "hand_steadying_gun" },
+					{ "time": 0.6333, "name": "hand_steadying_gun" },
+					{ "time": 0.7667, "name": "hand_steadying_gun" }
 				]
 			},
 			"weapon": {
 				"attachment": [
 					{ "name": "rifle" },
-					{ "time": 0.6667, "name": "rifle" }
+					{ "time": 1, "name": "rifle" }
 				]
 			}
 		},
@@ -2699,7 +2703,7 @@
 					{ "curve": "stepped" },
 					{ "time": 0.3333 },
 					{ "time": 0.4, "x": -1.52, "y": 0.25 },
-					{ "time": 0.6667 }
+					{ "time": 1 }
 				]
 			},
 			"torso": {
@@ -2708,13 +2712,13 @@
 					{ "time": 0.1667, "angle": -48.84 },
 					{ "time": 0.3333, "angle": -52.84 },
 					{ "time": 0.4333, "angle": -58.17 },
-					{ "time": 0.6667, "angle": -61.74 }
+					{ "time": 1, "angle": -61.74 }
 				],
 				"translate": [
 					{},
 					{ "time": 0.1667, "x": -2.22, "y": 2.96 },
 					{ "time": 0.3333, "x": -1.53, "y": 2.04 },
-					{ "time": 0.6667 }
+					{ "time": 1 }
 				]
 			},
 			"r_arm": {
@@ -2723,15 +2727,15 @@
 					{ "time": 0.1667, "angle": -320.86 },
 					{ "time": 0.3333, "angle": -316.58 },
 					{ "time": 0.4333, "angle": -318.36 },
-					{ "time": 0.6667, "angle": -305.76 }
+					{ "time": 1, "angle": -305.76 }
 				],
 				"translate": [
 					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
-					{ "time": 0.6667, "x": 1.75, "y": 3.25 }
+					{ "time": 1, "x": 1.75, "y": 3.25 }
 				],
 				"scale": [
 					{ "x": 0.9, "curve": "stepped" },
-					{ "time": 0.6667, "x": 0.9 }
+					{ "time": 1, "x": 0.9 }
 				]
 			},
 			"l_arm": {
@@ -2739,12 +2743,14 @@
 					{ "angle": 49 },
 					{ "time": 0.1667, "angle": 63.74 },
 					{ "time": 0.3333, "angle": 42.28, "curve": "stepped" },
-					{ "time": 0.4333, "angle": 42.28 },
-					{ "time": 0.6667, "angle": 49 }
+					{ "time": 0.4, "angle": 42.28 },
+					{ "time": 0.4667, "angle": 53.94, "curve": "stepped" },
+					{ "time": 0.6333, "angle": 53.94 },
+					{ "time": 1, "angle": 49 }
 				],
 				"translate": [
 					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
-					{ "time": 0.6667, "x": 4.6, "y": 4.11 }
+					{ "time": 1, "x": 4.6, "y": 4.11 }
 				]
 			},
 			"l_forearm": {
@@ -2752,8 +2758,10 @@
 					{ "angle": -391.49 },
 					{ "time": 0.1667, "angle": -474.01 },
 					{ "time": 0.3333, "angle": -402.3 },
-					{ "time": 0.4333, "angle": -408.36 },
-					{ "time": 0.6667, "angle": -391.49 }
+					{ "time": 0.4, "angle": -408.36 },
+					{ "time": 0.4667, "angle": -426.49, "curve": "stepped" },
+					{ "time": 0.6333, "angle": -426.49 },
+					{ "time": 1, "angle": -391.49 }
 				]
 			},
 			"l_hand": {
@@ -2762,14 +2770,15 @@
 					{ "time": 0.1667, "angle": 6.41 },
 					{ "time": 0.3333, "angle": 2.79, "curve": "stepped" },
 					{ "time": 0.4333, "angle": 2.79 },
-					{ "time": 0.6667, "angle": 50.04 }
+					{ "time": 0.6667, "angle": -1.81 },
+					{ "time": 1, "angle": 50.04 }
 				],
 				"translate": [
 					{ "x": -1.36, "y": -5.16 },
 					{ "time": 0.1667, "x": -0.74, "y": -2.49 },
 					{ "time": 0.3333, "x": 1.06, "y": 3.22, "curve": "stepped" },
 					{ "time": 0.4333, "x": 1.06, "y": 3.22 },
-					{ "time": 0.6667, "x": -1.36, "y": -5.16 }
+					{ "time": 1, "x": -1.36, "y": -5.16 }
 				]
 			},
 			"r_forearm": {
@@ -2778,11 +2787,11 @@
 					{ "time": 0.1667, "angle": 389.65 },
 					{ "time": 0.3333, "angle": 385.82 },
 					{ "time": 0.4333, "angle": 389.02 },
-					{ "time": 0.6667, "angle": 376.13 }
+					{ "time": 1, "angle": 376.13 }
 				],
 				"scale": [
 					{ "x": 1.111, "curve": "stepped" },
-					{ "time": 0.6667, "x": 1.111 }
+					{ "time": 1, "x": 1.111 }
 				]
 			},
 			"r_hand": {
@@ -2791,13 +2800,13 @@
 					{ "time": 0.1667, "angle": -15.17 },
 					{ "time": 0.3333, "angle": -9.14, "curve": "stepped" },
 					{ "time": 0.4333, "angle": -9.14 },
-					{ "time": 0.6667, "angle": -8.49 }
+					{ "time": 1, "angle": -8.49 }
 				]
 			},
 			"muzzle": {
 				"translate": [
 					{ "x": 71.14, "y": 1.04, "curve": "stepped" },
-					{ "time": 0.6667, "x": 71.14, "y": 1.04 }
+					{ "time": 1, "x": 71.14, "y": 1.04 }
 				]
 			},
 			"head": {
@@ -2805,13 +2814,13 @@
 					{},
 					{ "time": 0.1667, "angle": 9.3 },
 					{ "time": 0.3333, "angle": -6.82 },
-					{ "time": 0.6667 }
+					{ "time": 1 }
 				],
 				"translate": [
 					{},
 					{ "time": 0.1667, "x": -5.18, "y": 2.96 },
 					{ "time": 0.3333, "x": -0.98, "y": 4.79 },
-					{ "time": 0.6667 }
+					{ "time": 1 }
 				]
 			}
 		}
@@ -2821,13 +2830,14 @@
 			"l_hand": {
 				"attachment": [
 					{ "time": 0.1667, "name": "hand_grab_ammo" },
-					{ "time": 0.4667, "name": "hand_steadying_gun" }
+					{ "time": 0.6, "name": "hand_steadying_gun" },
+					{ "time": 0.7333, "name": "hand_steadying_gun" }
 				]
 			},
 			"weapon": {
 				"attachment": [
 					{ "name": "shotgun" },
-					{ "time": 0.6667, "name": "shotgun" }
+					{ "time": 1, "name": "shotgun" }
 				]
 			}
 		},
@@ -2837,7 +2847,7 @@
 					{ "curve": "stepped" },
 					{ "time": 0.3333 },
 					{ "time": 0.4, "x": -1.52, "y": 0.25 },
-					{ "time": 0.6667 }
+					{ "time": 1 }
 				]
 			},
 			"torso": {
@@ -2846,13 +2856,13 @@
 					{ "time": 0.1667, "angle": -48.84 },
 					{ "time": 0.3333, "angle": -52.84 },
 					{ "time": 0.4333, "angle": -58.17 },
-					{ "time": 0.6667, "angle": -61.74 }
+					{ "time": 1, "angle": -61.74 }
 				],
 				"translate": [
 					{},
 					{ "time": 0.1667, "x": -2.22, "y": 2.96 },
 					{ "time": 0.3333, "x": -1.53, "y": 2.04 },
-					{ "time": 0.6667 }
+					{ "time": 1 }
 				]
 			},
 			"r_arm": {
@@ -2861,15 +2871,15 @@
 					{ "time": 0.1667, "angle": -320.86 },
 					{ "time": 0.3333, "angle": -316.58 },
 					{ "time": 0.4333, "angle": -318.36 },
-					{ "time": 0.6667, "angle": -305.76 }
+					{ "time": 1, "angle": -305.76 }
 				],
 				"translate": [
 					{ "x": 1.75, "y": 3.25, "curve": "stepped" },
-					{ "time": 0.6667, "x": 1.75, "y": 3.25 }
+					{ "time": 1, "x": 1.75, "y": 3.25 }
 				],
 				"scale": [
 					{ "x": 0.9, "curve": "stepped" },
-					{ "time": 0.6667, "x": 0.9 }
+					{ "time": 1, "x": 0.9 }
 				]
 			},
 			"l_arm": {
@@ -2878,11 +2888,12 @@
 					{ "time": 0.1667, "angle": 63.74 },
 					{ "time": 0.3333, "angle": 42.28, "curve": "stepped" },
 					{ "time": 0.4333, "angle": 42.28 },
-					{ "time": 0.6667, "angle": 49 }
+					{ "time": 0.6, "angle": 57.67 },
+					{ "time": 1, "angle": 49 }
 				],
 				"translate": [
 					{ "x": 4.6, "y": 4.11, "curve": "stepped" },
-					{ "time": 0.6667, "x": 4.6, "y": 4.11 }
+					{ "time": 1, "x": 4.6, "y": 4.11 }
 				]
 			},
 			"l_forearm": {
@@ -2891,7 +2902,8 @@
 					{ "time": 0.1667, "angle": -474.01 },
 					{ "time": 0.3333, "angle": -402.3 },
 					{ "time": 0.4333, "angle": -408.36 },
-					{ "time": 0.6667, "angle": -391.49 }
+					{ "time": 0.6, "angle": -418.64 },
+					{ "time": 1, "angle": -391.49 }
 				]
 			},
 			"l_hand": {
@@ -2900,14 +2912,14 @@
 					{ "time": 0.1667, "angle": 6.41 },
 					{ "time": 0.3333, "angle": 2.79, "curve": "stepped" },
 					{ "time": 0.4333, "angle": 2.79 },
-					{ "time": 0.6667, "angle": 50.04 }
+					{ "time": 1, "angle": 50.04 }
 				],
 				"translate": [
 					{ "x": -1.36, "y": -5.16 },
 					{ "time": 0.1667, "x": -0.74, "y": -2.49 },
 					{ "time": 0.3333, "x": 1.06, "y": 3.22, "curve": "stepped" },
 					{ "time": 0.4333, "x": 1.06, "y": 3.22 },
-					{ "time": 0.6667, "x": -1.36, "y": -5.16 }
+					{ "time": 1, "x": -1.36, "y": -5.16 }
 				]
 			},
 			"r_forearm": {
@@ -2916,11 +2928,11 @@
 					{ "time": 0.1667, "angle": 389.65 },
 					{ "time": 0.3333, "angle": 385.82 },
 					{ "time": 0.4333, "angle": 389.02 },
-					{ "time": 0.6667, "angle": 376.13 }
+					{ "time": 1, "angle": 376.13 }
 				],
 				"scale": [
 					{ "x": 1.111, "curve": "stepped" },
-					{ "time": 0.6667, "x": 1.111 }
+					{ "time": 1, "x": 1.111 }
 				]
 			},
 			"r_hand": {
@@ -2929,13 +2941,13 @@
 					{ "time": 0.1667, "angle": -15.17 },
 					{ "time": 0.3333, "angle": -9.14, "curve": "stepped" },
 					{ "time": 0.4333, "angle": -9.14 },
-					{ "time": 0.6667, "angle": -8.49 }
+					{ "time": 1, "angle": -8.49 }
 				]
 			},
 			"muzzle": {
 				"translate": [
 					{ "x": 71.14, "y": 1.04, "curve": "stepped" },
-					{ "time": 0.6667, "x": 71.14, "y": 1.04 }
+					{ "time": 1, "x": 71.14, "y": 1.04 }
 				]
 			},
 			"head": {
@@ -2943,13 +2955,13 @@
 					{},
 					{ "time": 0.1667, "angle": 9.3 },
 					{ "time": 0.3333, "angle": -6.82 },
-					{ "time": 0.6667 }
+					{ "time": 1 }
 				],
 				"translate": [
 					{},
 					{ "time": 0.1667, "x": -5.18, "y": 2.96 },
 					{ "time": 0.3333, "x": -0.98, "y": 4.79 },
-					{ "time": 0.6667 }
+					{ "time": 1 }
 				]
 			}
 		}
