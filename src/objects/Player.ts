@@ -13,6 +13,13 @@ enum PlayerWeapon {
   KNIFE = "knife",
 }
 
+enum PlayerWeaponMode {
+  NONE = "none",
+  SINGLE = "single",
+  BURST = "burst",
+  AUTO = "auto",
+}
+
 enum PlayerState {
   IDLE = "idle",
   MOVE = "move",
@@ -43,6 +50,12 @@ export default class Player extends SpineContainer implements Debuggable {
   private currentState: PlayerState = PlayerState.IDLE;
   private currentLegsState: PlayerLegsState = PlayerLegsState.IDLE;
   private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN;
+  private currentWeaponMode: { [key in PlayerWeapon]: PlayerWeaponMode } = {
+    handgun: PlayerWeaponMode.SINGLE,
+    shotgun: PlayerWeaponMode.SINGLE,
+    rifle: PlayerWeaponMode.BURST,
+    knife: PlayerWeaponMode.NONE,
+  };
 
   constructor(scene: GameScene, x: number, y: number) {
     super(
@@ -224,11 +237,39 @@ export default class Player extends SpineContainer implements Debuggable {
 
   public selectWeapon(weapon: PlayerWeapon) {
     if (this.currentWeapon === weapon) {
+      const oldMode = this.currentWeaponMode[this.currentWeapon];
+      const newMode = this.nextWeaponMode(this.currentWeapon, oldMode);
+      this.currentWeaponMode[this.currentWeapon] = newMode;
+
+      if (oldMode !== newMode) {
+        this.scene.events.emit(Event.WEAPON_MODE_CHANGED, {
+          weapon: this.currentWeapon,
+          mode: newMode,
+        });
+      }
+
       return;
     }
 
     this.currentWeapon = weapon;
     this.spine.setAnimation(0, `${this.currentState}_${weapon}`, true);
+  }
+
+  nextWeaponMode(
+    weapon: PlayerWeapon,
+    currentMode: PlayerWeaponMode
+  ): PlayerWeaponMode {
+    if (weapon !== PlayerWeapon.RIFLE) {
+      return PlayerWeaponMode.SINGLE;
+    }
+
+    if (currentMode === PlayerWeaponMode.SINGLE) {
+      return PlayerWeaponMode.BURST;
+    } else if (currentMode === PlayerWeaponMode.BURST) {
+      return PlayerWeaponMode.AUTO;
+    } else if (currentMode === PlayerWeaponMode.AUTO) {
+      return PlayerWeaponMode.SINGLE;
+    }
   }
 
   public attack() {
@@ -237,6 +278,42 @@ export default class Player extends SpineContainer implements Debuggable {
       return;
     }
 
+    const mode = this.currentWeaponMode[this.currentWeapon];
+    if (mode === PlayerWeaponMode.SINGLE) {
+      this.shoot();
+    } else if (mode === PlayerWeaponMode.BURST) {
+      this.shoot();
+      this.scene.time.addEvent({
+        delay: 100,
+        callback: () => {
+          this.shoot();
+        },
+      });
+      this.scene.time.addEvent({
+        delay: 200,
+        callback: () => {
+          this.shoot();
+        },
+      });
+    } else if (mode === PlayerWeaponMode.AUTO) {
+      const shootEvent = this.scene.time.addEvent({
+        delay: 100,
+        callback: () => {
+          if (
+            this.scene.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.SPACE]
+              .isDown
+          ) {
+            this.shoot();
+          } else {
+            shootEvent.remove();
+          }
+        },
+        loop: true,
+      });
+    }
+  }
+
+  private shoot() {
     this.spine.setAnimation(0, `shoot_${this.currentWeapon}`, false);
     this.casingEmitter.emitOne(this.getCasingName(this.currentWeapon));
   }
@@ -319,6 +396,7 @@ export default class Player extends SpineContainer implements Debuggable {
       currentState: this.currentState,
       currentLegsState: this.currentLegsState,
       currentWeapon: this.currentWeapon,
+      currentWeaponMode: this.currentWeaponMode[this.currentWeapon],
       flashlight: this.flashlight?.getDebugInfo(),
     };
   }
