@@ -1,7 +1,7 @@
 {
-  "name": "phaser-webpack",
-  "version": "3.0.2",
-  "description": "Phaser Webpack",
+  "name": "zombies-and-shit",
+  "version": "0.0.1",
+  "description": "Zombies! (and sh*t)",
   "main": "src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -10,19 +10,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sebsowter/phaser-webpack.git"
+    "url": "git+https://github.com/ferrata/zombies.git"
   },
-  "author": "Seb Sowter",
+  "author": "Sasha Goloshchapov",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sebsowter/phaser-webpack/issues"
+    "url": "https://github.com/ferrata/zombies/issues"
   },
   "babel": {
     "presets": [
       "@babel/preset-env"
     ]
   },
-  "homepage": "https://github.com/sebsowter/phaser-webpack#readme",
+  "homepage": "https://zombies-and-shit.games",
   "devDependencies": {
     "@babel/core": "^7.21.4",
     "@babel/preset-env": "^7.21.4",
