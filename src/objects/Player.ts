@@ -4,6 +4,7 @@ import Flashlight from "./Flashlight";
 import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
 import { Debuggable } from "../types/Debuggable";
+import Reticle from "./Reticle";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -292,10 +293,7 @@ export default class Player extends SpineContainer implements Debuggable {
     this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
   }
 
-  public onUpdateReticle(
-    reticle: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-    distance: number
-  ) {
+  public onUpdateReticle(reticle: Reticle, distance: number) {
     this.flashlight?.pointTo(reticle.x, reticle.y, distance);
     this.updateCasingEmitterPosition(this.currentWeapon);
   }
