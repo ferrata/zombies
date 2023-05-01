@@ -1,5 +1,6 @@
 import PlayerInputs from "../controls/PlayerInputs";
 import Flashlight from "../objects/Flashlight";
+import Reticle from "../objects/Reticle";
 import Player from "../objects/Player";
 import { Event } from "./Event";
 
@@ -7,7 +8,7 @@ export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
 
   private field: Phaser.GameObjects.TileSprite;
-  private reticle: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  private reticle: Reticle;
   private player: Player;
   private objects: any[] = [];
   private _isDark: boolean;
@@ -41,12 +42,7 @@ export default class GameScene extends Phaser.Scene {
     this.objects.push(new Flashlight(this, 100, 100));
 
     this.player = new Player(this, 800, 600);
-
-    this.reticle = this.physics.add.sprite(800, 700, "target");
-    this.reticle
-      .setOrigin(0.5, 0.5)
-      .setDisplaySize(25, 25)
-      .setCollideWorldBounds(true);
+    this.reticle = new Reticle(this, 800, 700);
 
     this.lights.enable();
 
@@ -163,9 +159,7 @@ export default class GameScene extends Phaser.Scene {
     // Camera follows player ( can be set in create )
     this.cameras.main.startFollow(this.player);
 
-    // Makes reticle move with player
-    this.reticle.body.velocity.x = this.player.body.velocity.x;
-    this.reticle.body.velocity.y = this.player.body.velocity.y;
+    this.reticle.update(this.player);
 
     // Constrain velocity of player
     this.constrainVelocity(this.player, 500);
@@ -194,7 +188,7 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  constrainReticle(reticle: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
+  constrainReticle(reticle: Reticle) {
     const distX = reticle.x - this.player.x; // X distance between player & reticle
     const distY = reticle.y - this.player.y; // Y distance between player & reticle
 
