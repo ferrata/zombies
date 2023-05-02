@@ -1,5 +1,5 @@
 import { GameObjects } from "phaser";
-import { Debuggable, isDebuggable } from "../types/Debuggable";
+import { IDebuggable, isDebuggable } from "../types/Debuggable";
 
 export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   private debugInfoEnabled: boolean = false;
@@ -164,7 +164,7 @@ class DebugInfoWindow extends Phaser.GameObjects.Container {
     this.resize();
   }
 
-  public setDebuggable(debuggable: Debuggable): DebugInfoWindow {
+  public setDebuggable(debuggable: IDebuggable): DebugInfoWindow {
     const debugInfo = debuggable?.getDebugInfo();
     if (!debugInfo) {
       this.setText("no debug info available");

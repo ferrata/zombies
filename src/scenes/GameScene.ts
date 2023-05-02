@@ -1,6 +1,6 @@
 import PlayerInputs from "../controls/PlayerInputs";
 import Flashlight from "../objects/Flashlight";
-import Reticle from "../objects/Reticle";
+import Pointer from "../objects/Pointer";
 import Player from "../objects/Player";
 import { Event } from "./Event";
 
@@ -8,7 +8,7 @@ export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
 
   private field: Phaser.GameObjects.TileSprite;
-  private reticle: Reticle;
+  private pointer: Pointer;
   private player: Player;
   private objects: any[] = [];
   private _isDark: boolean;
@@ -42,7 +42,7 @@ export default class GameScene extends Phaser.Scene {
     this.objects.push(new Flashlight(this, 100, 100));
 
     this.player = new Player(this, 800, 600);
-    this.reticle = new Reticle(this, 800, 700);
+    this.pointer = new Pointer(this, 800, 700);
 
     this.lights.enable();
 
@@ -70,13 +70,13 @@ export default class GameScene extends Phaser.Scene {
       this.game.input.mouse.requestPointerLock();
     });
 
-    // Move reticle upon locked pointer move
+    // Move player pointer upon locked pointer move
     this.input.on(
       "pointermove",
-      function (pointer) {
+      function (pointer: Phaser.Input.Pointer) {
         if (this.input.mouse.locked) {
-          this.reticle.x += pointer.movementX;
-          this.reticle.y += pointer.movementY;
+          this.pointer.x += pointer.movementX;
+          this.pointer.y += pointer.movementY;
         }
       },
       this
@@ -144,30 +144,26 @@ export default class GameScene extends Phaser.Scene {
     const distance = Phaser.Math.Distance.Between(
       this.player.x,
       this.player.y,
-      this.reticle.x,
-      this.reticle.y
+      this.pointer.x,
+      this.pointer.y
     );
 
     // Rotates player to face towards reticle
     this.player.rotation = Phaser.Math.Angle.Between(
       this.player.x,
       this.player.y,
-      this.reticle.x,
-      this.reticle.y
+      this.pointer.x,
+      this.pointer.y
     );
 
     // Camera follows player ( can be set in create )
     this.cameras.main.startFollow(this.player);
 
-    this.reticle.update(this.player);
+    this.pointer.update(this.player);
 
-    // Constrain velocity of player
     this.constrainVelocity(this.player, 500);
 
-    // Constrain position of reticle
-    this.constrainReticle(this.reticle);
-
-    this.player.onUpdateReticle(this.reticle, distance);
+    this.player.onUpdatePointer(this.pointer, distance);
   }
 
   constrainVelocity(player: Player, maxVelocity: number) {
@@ -185,24 +181,6 @@ export default class GameScene extends Phaser.Scene {
       vy = Math.sin(angle) * maxVelocity;
       player.body.velocity.x = vx;
       player.body.velocity.y = vy;
-    }
-  }
-
-  constrainReticle(reticle: Reticle) {
-    const distX = reticle.x - this.player.x; // X distance between player & reticle
-    const distY = reticle.y - this.player.y; // Y distance between player & reticle
-
-    // Ensures reticle cannot be moved offscreen
-    if (distX > 800) {
-      reticle.x = this.player.x + 800;
-    } else if (distX < -800) {
-      reticle.x = this.player.x - 800;
-    }
-
-    if (distY > 600) {
-      reticle.y = this.player.y + 600;
-    } else if (distY < -600) {
-      reticle.y = this.player.y - 600;
     }
   }
 }
