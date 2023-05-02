@@ -3,6 +3,7 @@ import Flashlight from "../objects/Flashlight";
 import Pointer from "../objects/Pointer";
 import Player from "../objects/Player";
 import { Event } from "./Event";
+import { Pointable } from "../types/Pointable";
 
 export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
@@ -39,7 +40,7 @@ export default class GameScene extends Phaser.Scene {
     this.field = this.add.tileSprite(800, 600, 1600, 1200, "background");
     this.field.setPipeline("Light2D");
 
-    this.objects.push(new Flashlight(this, 100, 100));
+    this.objects.push(new (Pointable(Flashlight))(this, 100, 100));
 
     this.player = new Player(this, 800, 600);
     this.pointer = new Pointer(this, 800, 700);
