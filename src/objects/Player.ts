@@ -3,8 +3,8 @@ import { Event } from "../scenes/Event";
 import Flashlight from "./Flashlight";
 import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
-import { Debuggable } from "../types/Debuggable";
-import Reticle from "./Reticle";
+import { IDebuggable } from "../types/Debuggable";
+import Pointer from "./Pointer";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -33,7 +33,7 @@ enum PlayerLegsState {
   RUN = "run",
 }
 
-export default class Player extends SpineContainer implements Debuggable {
+export default class Player extends SpineContainer implements IDebuggable {
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
@@ -370,8 +370,8 @@ export default class Player extends SpineContainer implements Debuggable {
     this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
   }
 
-  public onUpdateReticle(reticle: Reticle, distance: number) {
-    this.flashlight?.pointTo(reticle.x, reticle.y, distance);
+  public onUpdatePointer(pointer: Pointer, distance: number) {
+    this.flashlight?.pointTo(pointer.x, pointer.y, distance);
     this.updateCasingEmitterPosition(this.currentWeapon);
   }
 

@@ -1,9 +1,9 @@
 import GameScene from "../scenes/GameScene";
-import { Debuggable } from "../types/Debuggable";
+import { IDebuggable } from "../types/Debuggable";
 
 export default class Flashlight
   extends Phaser.Physics.Arcade.Sprite
-  implements Debuggable
+  implements IDebuggable
 {
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
