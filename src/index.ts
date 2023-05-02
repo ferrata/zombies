@@ -7,10 +7,13 @@ import GameScene from "./scenes/GameScene";
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: "game",
-  width: window.innerWidth - 10,
-  height: window.innerHeight - 10,
-  autoCenter: Phaser.Scale.CENTER_BOTH,
-  zoom: 1,
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+    width: 1700,
+    height: 900,
+    zoom: 1,
+  },
   input: {
     keyboard: true,
     gamepad: true,
