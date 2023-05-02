@@ -163,6 +163,7 @@ export default class GameScene extends Phaser.Scene {
     this.pointer.update(this.player);
 
     this.constrainVelocity(this.player, 500);
+    this.constrainReticle(this.pointer);
 
     this.player.onUpdatePointer(this.pointer, distance);
   }
@@ -182,6 +183,21 @@ export default class GameScene extends Phaser.Scene {
       vy = Math.sin(angle) * maxVelocity;
       player.body.velocity.x = vx;
       player.body.velocity.y = vy;
+    }
+  }
+
+  constrainReticle(pointer: Pointer) {
+    // can't move pointer offscreen
+    if (pointer.x < this.cameras.main.worldView.x) {
+      pointer.x = this.cameras.main.worldView.x;
+    } else if (pointer.x > this.cameras.main.worldView.right) {
+      pointer.x = this.cameras.main.worldView.right;
+    }
+
+    if (pointer.y < this.cameras.main.worldView.y) {
+      pointer.y = this.cameras.main.worldView.y;
+    } else if (pointer.y > this.cameras.main.worldView.bottom) {
+      pointer.y = this.cameras.main.worldView.bottom;
     }
   }
 }
