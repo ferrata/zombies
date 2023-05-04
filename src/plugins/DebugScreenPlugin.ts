@@ -175,21 +175,24 @@ class DebugInfoWindow extends Phaser.GameObjects.Container {
   }
 
   public setDebugInfo(debugInfo: object) {
+    const text = this.formatDebugInfo(debugInfo);
+    return this.setText(text);
+  }
+
+  private formatDebugInfo(debugInfo: object, indent = 0) {
     const maxSpace =
       Math.max(...Object.keys(debugInfo).map((key) => key.length)) + 2;
-
-    const text = Object.keys(debugInfo)
+    const indentString = indent ? " ".repeat(indent) : "";
+    return Object.keys(debugInfo)
       .map(
         (key) =>
-          `${key}${" ".repeat(maxSpace - key.length)}${
+          `${indentString}${key}${" ".repeat(maxSpace - key.length)}${
             debugInfo[key] instanceof Object
-              ? JSON.stringify(debugInfo[key])
+              ? "\n" + this.formatDebugInfo(debugInfo[key], indent + 4)
               : debugInfo[key]
           }`
       )
       .join("\n");
-
-    return this.setText(text);
   }
 
   public setText(text: string): DebugInfoWindow {
