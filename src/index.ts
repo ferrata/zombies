@@ -8,11 +8,10 @@ const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: "game",
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.ScaleModes.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
-    width: 1700,
-    height: 900,
-    zoom: 1,
+    width: window.innerWidth * window.devicePixelRatio,
+    height: window.innerHeight * window.devicePixelRatio,
   },
   input: {
     keyboard: true,
