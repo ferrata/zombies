@@ -93,9 +93,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
         }
 
         const objectSize = {
-          // @ts-ignore
           width: object.body.width,
-          // @ts-ignore
           height: object.body.height,
         };
 

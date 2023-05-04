@@ -1,9 +1,7 @@
 import "phaser";
 
 export default class SpineContainer extends Phaser.GameObjects.Container {
-  // @ts-ignore
   private mainSpine: SpineGameObject;
-  // @ts-ignore
   private spines: { [key: string]: SpineGameObject } = {};
 
   get spine() {
@@ -20,7 +18,6 @@ export default class SpineContainer extends Phaser.GameObjects.Container {
   ) {
     super(scene, x, y);
 
-    // @ts-ignore
     this.mainSpine = scene.add.spine(0, 0, key, anim, loop);
 
     scene.physics.add.existing(this);
@@ -33,7 +30,6 @@ export default class SpineContainer extends Phaser.GameObjects.Container {
     this.add(this.mainSpine);
   }
 
-  // @ts-ignore
   public addSpine(spine: SpineGameObject, index?: number) {
     this.addAt(spine, index);
     this.spines[spine.key] = spine;
