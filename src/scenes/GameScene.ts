@@ -165,7 +165,7 @@ export default class GameScene extends Phaser.Scene {
     this.pointer.update(this.player);
 
     this.constrainVelocity(this.player, 500);
-    this.constrainReticle(this.pointer);
+    this.constrainPointer(this.pointer);
 
     this.player.onUpdatePointer(this.pointer, distance);
   }
@@ -188,7 +188,14 @@ export default class GameScene extends Phaser.Scene {
     }
   }
 
-  constrainReticle(pointer: Pointer) {
+  constrainPointer(pointer: Pointer) {
+    if (
+      this.cameras.main.worldView.right <= 0 ||
+      this.cameras.main.worldView.bottom <= 0
+    ) {
+      return;
+    }
+
     // can't move pointer offscreen
     if (pointer.x < this.cameras.main.worldView.x) {
       pointer.x = this.cameras.main.worldView.x;
