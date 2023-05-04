@@ -5,6 +5,7 @@ export class CasingEmitter extends Phaser.GameObjects.Container {
   private emitterAngle: number;
   private emitterOfffset: { x: number; y: number };
   private isDark: boolean;
+  private debug: Phaser.GameObjects.Rectangle;
 
   constructor(
     scene: GameScene,
@@ -79,23 +80,33 @@ export class CasingEmitter extends Phaser.GameObjects.Container {
       }
     );
 
+    this.scene.physics.world.enable(
+      (this.debug = scene.add
+        .rectangle(0, 0, 10, 20, 0xff00ff, 0.5)
+        .setOrigin(0.5, 0.5)
+        .setVisible(this.scene.physics.world.drawDebug))
+    );
+
     this.scene.add.existing(this.emitter);
   }
 
   public setEmitterPosition(
-    center: Phaser.Math.Vector2,
+    center: { x: number; y: number },
     length: number,
     angle: number
   ) {
-    const offset = new Phaser.Math.Vector2(center)
-      .setLength(length)
-      .rotate(Phaser.Math.DegToRad(angle));
+    const offset = new Phaser.Math.Vector2(center);
+    offset.setLength(length).setAngle(Phaser.Math.DegToRad(angle));
 
     this.emitterOfffset = { x: center.x + offset.x, y: center.y + offset.y };
+    this.debug
+      .setPosition(this.emitterOfffset.x, this.emitterOfffset.y)
+      .setVisible(this.scene.physics.world.drawDebug);
   }
 
   public setEmitterAngle(angle: number) {
     this.emitterAngle = angle;
+    this.debug.setAngle(angle).setVisible(this.scene.physics.world.drawDebug);
   }
 
   public onLight() {
