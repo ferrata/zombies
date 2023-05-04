@@ -19,9 +19,7 @@ export default class Flashlight
 
     this.name = "flashlight";
 
-    this.setOrigin(0.5, 0.5)
-      .setDisplaySize(42, 20)
-      .setRotation(-0.3 * Math.PI);
+    this.setOrigin(0.5, 0.5).setDisplaySize(50, 30);
 
     this.scene.add.existing(this);
     this.scene.physics.world.enable(this);
