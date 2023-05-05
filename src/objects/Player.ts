@@ -43,7 +43,6 @@ export default class Player extends SpineContainer implements IDebuggable {
   private readonly strafeFastSpeed: number = 500;
   private readonly casingEmitter: CasingEmitter;
 
-  // @ts-ignore
   private legs: SpineGameObject;
   private flashlight: Flashlight;
   private shadow: Phaser.FX.Shadow;
@@ -71,7 +70,6 @@ export default class Player extends SpineContainer implements IDebuggable {
 
     this.setScale(0.7, 0.7);
 
-    // @ts-ignore
     this.legs = scene.add.spine(0, 0, "player-legs", PlayerState.IDLE, true);
     this.addSpine(this.legs, 0);
 
