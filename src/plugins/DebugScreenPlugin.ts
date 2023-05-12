@@ -15,14 +15,27 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   ) {
     super(scene, pluginManager, "DebugScreenPlugin");
 
-    this.scene.events.once("boot", () => {
+    // enable debug by default for development
+    if (process.env.NODE_ENV === "development") {
+      this.debugInfoEnabled = true;
+    }
+
+    this.scene.events.once(Phaser.Scenes.Events.BOOT, () => {
       this.create();
     });
 
-    this.scene.events.once("ready", (event: Phaser.Scenes.Systems) => {
-      event.scene.physics.world.createDebugGraphic();
-      event.scene.physics.world.drawDebug = this.debugInfoEnabled;
-    });
+    this.scene.events.once(
+      Phaser.Scenes.Events.READY,
+      (event: Phaser.Scenes.Systems) => {
+        event.scene.physics.world.createDebugGraphic();
+        event.scene.physics.world.drawDebug = this.debugInfoEnabled;
+
+        if (event.scene.matter) {
+          event.scene.matter.world.createDebugGraphic();
+          event.scene.matter.world.drawDebug = this.debugInfoEnabled;
+        }
+      }
+    );
   }
 
   public create() {
@@ -53,7 +66,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     );
 
     this.scene.events.on(
-      "addedtoscene",
+      Phaser.Scenes.Events.ADDED_TO_SCENE,
       (object: Phaser.GameObjects.GameObject) => {
         if (isDebuggable(object)) {
           const objectInfo = new DebugInfoWindow(this.scene, object.name);
@@ -63,7 +76,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     );
 
     this.scene.events.on(
-      "removedfromscene",
+      Phaser.Scenes.Events.REMOVED_FROM_SCENE,
       (object: Phaser.GameObjects.GameObject) => {
         if (isDebuggable(object)) {
           this.debugObjects[object.name].destroy();
@@ -72,7 +85,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       }
     );
 
-    this.scene.events.on("update", () => {
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
       this.sceneDebugInfo.visible = this.debugInfoEnabled;
       for (const key in this.debugObjects) {
         this.debugObjects[key].visible = this.debugInfoEnabled;
@@ -83,6 +96,9 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       }
 
       this.scene.physics.world.debugGraphic.update();
+      if (this.scene.matter) {
+        this.scene.matter.world.debugGraphic.update();
+      }
 
       this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene));
 
@@ -114,6 +130,11 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
 
       this.scene.physics.world.debugGraphic.clear();
       this.scene.physics.world.drawDebug = this.debugInfoEnabled;
+
+      if (this.scene.matter) {
+        this.scene.matter.world.debugGraphic.clear();
+        this.scene.matter.world.drawDebug = this.debugInfoEnabled;
+      }
     });
   }
 

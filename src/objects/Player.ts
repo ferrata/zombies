@@ -5,6 +5,7 @@ import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
 import { IDebuggable } from "../types/Debuggable";
 import Pointer from "./Pointer";
+import { ILightAware } from "../types/LightAware";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -33,9 +34,15 @@ enum PlayerLegsState {
   RUN = "run",
 }
 
-export default class Player extends SpineContainer implements IDebuggable {
+export default class Player
+  extends SpineContainer
+  implements ILightAware, IDebuggable
+{
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
+
+  private matterSpot: MatterJS.BodyType;
+  // private matterObjectsAround: MatterJS.BodyType[] = [];
 
   private readonly runningSpeed: number = 500;
   private readonly walkingSpeed: number = 230;
@@ -75,13 +82,38 @@ export default class Player extends SpineContainer implements IDebuggable {
 
     this.scene.add.existing(this);
     this.scene.physics.world.enable(this);
+    this.body.setDrag(1, 1);
+
     this.shadow = this.postFX.addShadow(0, 0, 0.1, 0.3, 0x000000, 2, 3);
 
     const bounds = this.spine.getBounds();
+    // this.scene.add.rectangle(
+    //   this.x,
+    //   this.y,
+    //   bounds.size.x,
+    //   bounds.size.y,
+    //   0xff0000,
+    //   0.5
+    // );
+
     this.body
-      .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
-      .setSize(bounds.size.x, bounds.size.y)
+      // .setCircle(bounds.size.x / 2, 100, 100)
+      .setOffset(-bounds.size.x / 3, -bounds.size.y / 3 - 15)
+      .setCircle(bounds.size.x / 3)
+
+      // .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
+      // .setSize(bounds.size.x, bounds.size.y)
       .setCollideWorldBounds(true);
+
+    this.matterSpot = this.scene.matter.add.circle(this.x, this.y, 50, {
+      isSensor: true,
+      label: "player-spot",
+    });
+
+    // this.body
+    //   .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
+    //   .setSize(bounds.size.x, bounds.size.y)
+    //   .setCollideWorldBounds(true);
 
     this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
     this.selectWeapon(PlayerWeapon.HANDGUN);
@@ -120,6 +152,10 @@ export default class Player extends SpineContainer implements IDebuggable {
     } else {
       this.stop();
     }
+
+    this.matterSpot.angle = this.angle;
+    this.matterSpot.position.x = this.x;
+    this.matterSpot.position.y = this.y;
 
     if (Phaser.Input.Keyboard.JustDown(keys.F)) {
       if (!this.flashlight) {
@@ -253,7 +289,7 @@ export default class Player extends SpineContainer implements IDebuggable {
     this.spine.setAnimation(0, `${this.currentState}_${weapon}`, true);
   }
 
-  nextWeaponMode(
+  private nextWeaponMode(
     weapon: PlayerWeapon,
     currentMode: PlayerWeaponMode
   ): PlayerWeaponMode {
@@ -373,24 +409,36 @@ export default class Player extends SpineContainer implements IDebuggable {
     this.updateCasingEmitterPosition(this.currentWeapon);
   }
 
-  public onDark() {
+  public onDarken(): ILightAware {
     this.postFX.clear();
     this.postFX.addColorMatrix().brightness(0.5);
-    this.casingEmitter.onDark();
+    this.casingEmitter.onDarken();
+    this.flashlight?.onDarken();
+    return this;
   }
 
-  public onLight() {
+  public onLighten(): ILightAware {
     this.postFX.clear();
     this.postFX.add(this.shadow);
-    this.casingEmitter.onLight();
+    this.casingEmitter.onLighten();
+    this.flashlight?.onLighten();
+    return this;
   }
 
   public getDebugInfo() {
     return {
       x: this.x,
       y: this.y,
+      size: { width: this.body.width, height: this.body.height },
       angle: this.angle,
       velocity: this.body.velocity,
+
+      matterSpot: {
+        x: this.matterSpot.position.x,
+        y: this.matterSpot.position.y,
+        velocity: this.matterSpot.velocity,
+      },
+
       currentState: this.currentState,
       currentLegsState: this.currentLegsState,
       currentWeapon: this.currentWeapon,

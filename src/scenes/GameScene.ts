@@ -4,6 +4,13 @@ import Pointer from "../objects/Pointer";
 import Player from "../objects/Player";
 import { Event } from "./Event";
 import { Pointable } from "../types/Pointable";
+import { StaticMatterThing } from "../objects/StaticMatterThing";
+import {
+  StaticMatterProjectionRectangle,
+  StaticMatterProjectionCircle,
+} from "../objects/StaticMatterProjection";
+import { IObstacle } from "../types/Obstacle";
+import { isLightAware, LightAware } from "../types/LightAware";
 
 export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
@@ -12,6 +19,7 @@ export default class GameScene extends Phaser.Scene {
   private pointer: Pointer;
   private player: Player;
   private objects: any[] = [];
+  private obstacles: IObstacle[] = [];
   private _isDark: boolean;
 
   public get isDark(): boolean {
@@ -23,7 +31,13 @@ export default class GameScene extends Phaser.Scene {
   }
 
   constructor() {
-    super("GameScene");
+    super({
+      key: "GameScene",
+      physics: {
+        arcade: {},
+        matter: {},
+      },
+    });
   }
 
   public closestObject(): Phaser.GameObjects.GameObject {
@@ -37,11 +51,51 @@ export default class GameScene extends Phaser.Scene {
 
   create() {
     this.physics.world.setBounds(0, 0, 1600, 1200);
+    this.matter.world.setBounds(0, 0, 1600, 1200);
+
     this.field = this.add.tileSprite(800, 600, 1600, 1200, "background");
     this.field.setPipeline("Light2D");
 
+    const barrel = new (LightAware(StaticMatterThing))(
+      this,
+      970,
+      400,
+      "barrel-damaged"
+    )
+      .setScale(0.3)
+      .setAngle(25)
+      .setOrigin(0.5, 0.5);
+
+    const barrel2 = new (LightAware(StaticMatterThing))(
+      this,
+      800,
+      350,
+      "barrel"
+    )
+      .setScale(0.3)
+      .setCircle(75)
+      .setAngle(-15)
+      .setOrigin(0.5, 0.5);
+
+    const barrel3 = new (LightAware(StaticMatterThing))(
+      this,
+      900,
+      230,
+      "barrel-damaged-2"
+    )
+      .setScale(0.3)
+      .setCircle(60)
+      .setAngle(165)
+      .setOrigin(0.5, 0.5);
+
+    this.obstacles.push(new StaticMatterProjectionRectangle(this, barrel));
+    this.obstacles.push(new StaticMatterProjectionCircle(this, barrel2, 75));
+    this.obstacles.push(new StaticMatterProjectionCircle(this, barrel3, 60));
+
     this.objects.push(
-      new (Pointable(Flashlight))(this, 100, 100).setAngle(-45)
+      new (Pointable(Flashlight))(this, 820, 360).setAngle(-45),
+      barrel,
+      barrel2
     );
 
     this.player = new Player(this, 800, 600);
@@ -116,10 +170,11 @@ export default class GameScene extends Phaser.Scene {
   darken() {
     this._isDark = true;
     this.lights.setAmbientColor(0x333333);
-    this.player.onDark();
-    this.objects.forEach((obj) => {
-      if (obj.onDark) {
-        obj.onDark();
+
+    this.children.each((child) => {
+      if (isLightAware(child)) {
+        // console.log("darken", child.name);
+        child.onDarken();
       }
     });
   }
@@ -127,10 +182,11 @@ export default class GameScene extends Phaser.Scene {
   lighten() {
     this._isDark = false;
     this.lights.setAmbientColor(0xffffff);
-    this.player.onLight();
-    this.objects.forEach((obj) => {
-      if (obj.onLight) {
-        obj.onLight();
+
+    this.children.each((child) => {
+      if (isLightAware(child)) {
+        // console.log("lighten", child.name);
+        child.onLighten();
       }
     });
   }
@@ -142,6 +198,11 @@ export default class GameScene extends Phaser.Scene {
       } else {
         this.darken();
       }
+    }
+
+    if (this.obstacles.length > 0) {
+      const obstacles = this.obstacles as Phaser.Physics.Arcade.Group[];
+      this.physics.world.collide(this.player, obstacles);
     }
 
     const distance = Phaser.Math.Distance.Between(

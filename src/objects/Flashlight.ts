@@ -1,10 +1,14 @@
 import GameScene from "../scenes/GameScene";
 import { IDebuggable } from "../types/Debuggable";
+import { ILightAware } from "../types/LightAware";
 
 export default class Flashlight
   extends Phaser.Physics.Arcade.Sprite
-  implements IDebuggable
+  implements ILightAware, IDebuggable
 {
+  LIGHT_INTENSITY = 0.5;
+  DARK_INTENSITY = 1;
+
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
@@ -46,7 +50,9 @@ export default class Flashlight
   }
 
   public turnOn() {
-    const intensity = this.scene.isDark ? 1 : 0.5;
+    const intensity = this.scene.isDark
+      ? this.DARK_INTENSITY
+      : this.LIGHT_INTENSITY;
     this.beam.setIntensity(intensity);
   }
 
@@ -55,19 +61,21 @@ export default class Flashlight
     this.beam.radius = Math.max(100, (400 * distance) / 1000);
   }
 
-  public onLight() {
+  public onLighten(): ILightAware {
     if (this.isOff) {
-      return;
+      return this;
     }
 
-    this.beam.setIntensity(0.3);
+    this.beam.setIntensity(this.LIGHT_INTENSITY);
+    return this;
   }
 
-  public onDark() {
+  public onDarken(): ILightAware {
     if (this.isOff) {
-      return;
+      return this;
     }
 
-    this.beam.setIntensity(2);
+    this.beam.setIntensity(this.DARK_INTENSITY);
+    return this;
   }
 }

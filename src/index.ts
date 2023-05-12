@@ -4,6 +4,8 @@ import DebugScreenPlugin from "./plugins/DebugScreenPlugin";
 import PreloadScene from "./scenes/PreloadScene";
 import GameScene from "./scenes/GameScene";
 
+const allowDebug = true;
+
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   parent: "game",
@@ -26,9 +28,12 @@ const config: Phaser.Types.Core.GameConfig = {
     default: "arcade",
 
     arcade: {
-      gravity: {
-        y: 0,
-      },
+      debug: allowDebug,
+      gravity: { y: 0 },
+    },
+    matter: {
+      debug: allowDebug,
+      gravity: { y: 0 },
     },
   },
   scene: [PreloadScene, GameScene],

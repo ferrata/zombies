@@ -1,6 +1,10 @@
 import GameScene from "../scenes/GameScene";
+import { ILightAware } from "../types/LightAware";
 
-export class CasingEmitter extends Phaser.GameObjects.Container {
+export class CasingEmitter
+  extends Phaser.GameObjects.Container
+  implements ILightAware
+{
   private emitter: Phaser.GameObjects.Particles.ParticleEmitter;
   private emitterAngle: number;
   private emitterOfffset: { x: number; y: number };
@@ -109,14 +113,16 @@ export class CasingEmitter extends Phaser.GameObjects.Container {
     this.debug.setAngle(angle).setVisible(this.scene.physics.world.drawDebug);
   }
 
-  public onLight() {
+  public onLighten(): ILightAware {
     this.isDark = false;
     this.updateTintForAllAlive(0xffffff);
+    return this;
   }
 
-  public onDark() {
+  public onDarken(): ILightAware {
     this.isDark = true;
     this.updateTintForAllAlive(0x000000);
+    return this;
   }
 
   public emitOne(casingName: string) {
