@@ -15,6 +15,11 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   ) {
     super(scene, pluginManager, "DebugScreenPlugin");
 
+    // enable debug by default for development
+    if (process.env.NODE_ENV === "development") {
+      this.debugInfoEnabled = true;
+    }
+
     this.scene.events.once("boot", () => {
       this.create();
     });
@@ -22,6 +27,13 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     this.scene.events.once("ready", (event: Phaser.Scenes.Systems) => {
       event.scene.physics.world.createDebugGraphic();
       event.scene.physics.world.drawDebug = this.debugInfoEnabled;
+
+      if (!event.scene.matter) {
+        return;
+      }
+
+      event.scene.matter.world.createDebugGraphic();
+      event.scene.matter.world.drawDebug = this.debugInfoEnabled;
     });
   }
 
@@ -83,6 +95,9 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       }
 
       this.scene.physics.world.debugGraphic.update();
+      if (this.scene.matter) {
+        this.scene.matter.world.debugGraphic.update();
+      }
 
       this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene));
 
@@ -114,6 +129,13 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
 
       this.scene.physics.world.debugGraphic.clear();
       this.scene.physics.world.drawDebug = this.debugInfoEnabled;
+
+      if (!this.scene.matter) {
+        return;
+      }
+
+      this.scene.matter.world.debugGraphic.clear();
+      this.scene.matter.world.drawDebug = this.debugInfoEnabled;
     });
   }
 

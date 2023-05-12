@@ -36,7 +36,7 @@ type PointableObject = GenericConstructor<{
   name: string;
 }>;
 
-export function Pointable<TBase extends PointableObject>(Base: TBase) {
+export function Pointable<TBase extends PointableObject>(Base: TBase): TBase {
   return class extends Base implements IPointable {
     private highlight: Phaser.FX.Glow;
     private label: Label;
