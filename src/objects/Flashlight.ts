@@ -1,36 +1,52 @@
+import { config } from "../GameConfig";
 import GameScene from "../scenes/GameScene";
 import { IDebuggable } from "../types/Debuggable";
-import { ILightAware } from "../types/LightAware";
+import {
+  ILightAware,
+  isLightAware,
+  LightAwareShape,
+} from "../types/LightAware";
 
 export default class Flashlight
   extends Phaser.Physics.Arcade.Sprite
   implements ILightAware, IDebuggable
 {
-  LIGHT_INTENSITY = 0.5;
-  DARK_INTENSITY = 1;
-
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
-  private beam: Phaser.GameObjects.Light;
+  private raycaster: Raycaster;
+  private ray: Raycaster.Ray;
+  private graphics: Phaser.GameObjects.Graphics;
 
   public get isOff(): boolean {
-    return this.beam.intensity == 0;
+    return this.ray == null;
   }
 
-  constructor(scene: GameScene, x: number, y: number) {
+  constructor(scene: GameScene, x: number, y: number, raycaster: Raycaster) {
     super(scene, x, y, "flashlight");
 
     this.name = "flashlight";
 
-    this.setOrigin(0.5, 0.5).setDisplaySize(50, 30);
+    this.setOrigin(0.5, 0.5)
+      .setDisplaySize(50, 30)
+      .setDepth(config.depths.object + 1);
 
     this.scene.add.existing(this);
     this.scene.physics.world.enable(this);
-    this.beam = this.scene.lights
-      .addLight(180, 80, 100)
-      .setColor(0xffffff)
-      .setIntensity(0);
+
+    this.raycaster = raycaster;
+
+    const lightAware = [];
+    scene.children.each((child) => {
+      if (isLightAware(child)) {
+        const shape = child.getLightAwareShape();
+        if (shape) {
+          lightAware.push(shape);
+        }
+      }
+    });
+
+    raycaster.mapGameObjects(lightAware);
   }
 
   public getDebugInfo(): object {
@@ -40,25 +56,41 @@ export default class Flashlight
       y: this.y,
       isOff: this.isOff,
       rotation: this.rotation,
-      intensity: this.beam.intensity,
-      radius: this.beam.radius,
     };
   }
 
   public turnOff() {
-    this.beam.setIntensity(0);
+    this.graphics.clear();
+    this.ray.destroy();
+    this.ray = null;
   }
 
   public turnOn() {
-    const intensity = this.scene.isDark
-      ? this.DARK_INTENSITY
-      : this.LIGHT_INTENSITY;
-    this.beam.setIntensity(intensity);
+    this.ray = this.raycaster
+      .createRay()
+      .setOrigin(this.x, this.y)
+      .setAngleDeg(this.angle)
+      .setConeDeg(config.flashlight.coneDeg)
+      .setRayRange(config.flashlight.range)
+      .enablePhysics()
+      .enablePhysics("matter");
+
+    this.graphics = this.scene.add
+      .graphics({ fillStyle: { color: 0xffffff, alpha: 0.3 } })
+      .setDepth(config.depths.light);
   }
 
   public pointTo(x: number, y: number, distance: number) {
-    this.beam.setPosition(x, y);
-    this.beam.radius = Math.max(100, (400 * distance) / 1000);
+    if (this.isOff) {
+      return;
+    }
+    this.ray.setOrigin(this.x, this.y);
+    this.ray.setAngleDeg(this.angle);
+
+    const intersections = this.ray.castCone();
+    intersections.push(this.ray.origin);
+
+    this.graphics.clear().fillStyle(0xffffff, 0.3).fillPoints(intersections);
   }
 
   public onLighten(): ILightAware {
@@ -66,7 +98,6 @@ export default class Flashlight
       return this;
     }
 
-    this.beam.setIntensity(this.LIGHT_INTENSITY);
     return this;
   }
 
@@ -75,7 +106,14 @@ export default class Flashlight
       return this;
     }
 
-    this.beam.setIntensity(this.DARK_INTENSITY);
     return this;
+  }
+
+  public setLightAwareShape(shape: LightAwareShape): ILightAware {
+    return this;
+  }
+
+  public getLightAwareShape(): LightAwareShape {
+    return null;
   }
 }

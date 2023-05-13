@@ -1,6 +1,7 @@
 import "phaser";
 import "phaser/plugins/spine/dist/SpinePlugin";
 import DebugScreenPlugin from "./plugins/DebugScreenPlugin";
+import PhaserRaycaster from "phaser-raycaster";
 import PreloadScene from "./scenes/PreloadScene";
 import GameScene from "./scenes/GameScene";
 
@@ -41,6 +42,11 @@ const config: Phaser.Types.Core.GameConfig = {
     scene: [
       { key: "DebugScreen", plugin: DebugScreenPlugin, start: true },
       { key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" },
+      {
+        key: "PhaserRaycaster",
+        plugin: PhaserRaycaster,
+        mapping: "raycasterPlugin",
+      },
     ],
   },
 };

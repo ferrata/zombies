@@ -5,7 +5,8 @@ import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
 import { IDebuggable } from "../types/Debuggable";
 import Pointer from "./Pointer";
-import { ILightAware } from "../types/LightAware";
+import { ILightAware, LightAwareShape } from "../types/LightAware";
+import { config } from "../GameConfig";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -126,8 +127,8 @@ export default class Player
       { from: 0.4, to: 0.3 }
     );
 
-    this.setDepth(1000);
-    this.casingEmitter.setDepth(500);
+    this.setDepth(config.depths.player);
+    this.casingEmitter.setDepth(config.depths.casingEmitter);
   }
 
   public preUpdate(time: number, delta: number) {
@@ -405,7 +406,11 @@ export default class Player
   }
 
   public onUpdatePointer(pointer: Pointer, distance: number) {
-    this.flashlight?.pointTo(pointer.x, pointer.y, distance);
+    this.flashlight
+      ?.setPosition(this.x, this.y)
+      .setAngle(this.angle)
+      .pointTo(pointer.x, pointer.y, distance);
+
     this.updateCasingEmitterPosition(this.currentWeapon);
   }
 
@@ -425,6 +430,14 @@ export default class Player
     return this;
   }
 
+  public setLightAwareShape(shape: LightAwareShape): ILightAware {
+    return this;
+  }
+
+  public getLightAwareShape(): LightAwareShape {
+    return null;
+  }
+
   public getDebugInfo() {
     return {
       x: this.x,
@@ -433,11 +446,11 @@ export default class Player
       angle: this.angle,
       velocity: this.body.velocity,
 
-      matterSpot: {
-        x: this.matterSpot.position.x,
-        y: this.matterSpot.position.y,
-        velocity: this.matterSpot.velocity,
-      },
+      // matterSpot: {
+      //   x: this.matterSpot.position.x,
+      //   y: this.matterSpot.position.y,
+      //   velocity: this.matterSpot.velocity,
+      // },
 
       currentState: this.currentState,
       currentLegsState: this.currentLegsState,

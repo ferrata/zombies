@@ -1,5 +1,6 @@
 import { GenericConstructor } from "./Constructor";
 import { Label } from "../objects/Label";
+import { config } from "../GameConfig";
 
 export interface IPointable {
   showHighlight(): IPointable;
@@ -76,7 +77,7 @@ export function Pointable<TBase extends PointableObject>(Base: TBase): TBase {
       );
       this.scene.add.existing(this.label);
 
-      this.label.setDepth(1000);
+      this.label.setDepth(config.depths.pointableObject);
 
       return this;
     }

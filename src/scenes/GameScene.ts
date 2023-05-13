@@ -10,17 +10,19 @@ import {
   StaticMatterProjectionCircle,
 } from "../objects/StaticMatterProjection";
 import { IObstacle } from "../types/Obstacle";
-import { isLightAware, LightAware } from "../types/LightAware";
+import { ILightAware, isLightAware, LightAware } from "../types/LightAware";
+import PhaserRaycaster from "phaser-raycaster";
 
 export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
+  private _isDark: boolean;
 
+  private raycasterPlugin: PhaserRaycaster;
   private field: Phaser.GameObjects.TileSprite;
   private pointer: Pointer;
   private player: Player;
   private objects: any[] = [];
   private obstacles: IObstacle[] = [];
-  private _isDark: boolean;
 
   public get isDark(): boolean {
     return this._isDark;
@@ -63,8 +65,10 @@ export default class GameScene extends Phaser.Scene {
       "barrel-damaged"
     )
       .setScale(0.3)
-      .setAngle(25)
-      .setOrigin(0.5, 0.5);
+      .setOrigin(0.5, 0.5)
+      .setAngle(25);
+
+    barrel.setLightAwareShape(barrel.createRectangle());
 
     const barrel2 = new (LightAware(StaticMatterThing))(
       this,
@@ -77,6 +81,8 @@ export default class GameScene extends Phaser.Scene {
       .setAngle(-15)
       .setOrigin(0.5, 0.5);
 
+    barrel2.setLightAwareShape(barrel2.createCircle(73));
+
     const barrel3 = new (LightAware(StaticMatterThing))(
       this,
       900,
@@ -88,18 +94,25 @@ export default class GameScene extends Phaser.Scene {
       .setAngle(165)
       .setOrigin(0.5, 0.5);
 
+    barrel3.setLightAwareShape(barrel3.createCircle(70));
+
     this.obstacles.push(new StaticMatterProjectionRectangle(this, barrel));
     this.obstacles.push(new StaticMatterProjectionCircle(this, barrel2, 75));
     this.obstacles.push(new StaticMatterProjectionCircle(this, barrel3, 60));
 
     this.objects.push(
-      new (Pointable(Flashlight))(this, 820, 360).setAngle(-45),
+      new (Pointable(Flashlight))(
+        this,
+        820,
+        360,
+        this.raycasterPlugin.createRaycaster()
+      ).setAngle(-45),
       barrel,
       barrel2
     );
 
     this.player = new Player(this, 800, 600);
-    this.pointer = new Pointer(this, 800, 700);
+    this.pointer = new Pointer(this, 800, 500);
 
     this.lights.enable();
 
