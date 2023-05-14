@@ -68,7 +68,18 @@ export default class GameScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
       .setAngle(25);
 
-    barrel.setLightAwareShape(barrel.createRectangle());
+    barrel.setLightAwareShape(
+      barrel.createPolygon([
+        { x: 3, y: 35 },
+        { x: 195, y: 0 },
+        { x: 408, y: 2 },
+        { x: 617, y: 20 },
+        { x: 598, y: 208 },
+        { x: 402, y: 170 },
+        { x: 234, y: 167 },
+        { x: 32, y: 200 },
+      ])
+    );
 
     const barrel2 = new (LightAware(StaticMatterThing))(
       this,

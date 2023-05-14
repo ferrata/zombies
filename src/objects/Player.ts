@@ -369,11 +369,10 @@ export default class Player
       this.takeItem(() => {
         this.scene.physics.world.remove(item.body);
         this.scene.children.remove(item);
+
+        this.flashlight = item as Flashlight;
         return item;
       });
-
-      this.flashlight = item as Flashlight;
-      // this.addAt(this.flashlight, 0);
     } else {
       this.scene.events.emit(Event.UNKNOWN_OBJECT, item);
     }
@@ -396,7 +395,9 @@ export default class Player
           true
         );
 
-        this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
+        if (item) {
+          this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
+        }
       },
     };
 
@@ -427,6 +428,10 @@ export default class Player
     this.postFX.add(this.shadow);
     this.casingEmitter.onLighten();
     this.flashlight?.onLighten();
+    return this;
+  }
+
+  public onPointerOver(point: { x: number; y: number }): ILightAware {
     return this;
   }
 

@@ -1,11 +1,12 @@
 import { config } from "../GameConfig";
 import { GenericConstructor } from "./Constructor";
 
-export type LightAwareShape = any;
+export type LightAwareShape = null | Phaser.GameObjects.Shape;
 
 export interface ILightAware {
   onLighten(): ILightAware;
   onDarken(): ILightAware;
+  onPointerOver(point: { x: number; y: number }): ILightAware;
 
   setLightAwareShape(shape: LightAwareShape): ILightAware;
   getLightAwareShape(): LightAwareShape;
@@ -53,7 +54,7 @@ export function LightAware<TBase extends LightAwareObject>(
     constructor(...args: any[]) {
       super(...args);
 
-      this.setDepth(config.depths.lightAwareObject);
+      this.setDepth(config.depths.lightAwareShape);
     }
 
     public onLighten(): ILightAware {
@@ -73,25 +74,12 @@ export function LightAware<TBase extends LightAwareObject>(
       return this;
     }
 
-    public setLightAwareRectangle(): ILightAware {
-      return this.setLightAwareShape(
-        this.scene.add
-          .rectangle(this.x, this.y, this.width, this.height)
-          .setAngle(this.angle)
-          .setOrigin(this.originX, this.originY)
-          .setScale(this.scaleX, this.scaleY)
-      );
-    }
-
-    public setLightAwareCircle(radius: number): ILightAware {
-      const center = this.getCenter();
-      return this.setLightAwareShape(
-        this.scene.add.circle(center.x, center.y, radius)
-      );
+    public onPointerOver(point: { x: number; y: number }): ILightAware {
+      return this;
     }
 
     public setLightAwareShape(shape: LightAwareShape): ILightAware {
-      this.shape = shape.setVisible(false);
+      this.shape = shape.setDepth(config.depths.lightAwareShape);
       return this;
     }
 

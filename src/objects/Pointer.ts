@@ -1,3 +1,4 @@
+import { config } from "../GameConfig";
 import { IPointable, isPointable } from "../types/Pointable";
 import Player from "./Player";
 
@@ -28,6 +29,8 @@ export default class Pointer extends Phaser.GameObjects.GameObject {
 
     this.scene.add.existing(this.dot);
     this.scene.physics.world.enable(this.dot);
+
+    this.dot.setDepth(config.depths.pointer);
   }
 
   public update(player: Player) {

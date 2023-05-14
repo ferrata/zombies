@@ -29,7 +29,7 @@ export default class Flashlight
 
     this.setOrigin(0.5, 0.5)
       .setDisplaySize(50, 30)
-      .setDepth(config.depths.object + 1);
+      .setDepth(config.depths.matterThingTop + 1);
 
     this.scene.add.existing(this);
     this.scene.physics.world.enable(this);
@@ -47,6 +47,8 @@ export default class Flashlight
     });
 
     raycaster.mapGameObjects(lightAware);
+
+    this.graphics = this.makeLightGraphics(scene.isDark);
   }
 
   public getDebugInfo(): object {
@@ -67,17 +69,26 @@ export default class Flashlight
 
   public turnOn() {
     this.ray = this.raycaster
-      .createRay()
+      .createRay({
+        collisionRange: 900, //ray's field of view range
+      })
       .setOrigin(this.x, this.y)
       .setAngleDeg(this.angle)
       .setConeDeg(config.flashlight.coneDeg)
-      .setRayRange(config.flashlight.range)
-      .enablePhysics()
-      .enablePhysics("matter");
+      .setRayRange(config.flashlight.range);
+  }
 
-    this.graphics = this.scene.add
-      .graphics({ fillStyle: { color: 0xffffff, alpha: 0.3 } })
-      .setDepth(config.depths.light);
+  public makeGlitchy() {
+    const fx = this.graphics.postFX.addWipe();
+    this.scene.tweens.add({
+      targets: fx,
+      progress: 1,
+      repeatDelay: 10,
+      hold: 10,
+      yoyo: true,
+      repeat: -1,
+      duration: 0.5,
+    });
   }
 
   public pointTo(x: number, y: number, distance: number) {
@@ -90,22 +101,20 @@ export default class Flashlight
     const intersections = this.ray.castCone();
     intersections.push(this.ray.origin);
 
-    this.graphics.clear().fillStyle(0xffffff, 0.3).fillPoints(intersections);
+    this.graphics.clear().fillPoints(intersections);
   }
 
   public onLighten(): ILightAware {
-    if (this.isOff) {
-      return this;
-    }
-
+    this.graphics = this.makeLightGraphics(false);
     return this;
   }
 
   public onDarken(): ILightAware {
-    if (this.isOff) {
-      return this;
-    }
+    this.graphics = this.makeLightGraphics(true);
+    return this;
+  }
 
+  public onPointerOver(point: { x: number; y: number }): ILightAware {
     return this;
   }
 
@@ -115,5 +124,20 @@ export default class Flashlight
 
   public getLightAwareShape(): LightAwareShape {
     return null;
+  }
+
+  private makeLightGraphics(isDark: boolean): Phaser.GameObjects.Graphics {
+    this.graphics?.clear();
+
+    const graphics = this.scene.add
+      .graphics({
+        fillStyle: isDark
+          ? { color: 0xffffff, alpha: 0.3 }
+          : { color: 0xffffff, alpha: 0.2 },
+      })
+      .setDepth(config.depths.light);
+
+    graphics.postFX.addVignette(0.5, 0.5, 0.9);
+    return graphics;
   }
 }

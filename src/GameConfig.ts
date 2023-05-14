@@ -2,11 +2,13 @@ export const config = {
   depths: {
     background: 0,
     player: 1000,
+    pointer: 1000,
     casingEmitter: 500,
-    object: 100,
-    lightAwareObject: 100,
+    matterThingBottom: 100,
+    matterThingTop: 400,
+    lightAwareShape: 200,
     pointableObject: 1000,
-    light: 10,
+    light: 300,
   },
 
   flashlight: {
