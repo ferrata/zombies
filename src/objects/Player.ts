@@ -159,15 +159,7 @@ export default class Player
     this.matterSpot.position.y = this.y;
 
     if (Phaser.Input.Keyboard.JustDown(keys.F)) {
-      if (!this.flashlight) {
-        return this.scene.events.emit(Event.FLASHLIGHT_MISSING);
-      }
-
-      if (this.flashlight.isOff) {
-        this.flashlight.turnOn();
-      } else {
-        this.flashlight.turnOff();
-      }
+      this.toggleFlashlight();
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.E)) {
@@ -196,6 +188,21 @@ export default class Player
 
     if (Phaser.Input.Keyboard.JustDown(keys.space)) {
       this.attack();
+    }
+  }
+
+  private toggleFlashlight() {
+    if (!this.flashlight) {
+      this.scene.events.emit(Event.FLASHLIGHT_MISSING);
+      return;
+    }
+
+    if (this.flashlight.isOff) {
+      this.flashlight.turnOn();
+      // this.postFX.addGlow(0xffffff, 3, 0, false, 0.1, 1);
+      this.postFX.addGradient(0xffffff, 0.1, 1);
+    } else {
+      this.flashlight.turnOff();
     }
   }
 
@@ -417,7 +424,9 @@ export default class Player
 
   public onDarken(): ILightAware {
     this.postFX.clear();
-    this.postFX.addColorMatrix().brightness(0.5);
+    this.postFX
+      .addColorMatrix()
+      .brightness(config.colors.darkenColorMatrixBrightness);
     this.casingEmitter.onDarken();
     this.flashlight?.onDarken();
     return this;

@@ -16,6 +16,7 @@ export default class Flashlight
 
   private raycaster: Raycaster;
   private ray: Raycaster.Ray;
+  private glitchy: boolean;
   private graphics: Phaser.GameObjects.Graphics;
 
   public get isOff(): boolean {
@@ -78,17 +79,9 @@ export default class Flashlight
       .setRayRange(config.flashlight.range);
   }
 
-  public makeGlitchy() {
-    const fx = this.graphics.postFX.addWipe();
-    this.scene.tweens.add({
-      targets: fx,
-      progress: 1,
-      repeatDelay: 10,
-      hold: 10,
-      yoyo: true,
-      repeat: -1,
-      duration: 0.5,
-    });
+  public setGlitchy() {
+    this.glitchy = true;
+    return this;
   }
 
   public pointTo(x: number, y: number, distance: number) {
@@ -127,17 +120,28 @@ export default class Flashlight
   }
 
   private makeLightGraphics(isDark: boolean): Phaser.GameObjects.Graphics {
+    this.graphics?.postFX?.clear();
     this.graphics?.clear();
 
-    const graphics = this.scene.add
-      .graphics({
-        fillStyle: isDark
-          ? { color: 0xffffff, alpha: 0.3 }
-          : { color: 0xffffff, alpha: 0.2 },
-      })
-      .setDepth(config.depths.light);
+    const graphics = isDark
+      ? this.scene.flashlightGraphics
+      : this.scene.add.graphics({
+          fillStyle: { color: 0xffffff, alpha: 0.2 },
+        });
 
-    graphics.postFX.addVignette(0.5, 0.5, 0.9);
-    return graphics;
+    if (this.glitchy) {
+      const fx = graphics.postFX.addWipe();
+      this.scene.tweens.add({
+        targets: fx,
+        progress: 1,
+        repeatDelay: 10,
+        hold: 10,
+        yoyo: true,
+        repeat: -1,
+        duration: 0.5,
+      });
+    }
+
+    return graphics.setDepth(config.depths.light);
   }
 }

@@ -15,4 +15,9 @@ export const config = {
     coneDeg: 30,
     range: 2000,
   },
+
+  colors: {
+    darkenTintColor: 0x121212,
+    darkenColorMatrixBrightness: 0.2,
+  },
 };

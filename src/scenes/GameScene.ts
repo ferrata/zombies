@@ -10,14 +10,17 @@ import {
   StaticMatterProjectionCircle,
 } from "../objects/StaticMatterProjection";
 import { IObstacle } from "../types/Obstacle";
-import { ILightAware, isLightAware, LightAware } from "../types/LightAware";
+import { isLightAware, LightAware } from "../types/LightAware";
 import PhaserRaycaster from "phaser-raycaster";
+import { config } from "../GameConfig";
 
 export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
   private _isDark: boolean;
+  private _flashlightGraphics: Phaser.GameObjects.Graphics;
 
   private raycasterPlugin: PhaserRaycaster;
+  private fieldUnderFlashlight: Phaser.GameObjects.TileSprite;
   private field: Phaser.GameObjects.TileSprite;
   private pointer: Pointer;
   private player: Player;
@@ -26,6 +29,14 @@ export default class GameScene extends Phaser.Scene {
 
   public get isDark(): boolean {
     return this._isDark;
+  }
+
+  public get flashlightGraphics(): Phaser.GameObjects.Graphics {
+    if (this._flashlightGraphics.postFX.list.length === 0) {
+      this._flashlightGraphics.setPipeline("Light2D");
+    }
+
+    return this._flashlightGraphics;
   }
 
   public get inputs(): PlayerInputs {
@@ -52,11 +63,28 @@ export default class GameScene extends Phaser.Scene {
   }
 
   create() {
-    this.physics.world.setBounds(0, 0, 1600, 1200);
-    this.matter.world.setBounds(0, 0, 1600, 1200);
+    const { width, height } = { width: 1600, height: 1200 };
 
-    this.field = this.add.tileSprite(800, 600, 1600, 1200, "background");
+    this.physics.world.setBounds(0, 0, width, height);
+    this.matter.world.setBounds(0, 0, width, height);
+
+    this.fieldUnderFlashlight = this.add
+      .tileSprite(800, 600, width, height, "background")
+      .setDepth(config.depths.background - 1);
+    this.fieldUnderFlashlight.setPipeline("Light2D");
+
+    this.field = this.add
+      .tileSprite(800, 600, width, height, "background")
+      .setDepth(config.depths.background);
     this.field.setPipeline("Light2D");
+
+    this._flashlightGraphics = this.add
+      .graphics()
+      .fillStyle(0xffffff)
+      // .setAlpha(0.2)
+      .setBlendMode(Phaser.BlendModes.ADD);
+
+    this.field.setMask(this.flashlightGraphics.createBitmapMask());
 
     const barrel = new (LightAware(StaticMatterThing))(
       this,
@@ -153,7 +181,7 @@ export default class GameScene extends Phaser.Scene {
 
     // Move player pointer upon locked pointer move
     this.input.on(
-      "pointermove",
+      Phaser.Input.Events.POINTER_MOVE,
       function (pointer: Phaser.Input.Pointer) {
         if (this.input.mouse.locked) {
           this.pointer.x += pointer.movementX;
@@ -195,6 +223,13 @@ export default class GameScene extends Phaser.Scene {
     this._isDark = true;
     this.lights.setAmbientColor(0x333333);
 
+    // set flashlight beam sprite as mask for background tile sprite
+    if (this.fieldUnderFlashlight) {
+      this.fieldUnderFlashlight.setMask(
+        new Phaser.Display.Masks.BitmapMask(this, this.flashlightGraphics)
+      );
+    }
+
     this.children.each((child) => {
       if (isLightAware(child)) {
         // console.log("darken", child.name);
@@ -206,6 +241,8 @@ export default class GameScene extends Phaser.Scene {
   lighten() {
     this._isDark = false;
     this.lights.setAmbientColor(0xffffff);
+
+    this.fieldUnderFlashlight?.clearMask();
 
     this.children.each((child) => {
       if (isLightAware(child)) {

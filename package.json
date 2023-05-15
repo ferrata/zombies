@@ -31,7 +31,7 @@
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.5.0",
     "json-loader": "^0.5.7",
-    "phaser": "^v3.60.0-beta.23",
+    "phaser": "^3.60.0",
     "phaser-raycaster": "^0.10.6",
     "ts-loader": "^9.4.2",
     "typescript": "^5.0.3",

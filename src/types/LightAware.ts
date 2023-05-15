@@ -70,7 +70,7 @@ export function LightAware<TBase extends LightAwareObject>(
     public onDarken(): ILightAware {
       this.postFX.clear();
 
-      this.setTint(0x333333);
+      this.setTint(config.colors.darkenTintColor);
       return this;
     }
 
