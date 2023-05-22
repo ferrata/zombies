@@ -199,8 +199,6 @@ export default class Player
 
     if (this.flashlight.isOff) {
       this.flashlight.turnOn();
-      // this.postFX.addGlow(0xffffff, 3, 0, false, 0.1, 1);
-      this.postFX.addGradient(0xffffff, 0.1, 1);
     } else {
       this.flashlight.turnOff();
     }
@@ -414,9 +412,17 @@ export default class Player
   }
 
   public onUpdatePointer(pointer: Pointer, distance: number) {
+    const flashlightOffset = new Phaser.Math.Vector2();
+    // .setLength(200)
+    // .setAngle(Phaser.Math.DegToRad(20));
+    // .;
+    // flashlightOffset.setLength(200); //.setAngle(Phaser.Math.DegToRad(20));
+
+    // flashlightOffset.normalizeLeftHand();
+
     this.flashlight
-      ?.setPosition(this.x, this.y)
-      .setAngle(this.angle)
+      ?.setPosition(this.x + flashlightOffset.x, this.y + flashlightOffset.y)
+      .setAngle(this.angle + flashlightOffset.angle())
       .pointTo(pointer.x, pointer.y, distance);
 
     this.updateCasingEmitterPosition(this.currentWeapon);
@@ -440,7 +446,11 @@ export default class Player
     return this;
   }
 
-  public onPointerOver(point: { x: number; y: number }): ILightAware {
+  public onLightOverReset(): ILightAware {
+    return this;
+  }
+
+  public onLightOver(): ILightAware {
     return this;
   }
 

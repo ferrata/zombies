@@ -125,7 +125,11 @@ export class CasingEmitter
     return this;
   }
 
-  public onPointerOver(point: { x: number; y: number }): ILightAware {
+  public onLightOverReset(): ILightAware {
+    return this;
+  }
+
+  public onLightOver(): ILightAware {
     return this;
   }
 

@@ -7,6 +7,8 @@ export class StaticMatterThing extends Phaser.Physics.Matter.Image {
     super(scene.matter.world, x, y, texture);
     scene.add.existing(this);
 
+    this.setName(`static-matter:${texture}`);
+
     this.setStatic(true);
 
     this.setFrictionAir(0.9);
@@ -48,13 +50,13 @@ export class StaticMatterThing extends Phaser.Physics.Matter.Image {
   public createCircle(radius: number): Phaser.GameObjects.Arc {
     const center = this.getCenter();
 
-    // a copy of the texture is needed because of the glitch with the raycaster and circles
-    this.topImage = this.scene.add
-      .image(center.x, center.y, this.texture.key)
-      .setAngle(this.angle)
-      .setOrigin(this.originX, this.originY)
-      .setScale(this.scaleX, this.scaleY)
-      .setDepth(config.depths.matterThingTop);
+    // // a copy of the texture is needed because of the glitch with the raycaster and circles
+    // this.topImage = this.scene.add
+    //   .image(center.x, center.y, this.texture.key)
+    //   .setAngle(this.angle)
+    //   .setOrigin(this.originX, this.originY)
+    //   .setScale(this.scaleX, this.scaleY)
+    //   .setDepth(config.depths.matterThingTop);
 
     return this.scene.add.circle(center.x, center.y, radius);
   }

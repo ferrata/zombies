@@ -1,11 +1,17 @@
 import { GameObjects } from "phaser";
 import { IDebuggable, isDebuggable } from "../types/Debuggable";
 
+type DebugInfoLevel = "all" | "some" | "help";
+
 export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
-  private debugInfoEnabled: boolean = false;
+  private debugInfoLevel: DebugInfoLevel = "help";
   private help: DebugInfoWindow;
   private sceneDebugInfo: DebugInfoWindow;
   private debugObjects: { [key: string]: DebugInfoWindow } = {};
+
+  private get debugInfoEnabled(): boolean {
+    return this.debugInfoLevel !== "help";
+  }
 
   private readonly displayBorder: number = 10;
 
@@ -17,7 +23,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
 
     // enable debug by default for development
     if (process.env.NODE_ENV === "development") {
-      this.debugInfoEnabled = true;
+      this.debugInfoLevel = "some";
     }
 
     this.scene.events.once(Phaser.Scenes.Events.BOOT, () => {
@@ -86,9 +92,10 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     );
 
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      this.sceneDebugInfo.visible = this.debugInfoEnabled;
+      this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene));
+
       for (const key in this.debugObjects) {
-        this.debugObjects[key].visible = this.debugInfoEnabled;
+        this.debugObjects[key].visible = this.debugInfoLevel == "all";
       }
 
       if (!this.debugInfoEnabled) {
@@ -126,7 +133,13 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     this.scene.events.on("destroy", () => this.cleanup());
 
     this.scene.input.keyboard.on("keydown-F9", () => {
-      this.debugInfoEnabled = !this.debugInfoEnabled;
+      const nextLevel: { [key in DebugInfoLevel]: DebugInfoLevel } = {
+        all: "some",
+        some: "help",
+        help: "all",
+      };
+
+      this.debugInfoLevel = nextLevel[this.debugInfoLevel];
 
       this.scene.physics.world.debugGraphic.clear();
       this.scene.physics.world.drawDebug = this.debugInfoEnabled;
@@ -153,6 +166,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       bodies: scene.physics.world.bodies.size,
       collisions: scene.physics.world.colliders.length,
       lights: scene.lights.lights.length,
+      debugInfoLevel: this.debugInfoLevel,
     };
   }
 }

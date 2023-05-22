@@ -10,7 +10,7 @@ import {
   StaticMatterProjectionCircle,
 } from "../objects/StaticMatterProjection";
 import { IObstacle } from "../types/Obstacle";
-import { isLightAware, LightAware } from "../types/LightAware";
+import { ILightAware, isLightAware, LightAware } from "../types/LightAware";
 import PhaserRaycaster from "phaser-raycaster";
 import { config } from "../GameConfig";
 
@@ -24,6 +24,7 @@ export default class GameScene extends Phaser.Scene {
   private field: Phaser.GameObjects.TileSprite;
   private pointer: Pointer;
   private player: Player;
+  private lightAwareObjects: ILightAware[] = [];
   private objects: any[] = [];
   private obstacles: IObstacle[] = [];
 
@@ -68,23 +69,27 @@ export default class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, width, height);
     this.matter.world.setBounds(0, 0, width, height);
 
-    this.fieldUnderFlashlight = this.add
-      .tileSprite(800, 600, width, height, "background")
-      .setDepth(config.depths.background - 1);
+    this.fieldUnderFlashlight = this.add.tileSprite(
+      800,
+      600,
+      width,
+      height,
+      "background"
+    );
+    // .setDepth(config.depths.background - 1);
     this.fieldUnderFlashlight.setPipeline("Light2D");
 
-    this.field = this.add
-      .tileSprite(800, 600, width, height, "background")
-      .setDepth(config.depths.background);
+    this.field = this.add.tileSprite(800, 600, width, height, "background");
+    // .setDepth(config.depths.background);
     this.field.setPipeline("Light2D");
 
     this._flashlightGraphics = this.add
       .graphics()
-      .fillStyle(0xffffff)
-      // .setAlpha(0.2)
-      .setBlendMode(Phaser.BlendModes.ADD);
+      .fillStyle(0xffffff, 0.2)
+      .setBlendMode(Phaser.BlendModes.ADD)
+      .setDepth(config.depths.light);
 
-    this.field.setMask(this.flashlightGraphics.createBitmapMask());
+    this.field.setMask(this._flashlightGraphics.createBitmapMask());
 
     const barrel = new (LightAware(StaticMatterThing))(
       this,
@@ -111,12 +116,12 @@ export default class GameScene extends Phaser.Scene {
 
     const barrel2 = new (LightAware(StaticMatterThing))(
       this,
-      800,
+      770,
       350,
       "barrel"
     )
       .setScale(0.3)
-      .setCircle(75)
+      .setCircle(80)
       .setAngle(-15)
       .setOrigin(0.5, 0.5);
 
@@ -125,19 +130,19 @@ export default class GameScene extends Phaser.Scene {
     const barrel3 = new (LightAware(StaticMatterThing))(
       this,
       900,
-      230,
+      220,
       "barrel-damaged-2"
     )
       .setScale(0.3)
-      .setCircle(60)
+      .setCircle(75)
       .setAngle(165)
       .setOrigin(0.5, 0.5);
 
-    barrel3.setLightAwareShape(barrel3.createCircle(70));
+    barrel3.setLightAwareShape(barrel3.createCircle(68));
 
     this.obstacles.push(new StaticMatterProjectionRectangle(this, barrel));
     this.obstacles.push(new StaticMatterProjectionCircle(this, barrel2, 75));
-    this.obstacles.push(new StaticMatterProjectionCircle(this, barrel3, 60));
+    this.obstacles.push(new StaticMatterProjectionCircle(this, barrel3, 70));
 
     this.objects.push(
       new (Pointable(Flashlight))(
@@ -166,6 +171,12 @@ export default class GameScene extends Phaser.Scene {
         }
       },
       loop: true,
+    });
+
+    this.children.each((child) => {
+      if (isLightAware(child)) {
+        this.lightAwareObjects.push(child);
+      }
     });
 
     // this.darken();
@@ -221,7 +232,7 @@ export default class GameScene extends Phaser.Scene {
 
   darken() {
     this._isDark = true;
-    this.lights.setAmbientColor(0x333333);
+    this.lights.setAmbientColor(0xffffff);
 
     // set flashlight beam sprite as mask for background tile sprite
     if (this.fieldUnderFlashlight) {
@@ -289,6 +300,12 @@ export default class GameScene extends Phaser.Scene {
     this.constrainVelocity(this.player, 500);
     this.constrainPointer(this.pointer);
 
+    // reset light effects
+    this.lightAwareObjects.forEach((child) => {
+      child.onLightOverReset();
+    });
+
+    // update player
     this.player.onUpdatePointer(this.pointer, distance);
   }
 

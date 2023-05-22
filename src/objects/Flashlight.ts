@@ -11,9 +11,13 @@ export default class Flashlight
   extends Phaser.Physics.Arcade.Sprite
   implements ILightAware, IDebuggable
 {
+  LIGHT_INTENSITY = 0.5;
+  DARK_INTENSITY = 1;
+
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
+  // private beam: Phaser.GameObjects.Light;
   private raycaster: Raycaster;
   private ray: Raycaster.Ray;
   private glitchy: boolean;
@@ -49,7 +53,13 @@ export default class Flashlight
 
     raycaster.mapGameObjects(lightAware);
 
-    this.graphics = this.makeLightGraphics(scene.isDark);
+    // this.beam = this.scene.lights
+    //   .addLight(180, 80, 100)
+    //   .setColor(0xffffff)
+    //   .setIntensity(0)
+    //   .setZ(config.depths.lightAwareShape + 1);
+
+    this.graphics = this.getLightGraphics(scene.isDark);
   }
 
   public getDebugInfo(): object {
@@ -59,6 +69,8 @@ export default class Flashlight
       y: this.y,
       isOff: this.isOff,
       rotation: this.rotation,
+      // intensity: this.beam.intensity,
+      // radius: this.beam.radius,
     };
   }
 
@@ -76,7 +88,7 @@ export default class Flashlight
       .setOrigin(this.x, this.y)
       .setAngleDeg(this.angle)
       .setConeDeg(config.flashlight.coneDeg)
-      .setRayRange(config.flashlight.range);
+      .setRayRange(config.flashlight.coneRange);
   }
 
   public setGlitchy() {
@@ -88,26 +100,69 @@ export default class Flashlight
     if (this.isOff) {
       return;
     }
+
+    // this.beam.setPosition(x, y);
+    // this.beam.radius = Math.max(100, (400 * distance) / 1000);
+
     this.ray.setOrigin(this.x, this.y);
     this.ray.setAngleDeg(this.angle);
 
     const intersections = this.ray.castCone();
+    const initialIntersections = intersections.slice();
     intersections.push(this.ray.origin);
 
     this.graphics.clear().fillPoints(intersections);
+
+    const affectedObjects = initialIntersections.reduce((acc, intersection) => {
+      // @ts-ignore
+      const { object } = intersection;
+
+      if (object && acc.indexOf(object) === -1) {
+        acc.push(object);
+      }
+
+      return acc;
+    }, []);
+
+    // if (objectIntersections.length) {
+    //   console.log(objectIntersections.map((o) => o.name));
+    // }
+
+    affectedObjects.forEach((object) => {
+      const owner = object.owner as ILightAware;
+      if (owner) {
+        owner.onLightOver(
+          this.ray,
+          config.flashlight.closeRange,
+          initialIntersections
+        );
+      }
+    });
   }
 
   public onLighten(): ILightAware {
-    this.graphics = this.makeLightGraphics(false);
+    // this.graphics?.postFX?.clear();
+    this.graphics?.clear();
+
+    // this.beam.setIntensity(this.LIGHT_INTENSITY);
+    this.graphics = this.getLightGraphics(false);
     return this;
   }
 
   public onDarken(): ILightAware {
-    this.graphics = this.makeLightGraphics(true);
+    // this.graphics?.postFX?.clear();
+    this.graphics?.clear();
+
+    // this.beam.setIntensity(this.DARK_INTENSITY);
+    this.graphics = this.getLightGraphics(true);
     return this;
   }
 
-  public onPointerOver(point: { x: number; y: number }): ILightAware {
+  public onLightOverReset(): ILightAware {
+    return this;
+  }
+
+  public onLightOver(): ILightAware {
     return this;
   }
 
@@ -119,10 +174,7 @@ export default class Flashlight
     return null;
   }
 
-  private makeLightGraphics(isDark: boolean): Phaser.GameObjects.Graphics {
-    this.graphics?.postFX?.clear();
-    this.graphics?.clear();
-
+  private getLightGraphics(isDark: boolean): Phaser.GameObjects.Graphics {
     const graphics = isDark
       ? this.scene.flashlightGraphics
       : this.scene.add.graphics({

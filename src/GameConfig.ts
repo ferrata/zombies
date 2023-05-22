@@ -8,16 +8,17 @@ export const config = {
     matterThingTop: 400,
     lightAwareShape: 200,
     pointableObject: 1000,
-    light: 300,
+    light: 150,
   },
 
   flashlight: {
-    coneDeg: 30,
-    range: 2000,
+    coneDeg: 35,
+    coneRange: 2000,
+    closeRange: 800,
   },
 
   colors: {
-    darkenTintColor: 0x121212,
+    darkenTintColor: 0x212121,
     darkenColorMatrixBrightness: 0.2,
   },
 };
