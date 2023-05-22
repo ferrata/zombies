@@ -1,16 +1,16 @@
 import { GameObjects } from "phaser";
 import { IDebuggable, isDebuggable } from "../types/Debuggable";
 
-type DebugInfoLevel = "all" | "some" | "help";
+type DebugInfoLevel = "all" | "physics" | "info" | "none";
 
 export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
-  private debugInfoLevel: DebugInfoLevel = "help";
+  private debugInfoLevel: DebugInfoLevel = "none";
   private help: DebugInfoWindow;
   private sceneDebugInfo: DebugInfoWindow;
   private debugObjects: { [key: string]: DebugInfoWindow } = {};
 
   private get debugInfoEnabled(): boolean {
-    return this.debugInfoLevel !== "help";
+    return this.debugInfoLevel !== "none";
   }
 
   private readonly displayBorder: number = 10;
@@ -23,7 +23,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
 
     // enable debug by default for development
     if (process.env.NODE_ENV === "development") {
-      this.debugInfoLevel = "some";
+      this.debugInfoLevel = "physics";
     }
 
     this.scene.events.once(Phaser.Scenes.Events.BOOT, () => {
@@ -94,8 +94,11 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
       this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene));
 
+      const drawDebugInfo =
+        this.debugInfoLevel === "all" || this.debugInfoLevel === "info";
+
       for (const key in this.debugObjects) {
-        this.debugObjects[key].visible = this.debugInfoLevel == "all";
+        this.debugObjects[key].visible = drawDebugInfo;
       }
 
       if (!this.debugInfoEnabled) {
@@ -134,19 +137,22 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
 
     this.scene.input.keyboard.on("keydown-F9", () => {
       const nextLevel: { [key in DebugInfoLevel]: DebugInfoLevel } = {
-        all: "some",
-        some: "help",
-        help: "all",
+        all: "physics",
+        physics: "info",
+        info: "none",
+        none: "all",
       };
 
       this.debugInfoLevel = nextLevel[this.debugInfoLevel];
+      const drawDebug =
+        this.debugInfoLevel === "physics" || this.debugInfoLevel === "all";
 
       this.scene.physics.world.debugGraphic.clear();
-      this.scene.physics.world.drawDebug = this.debugInfoEnabled;
+      this.scene.physics.world.drawDebug = drawDebug;
 
       if (this.scene.matter) {
         this.scene.matter.world.debugGraphic.clear();
-        this.scene.matter.world.drawDebug = this.debugInfoEnabled;
+        this.scene.matter.world.drawDebug = drawDebug;
       }
     });
   }
