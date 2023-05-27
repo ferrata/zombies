@@ -9,9 +9,15 @@ export const config = {
     lightAwareShape: 200,
     pointableObject: 1000,
     light: 150,
+
+    debug: 10000,
   },
 
   flashlight: {
+    lightColor: 0xffffff,
+    lightAlpha: 0.3,
+
+    collisionRange: 900,
     coneDeg: 35,
     coneRange: 2000,
     closeRange: 800,

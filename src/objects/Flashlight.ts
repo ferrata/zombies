@@ -20,8 +20,13 @@ export default class Flashlight
   // private beam: Phaser.GameObjects.Light;
   private raycaster: Raycaster;
   private ray: Raycaster.Ray;
-  private glitchy: boolean;
+  private glitchy: boolean = false;
   private graphics: Phaser.GameObjects.Graphics;
+  private ownGraphics: Phaser.GameObjects.Graphics;
+
+  public get isOn(): boolean {
+    return !this.isOff;
+  }
 
   public get isOff(): boolean {
     return this.ray == null;
@@ -67,28 +72,55 @@ export default class Flashlight
       name: this.name,
       x: this.x,
       y: this.y,
-      isOff: this.isOff,
+      isOn: this.isOn,
       rotation: this.rotation,
+      glitchy: this.glitchy,
+      graphics: this.graphics ? this.graphics.name : "null",
       // intensity: this.beam.intensity,
       // radius: this.beam.radius,
     };
   }
 
+  public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
+    if (!this.ray) {
+      return;
+    }
+
+    graphics.fillStyle(0xff0000, 0.5);
+    this.ray.intersections.forEach((intersection) => {
+      // @ts-ignore
+      graphics.fillCircle(intersection.x, intersection.y, 3);
+    });
+
+    graphics.fillStyle(0x000000, 0.2);
+    graphics.lineStyle(1, 0xff00ff, 0.5);
+    this.ray.slicedIntersections.forEach((intersection) => {
+      graphics.strokeTriangle(
+        intersection.x1,
+        intersection.y1,
+        intersection.x2,
+        intersection.y2,
+        intersection.x3,
+        intersection.y3
+      );
+    });
+  }
+
   public turnOff() {
-    this.graphics.clear();
-    this.ray.destroy();
+    this.graphics?.clear();
+    this.ray?.destroy();
     this.ray = null;
   }
 
   public turnOn() {
     this.ray = this.raycaster
-      .createRay({
-        collisionRange: 900, //ray's field of view range
-      })
+      .createRay({ collisionRange: config.flashlight.collisionRange })
       .setOrigin(this.x, this.y)
       .setAngleDeg(this.angle)
       .setConeDeg(config.flashlight.coneDeg)
       .setRayRange(config.flashlight.coneRange);
+
+    this.ray.autoSlice = true;
   }
 
   public setGlitchy() {
@@ -97,7 +129,7 @@ export default class Flashlight
   }
 
   public pointTo(x: number, y: number, distance: number) {
-    if (this.isOff) {
+    if (this.ray == null) {
       return;
     }
 
@@ -124,37 +156,33 @@ export default class Flashlight
       return acc;
     }, []);
 
-    // if (objectIntersections.length) {
-    //   console.log(objectIntersections.map((o) => o.name));
-    // }
-
     affectedObjects.forEach((object) => {
       const owner = object.owner as ILightAware;
       if (owner) {
-        owner.onLightOver(
-          this.ray,
-          config.flashlight.closeRange,
-          initialIntersections
-        );
+        owner.onLightOver(this.ray, initialIntersections);
       }
     });
   }
 
   public onLighten(): ILightAware {
     // this.graphics?.postFX?.clear();
-    this.graphics?.clear();
+    this.ownGraphics?.clear();
 
     // this.beam.setIntensity(this.LIGHT_INTENSITY);
     this.graphics = this.getLightGraphics(false);
+
     return this;
   }
 
   public onDarken(): ILightAware {
     // this.graphics?.postFX?.clear();
-    this.graphics?.clear();
+    this.ownGraphics?.clear();
+
+    // this.graphics.fillStyle(0xffffff, 0.2);
 
     // this.beam.setIntensity(this.DARK_INTENSITY);
     this.graphics = this.getLightGraphics(true);
+    // this.pointTo(this.x, this.y, 0);
     return this;
   }
 
@@ -175,11 +203,21 @@ export default class Flashlight
   }
 
   private getLightGraphics(isDark: boolean): Phaser.GameObjects.Graphics {
-    const graphics = isDark
-      ? this.scene.flashlightGraphics
-      : this.scene.add.graphics({
-          fillStyle: { color: 0xffffff, alpha: 0.2 },
-        });
+    let graphics = this.scene.flashlightSceneGraphics;
+
+    if (!isDark) {
+      this.ownGraphics?.destroy();
+      this.ownGraphics = this.scene.add
+        .graphics({
+          fillStyle: {
+            color: config.flashlight.lightColor,
+            alpha: config.flashlight.lightAlpha,
+          },
+        })
+        .setName("flashlightOwnGraphics");
+
+      graphics = this.ownGraphics;
+    }
 
     if (this.glitchy) {
       const fx = graphics.postFX.addWipe();

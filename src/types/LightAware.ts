@@ -10,7 +10,6 @@ export interface ILightAware {
   onLightOverReset(): ILightAware;
   onLightOver(
     light: Raycaster.Ray,
-    distance: number,
     intersection: Phaser.Geom.Point[]
   ): ILightAware;
 
@@ -91,7 +90,6 @@ export function LightAware<TBase extends LightAwareObject>(
 
     public onLightOver(
       light: Raycaster.Ray,
-      distance: number,
       intersections: Point[]
     ): ILightAware {
       if (!this.shape) {
@@ -124,50 +122,64 @@ export function LightAware<TBase extends LightAwareObject>(
         .setDepth(config.depths.lightAwareShape)
         .fillStyle(0xffffff, 1);
 
-      const angle = light.angle;
+      // const angle = light.angle;
 
-      const leftSide = new Phaser.Math.Vector2(light.origin.x, light.origin.y)
-        .setLength(distance)
-        .setAngle(angle - light.cone / 2)
-        .add(light.origin);
+      if (effectiveIntersections.length > 1) {
+        const firstIntersection = effectiveIntersections[0];
+        const lastIntersection =
+          effectiveIntersections[effectiveIntersections.length - 1];
 
-      const rightSide = new Phaser.Math.Vector2(light.origin.x, light.origin.y)
-        .setLength(distance)
-        .setAngle(angle + light.cone / 2)
-        .add(light.origin);
-
-      const middlePoint = new Phaser.Math.Vector2(
-        light.origin.x,
-        light.origin.y
-      )
-        .setLength(distance)
-        .setAngle(angle)
-        .add(light.origin);
-
-      g.beginPath()
-        .moveTo(light.origin.x, light.origin.y)
-        .lineTo(leftSide.x, leftSide.y)
-        .arc(
+        const firstIntersectionLine = new Phaser.Geom.Line(
           light.origin.x,
           light.origin.y,
-          distance,
-          angle - light.cone / 2,
-          angle + light.cone / 2,
-          false,
-          0.01
+          firstIntersection.x,
+          firstIntersection.y
+        );
+
+        const lastIntersectionLine = new Phaser.Geom.Line(
+          light.origin.x,
+          light.origin.y,
+          lastIntersection.x,
+          lastIntersection.y
+        );
+
+        const firstIntersectionAngle = Phaser.Geom.Line.Angle(
+          firstIntersectionLine
+        );
+
+        const lastIntersectionAngle =
+          Phaser.Geom.Line.Angle(lastIntersectionLine);
+
+        const boxSize = Math.max(
+          this.scene.cameras.main.width,
+          this.scene.cameras.main.height
+        );
+
+        const boxTopLeft = new Phaser.Math.Vector2(
+          firstIntersection.x,
+          firstIntersection.y
         )
-        .lineTo(rightSide.x, rightSide.y)
-        .closePath()
-        .fillPath();
+          .setLength(boxSize)
+          .setAngle(firstIntersectionAngle)
+          .add(firstIntersection);
 
-      const middlePointRadius = Phaser.Math.Distance.Between(
-        middlePoint.x,
-        middlePoint.y,
-        leftSide.x,
-        leftSide.y
-      );
+        const boxTopRight = new Phaser.Math.Vector2(
+          lastIntersection.x,
+          lastIntersection.y
+        )
+          .setLength(boxSize)
+          .setAngle(lastIntersectionAngle)
+          .add(lastIntersection);
 
-      g.fillCircle(middlePoint.x, middlePoint.y, middlePointRadius);
+        g.beginPath()
+          .moveTo(light.origin.x, light.origin.y)
+          .lineTo(boxTopLeft.x, boxTopLeft.y)
+          .lineTo(boxTopRight.x, boxTopRight.y)
+          .closePath()
+          .fillPath();
+      } else {
+        // console.log("less than 2 intersections");
+      }
 
       this.textureUnderLight
         .setCrop(0, 0, this.width, this.height)
@@ -189,26 +201,6 @@ export function LightAware<TBase extends LightAwareObject>(
         .setDepth(config.depths.lightAwareShape + 1);
 
       this.textureUnderLight.setPipeline("Light2D");
-
-      // // const obj = this as unknown as Phaser.GameObjects.Image;
-      // // obj.texture.
-
-      // this.textureUnderLight = this.scene.make.renderTexture({});
-
-      // this.textureUnderLight
-      //   .setPosition(this.x, this.y + 1)
-      //   .setSize(this.width, this.height)
-      //   .setScale(this.scaleX, this.scaleY)
-      //   .setOrigin(this.originX, this.originY)
-      //   .setAngle(this.angle)
-      //   .setDepth(config.depths.lightAwareShape + 1);
-
-      // this.textureUnderLight.setPipeline("Light2D");
-
-      // this.textureUnderLight
-      //   // @ts-ignore
-      //   .drawFrame(this.texture.key, this.frame.name)
-      //   .setCrop(0, 0, 0, 0);
 
       this.shape = shape
         // @ts-ignore
