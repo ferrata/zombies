@@ -17,11 +17,9 @@ export default class Flashlight
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
-  // private beam: Phaser.GameObjects.Light;
   private raycaster: Raycaster;
   private ray: Raycaster.Ray;
   private glitchy: boolean = false;
-  private graphics: Phaser.GameObjects.Graphics;
   private ownGraphics: Phaser.GameObjects.Graphics;
 
   public get isOn(): boolean {
@@ -30,6 +28,10 @@ export default class Flashlight
 
   public get isOff(): boolean {
     return this.ray == null;
+  }
+
+  public get isGlitchy(): boolean {
+    return this.glitchy;
   }
 
   constructor(scene: GameScene, x: number, y: number, raycaster: Raycaster) {
@@ -58,13 +60,15 @@ export default class Flashlight
 
     raycaster.mapGameObjects(lightAware);
 
-    // this.beam = this.scene.lights
-    //   .addLight(180, 80, 100)
-    //   .setColor(0xffffff)
-    //   .setIntensity(0)
-    //   .setZ(config.depths.lightAwareShape + 1);
-
-    this.graphics = this.getLightGraphics(scene.isDark);
+    this.ownGraphics = this.scene.add
+      .graphics({
+        fillStyle: {
+          color: config.flashlight.lightColor,
+          alpha: config.flashlight.lightAlpha,
+        },
+      })
+      .setDepth(config.depths.light)
+      .setName("flashlightOwnGraphics");
   }
 
   public getDebugInfo(): object {
@@ -75,9 +79,6 @@ export default class Flashlight
       isOn: this.isOn,
       rotation: this.rotation,
       glitchy: this.glitchy,
-      graphics: this.graphics ? this.graphics.name : "null",
-      // intensity: this.beam.intensity,
-      // radius: this.beam.radius,
     };
   }
 
@@ -107,7 +108,10 @@ export default class Flashlight
   }
 
   public turnOff() {
-    this.graphics?.clear();
+    this.scene.flashlightSceneGraphics.clear();
+    this.scene.flashlightShadowSceneGraphics.clear();
+    this.ownGraphics.clear();
+
     this.ray?.destroy();
     this.ray = null;
   }
@@ -123,8 +127,9 @@ export default class Flashlight
     this.ray.autoSlice = true;
   }
 
-  public setGlitchy() {
-    this.glitchy = true;
+  public setGlitchy(value: boolean) {
+    // TODO: implement
+    console.log("setGlitchy", value);
     return this;
   }
 
@@ -133,9 +138,6 @@ export default class Flashlight
       return;
     }
 
-    // this.beam.setPosition(x, y);
-    // this.beam.radius = Math.max(100, (400 * distance) / 1000);
-
     this.ray.setOrigin(this.x, this.y);
     this.ray.setAngleDeg(this.angle);
 
@@ -143,7 +145,49 @@ export default class Flashlight
     const initialIntersections = intersections.slice();
     intersections.push(this.ray.origin);
 
-    this.graphics.clear().fillPoints(intersections);
+    if (!this.scene.isDark) {
+      this.ownGraphics.clear().fillPoints(intersections);
+      return;
+    }
+
+    const boxSize = Math.max(
+      this.scene.cameras.main.width,
+      this.scene.cameras.main.height
+    );
+
+    const leftEdgePoint = new Phaser.Math.Vector2(
+      this.ray.origin.x,
+      this.ray.origin.y
+    )
+      .setLength(boxSize)
+      .setAngle(this.ray.angle - this.ray.cone / 2)
+      .add(this.ray.origin);
+
+    const rightEdgePoint = new Phaser.Math.Vector2(
+      this.ray.origin.x,
+      this.ray.origin.y
+    )
+      .setLength(boxSize)
+      .setAngle(this.ray.angle + this.ray.cone / 2)
+      .add(this.ray.origin);
+
+    this.scene.flashlightShadowSceneGraphics
+      .clear()
+      .fillStyle(0xffffff, 0)
+      .fillTriangle(
+        this.ray.origin.x,
+        this.ray.origin.y,
+        leftEdgePoint.x,
+        leftEdgePoint.y,
+        rightEdgePoint.x,
+        rightEdgePoint.y
+      )
+      .fillPoints(intersections);
+
+    this.scene.flashlightSceneGraphics
+      .clear()
+      .fillStyle(0xffffff, 0)
+      .fillPoints(intersections);
 
     const affectedObjects = initialIntersections.reduce((acc, intersection) => {
       // @ts-ignore
@@ -165,24 +209,12 @@ export default class Flashlight
   }
 
   public onLighten(): ILightAware {
-    // this.graphics?.postFX?.clear();
-    this.ownGraphics?.clear();
-
-    // this.beam.setIntensity(this.LIGHT_INTENSITY);
-    this.graphics = this.getLightGraphics(false);
-
+    this.ownGraphics.clear();
     return this;
   }
 
   public onDarken(): ILightAware {
-    // this.graphics?.postFX?.clear();
-    this.ownGraphics?.clear();
-
-    // this.graphics.fillStyle(0xffffff, 0.2);
-
-    // this.beam.setIntensity(this.DARK_INTENSITY);
-    this.graphics = this.getLightGraphics(true);
-    // this.pointTo(this.x, this.y, 0);
+    this.ownGraphics.clear();
     return this;
   }
 
@@ -200,38 +232,5 @@ export default class Flashlight
 
   public getLightAwareShape(): LightAwareShape {
     return null;
-  }
-
-  private getLightGraphics(isDark: boolean): Phaser.GameObjects.Graphics {
-    let graphics = this.scene.flashlightSceneGraphics;
-
-    if (!isDark) {
-      this.ownGraphics?.destroy();
-      this.ownGraphics = this.scene.add
-        .graphics({
-          fillStyle: {
-            color: config.flashlight.lightColor,
-            alpha: config.flashlight.lightAlpha,
-          },
-        })
-        .setName("flashlightOwnGraphics");
-
-      graphics = this.ownGraphics;
-    }
-
-    if (this.glitchy) {
-      const fx = graphics.postFX.addWipe();
-      this.scene.tweens.add({
-        targets: fx,
-        progress: 1,
-        repeatDelay: 10,
-        hold: 10,
-        yoyo: true,
-        repeat: -1,
-        duration: 0.5,
-      });
-    }
-
-    return graphics.setDepth(config.depths.light);
   }
 }

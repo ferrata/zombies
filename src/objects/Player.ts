@@ -497,50 +497,83 @@ export default class Player
   }
 
   private updateFlashlightPosition(weapon: PlayerWeapon) {
-    const adjustByWeapon = {
+    const attachedToByWeapon = {
       [PlayerWeapon.HANDGUN]: {
-        radius: 50,
-        shift: 30,
-        angle: 0,
-        attachedTo: { bone: "r_hand", rotationMultiplier: -1 },
+        frontBone: "muzzle",
+        rearBone: "weapon",
+        shift: 10,
       },
       [PlayerWeapon.SHOTGUN]: {
-        radius: 60,
-        shift: 20,
-        angle: -15,
-        attachedTo: { bone: "r_hand", rotationMultiplier: -1 },
+        frontBone: "muzzle",
+        rearBone: "weapon",
+        shift: 60,
       },
       [PlayerWeapon.RIFLE]: {
-        radius: 60,
-        shift: 20,
-        angle: -15,
-        attachedTo: { bone: "r_hand", rotationMultiplier: -1 },
+        frontBone: "muzzle",
+        rearBone: "weapon",
+        shift: 60,
       },
       [PlayerWeapon.KNIFE]: {
-        radius: 0,
+        frontBone: "head",
+        rearBone: "head",
         shift: 0,
-        angle: 0,
-        attachedTo: { bone: "head", rotationMultiplier: -1 },
       },
     };
 
-    const { radius, shift, angle, attachedTo } = adjustByWeapon[weapon];
+    const attachedTo = attachedToByWeapon[weapon];
+    const frontBone = this.getBonePosition(attachedTo.frontBone);
+    const rearBone = this.getBonePosition(attachedTo.rearBone);
 
     const flashlightOffset = new Phaser.Math.Vector2(
-      Math.cos(this.rotation) * radius,
-      Math.sin(this.rotation) * radius
+      frontBone.x - rearBone.x,
+      frontBone.y - rearBone.y
+    ).setLength(attachedTo.shift);
+
+    const weaponAngle = Phaser.Math.Angle.Between(
+      rearBone.x,
+      rearBone.y,
+      frontBone.x,
+      frontBone.y
     );
 
-    flashlightOffset.x += Math.cos(this.rotation + Math.PI / 2) * shift;
-    flashlightOffset.y += Math.sin(this.rotation + Math.PI / 2) * shift;
-
-    const bone = this.spine.skeleton.findBone(attachedTo.bone);
-
     this.flashlight
-      ?.setPosition(this.x + flashlightOffset.x, this.y + flashlightOffset.y)
-      .setAngle(
-        this.angle + angle + bone.rotation * attachedTo.rotationMultiplier
-      );
+      ?.setPosition(
+        flashlightOffset.x + rearBone.x,
+        flashlightOffset.y + rearBone.y
+      )
+      .setAngle(Phaser.Math.RadToDeg(weaponAngle));
+  }
+
+  private getBonePosition(boneName: string) {
+    const bone = this.spine.skeleton.findBone(boneName);
+    const boneInnerPosition = new Phaser.Math.Vector2(
+      bone.worldX + this.x - this.spine.skeleton.x,
+      bone.worldY + this.y - this.spine.skeleton.y
+    );
+
+    const distance = Phaser.Math.Distance.Between(
+      this.body.center.x,
+      this.body.center.y,
+      boneInnerPosition.x,
+      boneInnerPosition.y
+    );
+
+    const angle = Phaser.Math.Angle.Between(
+      this.body.center.x,
+      this.body.center.y,
+      boneInnerPosition.x,
+      boneInnerPosition.y
+    );
+
+    const bonePosition = new Phaser.Math.Vector2(
+      this.body.center.x,
+      this.body.center.y
+    )
+      .setLength(distance)
+      .setAngle(-angle)
+      .add(this.body.center);
+
+    return bonePosition;
   }
 
   private getCasingName(weapon: PlayerWeapon) {

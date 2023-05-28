@@ -18,9 +18,11 @@ export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
   private _isDark: boolean;
   private _flashlightSceneGraphics: Phaser.GameObjects.Graphics;
+  private _flashlightShadowSceneGraphics: Phaser.GameObjects.Graphics;
 
   private raycasterPlugin: PhaserRaycaster;
   private fieldUnderFlashlight: Phaser.GameObjects.TileSprite;
+  private fieldUnderFlashlightShadow: Phaser.GameObjects.TileSprite;
   private field: Phaser.GameObjects.TileSprite;
   private pointer: Pointer;
   private player: Player;
@@ -38,6 +40,14 @@ export default class GameScene extends Phaser.Scene {
     }
 
     return this._flashlightSceneGraphics;
+  }
+
+  public get flashlightShadowSceneGraphics(): Phaser.GameObjects.Graphics {
+    if (this._flashlightShadowSceneGraphics.postFX.list.length === 0) {
+      this._flashlightShadowSceneGraphics.setPipeline("Light2D");
+    }
+
+    return this._flashlightShadowSceneGraphics;
   }
 
   public get inputs(): PlayerInputs {
@@ -71,8 +81,14 @@ export default class GameScene extends Phaser.Scene {
 
     this.fieldUnderFlashlight = this.add
       .tileSprite(800, 600, width, height, "background")
-      .setDepth(config.depths.background - 1);
+      .setDepth(config.depths.background - 2);
     this.fieldUnderFlashlight.setPipeline("Light2D");
+
+    this.fieldUnderFlashlightShadow = this.add
+      .tileSprite(800, 600, width, height, "background")
+      .setDepth(config.depths.background - 1)
+      .setTint(0x4a4a4a);
+    this.fieldUnderFlashlightShadow.setPipeline("Light2D");
 
     this.field = this.add
       .tileSprite(800, 600, width, height, "background")
@@ -84,14 +100,21 @@ export default class GameScene extends Phaser.Scene {
 
     this._flashlightSceneGraphics = this.add
       .graphics()
-      .setName("flashlightSceneGraphics")
-      .fillStyle(0xffffff, 0.2)
-      .setBlendMode(Phaser.BlendModes.ADD)
-      .setDepth(config.depths.light);
+      .setName("flashlightSceneGraphics");
 
-    const mask = this._flashlightSceneGraphics.createGeometryMask();
-    mask.invertAlpha = true;
-    this.field.setMask(mask);
+    this._flashlightShadowSceneGraphics = this.add
+      .graphics()
+      .setName("flashlightShadowSceneGraphics");
+
+    this.field.setMask(
+      this._flashlightShadowSceneGraphics
+        .createGeometryMask()
+        .setInvertAlpha(true)
+    );
+
+    this.fieldUnderFlashlightShadow.setMask(
+      this._flashlightSceneGraphics.createGeometryMask().setInvertAlpha(true)
+    );
 
     const barrel = new (LightAware(StaticMatterThing))(
       this,
@@ -244,6 +267,7 @@ export default class GameScene extends Phaser.Scene {
   darken() {
     this._isDark = true;
     this.flashlightSceneGraphics.clear();
+    this.flashlightShadowSceneGraphics.clear();
 
     this.field.setTint(config.colors.darkenTintColor);
 
@@ -258,6 +282,7 @@ export default class GameScene extends Phaser.Scene {
   lighten() {
     this._isDark = false;
     this.flashlightSceneGraphics.clear();
+    this.flashlightShadowSceneGraphics.clear();
 
     this.field.setTint();
 

@@ -122,8 +122,6 @@ export function LightAware<TBase extends LightAwareObject>(
         .setDepth(config.depths.lightAwareShape)
         .fillStyle(0xffffff, 1);
 
-      // const angle = light.angle;
-
       if (effectiveIntersections.length > 1) {
         const firstIntersection = effectiveIntersections[0];
         const lastIntersection =
@@ -160,7 +158,7 @@ export function LightAware<TBase extends LightAwareObject>(
           firstIntersection.y
         )
           .setLength(boxSize)
-          .setAngle(firstIntersectionAngle)
+          .setAngle(firstIntersectionAngle - Math.PI / 128)
           .add(firstIntersection);
 
         const boxTopRight = new Phaser.Math.Vector2(
@@ -168,17 +166,17 @@ export function LightAware<TBase extends LightAwareObject>(
           lastIntersection.y
         )
           .setLength(boxSize)
-          .setAngle(lastIntersectionAngle)
+          .setAngle(lastIntersectionAngle + Math.PI / 128)
           .add(lastIntersection);
 
-        g.beginPath()
-          .moveTo(light.origin.x, light.origin.y)
-          .lineTo(boxTopLeft.x, boxTopLeft.y)
-          .lineTo(boxTopRight.x, boxTopRight.y)
-          .closePath()
-          .fillPath();
-      } else {
-        // console.log("less than 2 intersections");
+        g.fillTriangle(
+          light.origin.x,
+          light.origin.y,
+          boxTopLeft.x,
+          boxTopLeft.y,
+          boxTopRight.x,
+          boxTopRight.y
+        );
       }
 
       this.textureUnderLight
