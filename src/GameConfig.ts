@@ -25,6 +25,7 @@ export const config = {
 
   colors: {
     darkenTintColor: 0x212121,
+    darkenShadowTintColor: 0x323232,
     darkenColorMatrixBrightness: 0.2,
   },
 };

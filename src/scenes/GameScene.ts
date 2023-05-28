@@ -87,7 +87,7 @@ export default class GameScene extends Phaser.Scene {
     this.fieldUnderFlashlightShadow = this.add
       .tileSprite(800, 600, width, height, "background")
       .setDepth(config.depths.background - 1)
-      .setTint(0x4a4a4a);
+      .setTint(config.colors.darkenShadowTintColor);
     this.fieldUnderFlashlightShadow.setPipeline("Light2D");
 
     this.field = this.add
