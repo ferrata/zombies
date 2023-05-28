@@ -1,6 +1,8 @@
 import { StaticMatterThing } from "./StaticMatterThing";
 import { IProjection } from "../types/Projection";
 
+// TODO: refactor this for better performance. right now it creates a lot of objects
+
 export class StaticMatterProjectionCircle
   extends Phaser.Physics.Arcade.StaticGroup
   implements IProjection

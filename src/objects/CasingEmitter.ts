@@ -1,5 +1,5 @@
 import GameScene from "../scenes/GameScene";
-import { ILightAware } from "../types/LightAware";
+import { ILightAware, LightAwareShape } from "../types/LightAware";
 
 export class CasingEmitter
   extends Phaser.GameObjects.Container
@@ -123,6 +123,22 @@ export class CasingEmitter
     this.isDark = true;
     this.updateTintForAllAlive(0x000000);
     return this;
+  }
+
+  public onLightOverReset(): ILightAware {
+    return this;
+  }
+
+  public onLightOver(): ILightAware {
+    return this;
+  }
+
+  public setLightAwareShape(shape: LightAwareShape): ILightAware {
+    return this;
+  }
+
+  public getLightAwareShape(): LightAwareShape {
+    return null;
   }
 
   public emitOne(casingName: string) {

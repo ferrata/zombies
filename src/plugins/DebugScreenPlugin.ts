@@ -1,11 +1,24 @@
 import { GameObjects } from "phaser";
 import { IDebuggable, isDebuggable } from "../types/Debuggable";
+import { config } from "../GameConfig";
+
+type DebugInfoLevel = "all" | "physics" | "info" | "none";
 
 export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
-  private debugInfoEnabled: boolean = false;
+  private debugInfoLevel: DebugInfoLevel = "none";
   private help: DebugInfoWindow;
   private sceneDebugInfo: DebugInfoWindow;
-  private debugObjects: { [key: string]: DebugInfoWindow } = {};
+  private debugGraphics: Phaser.GameObjects.Graphics;
+  private debugObjects: {
+    [key: string]: {
+      object: IDebuggable;
+      window: DebugInfoWindow;
+    };
+  } = {};
+
+  private get debugInfoEnabled(): boolean {
+    return this.debugInfoLevel !== "none";
+  }
 
   private readonly displayBorder: number = 10;
 
@@ -17,22 +30,29 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
 
     // enable debug by default for development
     if (process.env.NODE_ENV === "development") {
-      this.debugInfoEnabled = true;
+      this.debugInfoLevel = "info";
     }
 
     this.scene.events.once(Phaser.Scenes.Events.BOOT, () => {
       this.create();
     });
 
+    const drawDebugPhysics =
+      this.debugInfoLevel === "all" || this.debugInfoLevel === "physics";
+
     this.scene.events.once(
       Phaser.Scenes.Events.READY,
       (event: Phaser.Scenes.Systems) => {
+        this.debugGraphics = event.scene.add
+          .graphics()
+          .setDepth(config.depths.debug);
+
         event.scene.physics.world.createDebugGraphic();
-        event.scene.physics.world.drawDebug = this.debugInfoEnabled;
+        event.scene.physics.world.drawDebug = drawDebugPhysics;
 
         if (event.scene.matter) {
           event.scene.matter.world.createDebugGraphic();
-          event.scene.matter.world.drawDebug = this.debugInfoEnabled;
+          event.scene.matter.world.drawDebug = drawDebugPhysics;
         }
       }
     );
@@ -70,7 +90,10 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       (object: Phaser.GameObjects.GameObject) => {
         if (isDebuggable(object)) {
           const objectInfo = new DebugInfoWindow(this.scene, object.name);
-          this.debugObjects[object.name] = objectInfo;
+          this.debugObjects[object.name] = {
+            object: object as IDebuggable,
+            window: objectInfo,
+          };
         }
       }
     );
@@ -79,70 +102,107 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       Phaser.Scenes.Events.REMOVED_FROM_SCENE,
       (object: Phaser.GameObjects.GameObject) => {
         if (isDebuggable(object)) {
-          this.debugObjects[object.name].destroy();
+          this.debugObjects[object.name].window.destroy();
           delete this.debugObjects[object.name];
         }
       }
     );
 
     this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
-      this.sceneDebugInfo.visible = this.debugInfoEnabled;
-      for (const key in this.debugObjects) {
-        this.debugObjects[key].visible = this.debugInfoEnabled;
-      }
-
-      if (!this.debugInfoEnabled) {
-        return;
-      }
-
-      this.scene.physics.world.debugGraphic.update();
-      if (this.scene.matter) {
-        this.scene.matter.world.debugGraphic.update();
-      }
-
-      this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene));
-
-      for (const key in this.debugObjects) {
-        const object = this.scene.children.getByName(key);
-        if (!object || !isDebuggable(object)) {
-          continue;
-        }
-
-        const objectSize = {
-          width: object.body.width,
-          height: object.body.height,
-        };
-
-        const objectInfo = this.debugObjects[key];
-        objectInfo.setDebuggable(object);
-        objectInfo.setPosition(
-          object.body.position.x + objectSize.width + 10,
-          object.body.position.y + objectSize.height + 10
-        );
-      }
+      this.resetDebugGraphics(this.debugInfoLevel);
+      this.drawDebugInfo();
+      this.drawDebugPhysics();
     });
-
-    this.scene.events.on("shutdown", () => this.cleanup());
-    this.scene.events.on("destroy", () => this.cleanup());
+    this.scene.events.on(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
+    this.scene.events.on(Phaser.Scenes.Events.DESTROY, () => this.cleanup());
 
     this.scene.input.keyboard.on("keydown-F9", () => {
-      this.debugInfoEnabled = !this.debugInfoEnabled;
+      const nextLevel: { [key in DebugInfoLevel]: DebugInfoLevel } = {
+        all: "physics",
+        physics: "info",
+        info: "none",
+        none: "all",
+      };
 
-      this.scene.physics.world.debugGraphic.clear();
-      this.scene.physics.world.drawDebug = this.debugInfoEnabled;
-
-      if (this.scene.matter) {
-        this.scene.matter.world.debugGraphic.clear();
-        this.scene.matter.world.drawDebug = this.debugInfoEnabled;
-      }
+      this.debugInfoLevel = nextLevel[this.debugInfoLevel];
+      this.resetDebugGraphics(this.debugInfoLevel);
     });
+  }
+
+  private resetDebugGraphics(level: DebugInfoLevel) {
+    const drawDebugPhysics = level === "physics" || level === "all";
+
+    this.debugGraphics.clear();
+
+    this.scene.physics.world.debugGraphic.clear();
+    this.scene.physics.world.drawDebug = drawDebugPhysics;
+
+    if (this.scene.matter) {
+      this.scene.matter.world.debugGraphic.clear();
+      this.scene.matter.world.drawDebug = drawDebugPhysics;
+    }
+  }
+
+  private drawDebugInfo() {
+    this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene));
+
+    const drawDebugInfo =
+      this.debugInfoLevel === "all" || this.debugInfoLevel === "info";
+
+    for (const key in this.debugObjects) {
+      this.debugObjects[key].window.visible = drawDebugInfo;
+    }
+
+    if (!this.debugInfoEnabled) {
+      return;
+    }
+
+    this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene));
+
+    for (const key in this.debugObjects) {
+      const object = this.debugObjects[key].object;
+      if (!object) {
+        continue;
+      }
+
+      const objectSize = {
+        width: object.body.width,
+        height: object.body.height,
+      };
+
+      const objectInfo = this.debugObjects[key].window;
+      objectInfo.setDebuggable(object);
+      objectInfo.setPosition(
+        object.body.position.x + objectSize.width + 10,
+        object.body.position.y + objectSize.height + 10
+      );
+    }
+  }
+
+  private drawDebugPhysics() {
+    const drawDebugPhysics =
+      this.debugInfoLevel === "all" || this.debugInfoLevel === "physics";
+
+    if (!drawDebugPhysics) {
+      return;
+    }
+
+    for (const key in this.debugObjects) {
+      const object = this.debugObjects[key].object;
+      if (!object) {
+        console.log("skipping", key);
+        continue;
+      }
+
+      object.drawDebugPhysics(this.debugGraphics);
+    }
   }
 
   private cleanup() {
     this.sceneDebugInfo.destroy();
     this.help.destroy();
     for (const key in this.debugObjects) {
-      this.debugObjects[key].destroy();
+      this.debugObjects[key].window.destroy();
     }
   }
 
@@ -153,6 +213,8 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       bodies: scene.physics.world.bodies.size,
       collisions: scene.physics.world.colliders.length,
       lights: scene.lights.lights.length,
+      debugInfoLevel: this.debugInfoLevel,
+      debugObjects: Object.keys(this.debugObjects),
     };
   }
 }

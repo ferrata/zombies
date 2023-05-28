@@ -5,7 +5,8 @@ import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
 import { IDebuggable } from "../types/Debuggable";
 import Pointer from "./Pointer";
-import { ILightAware } from "../types/LightAware";
+import { ILightAware, LightAwareShape } from "../types/LightAware";
+import { config } from "../GameConfig";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -126,8 +127,8 @@ export default class Player
       { from: 0.4, to: 0.3 }
     );
 
-    this.setDepth(1000);
-    this.casingEmitter.setDepth(500);
+    this.setDepth(config.depths.player);
+    this.casingEmitter.setDepth(config.depths.casingEmitter);
   }
 
   public preUpdate(time: number, delta: number) {
@@ -158,15 +159,7 @@ export default class Player
     this.matterSpot.position.y = this.y;
 
     if (Phaser.Input.Keyboard.JustDown(keys.F)) {
-      if (!this.flashlight) {
-        return this.scene.events.emit(Event.FLASHLIGHT_MISSING);
-      }
-
-      if (this.flashlight.isOff) {
-        this.flashlight.turnOn();
-      } else {
-        this.flashlight.turnOff();
-      }
+      this.toggleFlashlight();
     }
 
     if (Phaser.Input.Keyboard.JustDown(keys.E)) {
@@ -195,6 +188,19 @@ export default class Player
 
     if (Phaser.Input.Keyboard.JustDown(keys.space)) {
       this.attack();
+    }
+  }
+
+  private toggleFlashlight() {
+    if (!this.flashlight) {
+      this.scene.events.emit(Event.FLASHLIGHT_MISSING);
+      return;
+    }
+
+    if (this.flashlight.isOff) {
+      this.flashlight.turnOn();
+    } else {
+      this.flashlight.turnOff();
     }
   }
 
@@ -368,11 +374,10 @@ export default class Player
       this.takeItem(() => {
         this.scene.physics.world.remove(item.body);
         this.scene.children.remove(item);
+
+        this.flashlight = item as Flashlight;
         return item;
       });
-
-      this.flashlight = item as Flashlight;
-      // this.addAt(this.flashlight, 0);
     } else {
       this.scene.events.emit(Event.UNKNOWN_OBJECT, item);
     }
@@ -395,7 +400,9 @@ export default class Player
           true
         );
 
-        this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
+        if (item) {
+          this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
+        }
       },
     };
 
@@ -405,13 +412,17 @@ export default class Player
   }
 
   public onUpdatePointer(pointer: Pointer, distance: number) {
+    this.updateFlashlightPosition(this.currentWeapon);
     this.flashlight?.pointTo(pointer.x, pointer.y, distance);
+
     this.updateCasingEmitterPosition(this.currentWeapon);
   }
 
   public onDarken(): ILightAware {
     this.postFX.clear();
-    this.postFX.addColorMatrix().brightness(0.5);
+    this.postFX
+      .addColorMatrix()
+      .brightness(config.colors.darkenColorMatrixBrightness);
     this.casingEmitter.onDarken();
     this.flashlight?.onDarken();
     return this;
@@ -425,6 +436,22 @@ export default class Player
     return this;
   }
 
+  public onLightOverReset(): ILightAware {
+    return this;
+  }
+
+  public onLightOver(): ILightAware {
+    return this;
+  }
+
+  public setLightAwareShape(shape: LightAwareShape): ILightAware {
+    return this;
+  }
+
+  public getLightAwareShape(): LightAwareShape {
+    return null;
+  }
+
   public getDebugInfo() {
     return {
       x: this.x,
@@ -433,11 +460,11 @@ export default class Player
       angle: this.angle,
       velocity: this.body.velocity,
 
-      matterSpot: {
-        x: this.matterSpot.position.x,
-        y: this.matterSpot.position.y,
-        velocity: this.matterSpot.velocity,
-      },
+      // matterSpot: {
+      //   x: this.matterSpot.position.x,
+      //   y: this.matterSpot.position.y,
+      //   velocity: this.matterSpot.velocity,
+      // },
 
       currentState: this.currentState,
       currentLegsState: this.currentLegsState,
@@ -445,6 +472,10 @@ export default class Player
       currentWeaponMode: this.currentWeaponMode[this.currentWeapon],
       flashlight: this.flashlight?.getDebugInfo(),
     };
+  }
+
+  public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
+    this.flashlight?.drawDebugPhysics(graphics);
   }
 
   private updateCasingEmitterPosition(weapon: PlayerWeapon) {
@@ -463,6 +494,86 @@ export default class Player
     );
 
     this.casingEmitter.setEmitterAngle(this.angle);
+  }
+
+  private updateFlashlightPosition(weapon: PlayerWeapon) {
+    const attachedToByWeapon = {
+      [PlayerWeapon.HANDGUN]: {
+        frontBone: "muzzle",
+        rearBone: "weapon",
+        shift: 10,
+      },
+      [PlayerWeapon.SHOTGUN]: {
+        frontBone: "muzzle",
+        rearBone: "weapon",
+        shift: 60,
+      },
+      [PlayerWeapon.RIFLE]: {
+        frontBone: "muzzle",
+        rearBone: "weapon",
+        shift: 60,
+      },
+      [PlayerWeapon.KNIFE]: {
+        frontBone: "head",
+        rearBone: "head",
+        shift: 0,
+      },
+    };
+
+    const attachedTo = attachedToByWeapon[weapon];
+    const frontBone = this.getBonePosition(attachedTo.frontBone);
+    const rearBone = this.getBonePosition(attachedTo.rearBone);
+
+    const flashlightOffset = new Phaser.Math.Vector2(
+      frontBone.x - rearBone.x,
+      frontBone.y - rearBone.y
+    ).setLength(attachedTo.shift);
+
+    const weaponAngle = Phaser.Math.Angle.Between(
+      rearBone.x,
+      rearBone.y,
+      frontBone.x,
+      frontBone.y
+    );
+
+    this.flashlight
+      ?.setPosition(
+        flashlightOffset.x + rearBone.x,
+        flashlightOffset.y + rearBone.y
+      )
+      .setAngle(Phaser.Math.RadToDeg(weaponAngle));
+  }
+
+  private getBonePosition(boneName: string) {
+    const bone = this.spine.skeleton.findBone(boneName);
+    const boneInnerPosition = new Phaser.Math.Vector2(
+      bone.worldX + this.x - this.spine.skeleton.x,
+      bone.worldY + this.y - this.spine.skeleton.y
+    );
+
+    const distance = Phaser.Math.Distance.Between(
+      this.body.center.x,
+      this.body.center.y,
+      boneInnerPosition.x,
+      boneInnerPosition.y
+    );
+
+    const angle = Phaser.Math.Angle.Between(
+      this.body.center.x,
+      this.body.center.y,
+      boneInnerPosition.x,
+      boneInnerPosition.y
+    );
+
+    const bonePosition = new Phaser.Math.Vector2(
+      this.body.center.x,
+      this.body.center.y
+    )
+      .setLength(distance)
+      .setAngle(-angle)
+      .add(this.body.center);
+
+    return bonePosition;
   }
 
   private getCasingName(weapon: PlayerWeapon) {
