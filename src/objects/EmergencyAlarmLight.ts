@@ -4,7 +4,7 @@ import { IDebuggable } from "../types/Debuggable";
 import { ILightAware, LightAwareShape } from "../types/LightAware";
 import { LightSource } from "../types/LightSource";
 
-export default class Flashlight
+export default class EmergencyAlarmLight
   extends Phaser.Physics.Arcade.Sprite
   implements ILightAware, IDebuggable
 {
@@ -12,49 +12,47 @@ export default class Flashlight
   public body: Phaser.Physics.Arcade.Body;
 
   private light: LightSource;
-  private glitchy: boolean = false;
-
-  public get isOn(): boolean {
-    return this.light.enabled;
-  }
-
-  public get isOff(): boolean {
-    return !this.isOn;
-  }
-
-  public get isGlitchy(): boolean {
-    return this.glitchy;
-  }
+  private glow: Phaser.FX.Glow;
 
   constructor(scene: GameScene, x: number, y: number, raycaster: Raycaster) {
-    super(scene, x, y, "flashlight");
+    super(scene, x, y, "wall-lamp");
 
-    this.name = "flashlight";
+    this.name = "emergency-alarm-light";
 
     this.scene.add.existing(this);
     this.scene.physics.world.enable(this);
 
     this.setOrigin(0.5, 0.5)
-      .setDisplaySize(50, 30)
-      .setDepth(config.depths.matterThingTop + 1);
+      .setDisplaySize(60, 20)
+      .setDepth(config.depths.ceiling);
 
     this.light = new LightSource(
       scene,
       raycaster,
-      "flashlight-source",
-      config.flashlight
+      "emergency-alarm-light-source",
+      config.emergencyAlarmLight
     ).setDepth(config.depths.light);
   }
 
-  public setPosition(x: number, y: number): this {
-    super.setPosition(x, y);
-    this.light?.setOrigin(x, y);
+  public get isOn(): boolean {
+    return this.light.enabled;
+  }
+
+  public turnOn(): EmergencyAlarmLight {
+    this.setTint();
+    this.light
+      .enable()
+      .setOrigin(this.x, this.y)
+      .setAngleDeg(this.angle - 90)
+      .setConeDeg(config.emergencyAlarmLight.coneDeg)
+      .setRayRange(config.emergencyAlarmLight.coneRange)
+      .emit();
     return this;
   }
 
-  public setAngle(angle: number): this {
-    super.setAngle(angle);
-    this.light?.setAngleDeg(this.angle);
+  public turnOff(): EmergencyAlarmLight {
+    this.setTint(this.scene.isDark ? 0x111111 : 0x505050);
+    this.light.disable();
     return this;
   }
 
@@ -63,38 +61,12 @@ export default class Flashlight
       name: this.name,
       x: this.x,
       y: this.y,
-      isOn: this.isOn,
-      rotation: this.rotation,
-      glitchy: this.glitchy,
+      angle: this.angle,
     };
   }
 
   public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
     this.light.drawDebugPhysics(graphics);
-  }
-
-  public turnOff() {
-    this.light.disable();
-  }
-
-  public turnOn() {
-    this.light
-      .enable()
-      .setOrigin(this.x, this.y)
-      .setAngleDeg(this.angle)
-      .setConeDeg(config.flashlight.coneDeg)
-      .setRayRange(config.flashlight.coneRange)
-      .emit();
-  }
-
-  public setGlitchy(value: boolean) {
-    // TODO: implement
-    console.log("setGlitchy", value);
-    return this;
-  }
-
-  public pointTo(x: number, y: number, distance: number) {
-    this.light.emit();
   }
 
   public onLighten(): ILightAware {

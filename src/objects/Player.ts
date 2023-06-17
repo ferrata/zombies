@@ -1,3 +1,4 @@
+import config from "../GameConfig";
 import GameScene from "../scenes/GameScene";
 import { Event } from "../scenes/Event";
 import Flashlight from "./Flashlight";
@@ -6,7 +7,6 @@ import { CasingEmitter } from "./CasingEmitter";
 import { IDebuggable } from "../types/Debuggable";
 import Pointer from "./Pointer";
 import { ILightAware, LightAwareShape } from "../types/LightAware";
-import { config } from "../GameConfig";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -43,7 +43,8 @@ export default class Player
   public body: Phaser.Physics.Arcade.Body;
 
   private matterSpot: MatterJS.BodyType;
-  // private matterObjectsAround: MatterJS.BodyType[] = [];
+  private lightAwareShape: LightAwareShape;
+  private textureUnderLight: Phaser.GameObjects.RenderTexture;
 
   private readonly runningSpeed: number = 500;
   private readonly walkingSpeed: number = 230;
@@ -110,6 +111,27 @@ export default class Player
       isSensor: true,
       label: "player-spot",
     });
+
+    this.lightAwareShape = this.scene.add.circle(this.x, this.y, 50);
+    // @ts-ignore
+    this.lightAwareShape.owner = this;
+
+    this.textureUnderLight = this.scene.add.renderTexture(
+      0,
+      0,
+      // this.scene.cameras.main.width,
+      // this.scene.cameras.main.height
+      this.body.width,
+      this.body.height
+    );
+    // .setDepth(config.depths.player + 1)
+    // .setOrigin(this.originX, this.originY);
+    // .setScale(this.scaleX, this.scaleY);
+    // .setAngle(this.angle)
+    // // .setCrop(0, 0, 0, 0)
+    // .setDepth(config.depths.lightAwareShape + 1);
+
+    // .drawFrame(image.texture.key, image.frame.name)
 
     // this.body
     //   .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
@@ -412,6 +434,8 @@ export default class Player
   }
 
   public onUpdatePointer(pointer: Pointer, distance: number) {
+    this.updateLightAwareShape();
+
     this.updateFlashlightPosition(this.currentWeapon);
     this.flashlight?.pointTo(pointer.x, pointer.y, distance);
 
@@ -437,10 +461,20 @@ export default class Player
   }
 
   public onLightOverReset(): ILightAware {
+    if (this.scene.isDark) {
+      this.postFX.clear();
+      this.postFX
+        .addColorMatrix()
+        .brightness(config.colors.darkenColorMatrixBrightness);
+    }
     return this;
   }
 
-  public onLightOver(): ILightAware {
+  public onLightOver(
+    light: Raycaster.Ray,
+    intersections: Phaser.Geom.Point[]
+  ): ILightAware {
+    this.postFX.clear();
     return this;
   }
 
@@ -449,7 +483,7 @@ export default class Player
   }
 
   public getLightAwareShape(): LightAwareShape {
-    return null;
+    return this.lightAwareShape;
   }
 
   public getDebugInfo() {
@@ -476,6 +510,11 @@ export default class Player
 
   public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
     this.flashlight?.drawDebugPhysics(graphics);
+  }
+
+  private updateLightAwareShape() {
+    this.lightAwareShape.x = this.x;
+    this.lightAwareShape.y = this.y;
   }
 
   private updateCasingEmitterPosition(weapon: PlayerWeapon) {

@@ -1,4 +1,10 @@
-type AssetType = "2D Art" | "Textures" | "Music" | "Sound Effects" | "Fonts";
+type AssetType =
+  | "2D Art"
+  | "3D Art"
+  | "Textures"
+  | "Music"
+  | "Sound Effects"
+  | "Fonts";
 
 export interface Asset {
   type: AssetType;
@@ -42,6 +48,17 @@ export const credits: Credit[] = [
         type: "Textures",
         name: "Even grey stone tile floor 256px",
         url: "https://opengameart.org/content/even-grey-stone-tile-floor-256px",
+      },
+    ],
+  },
+  {
+    author: "iwanPlays",
+    url: "https://sketchfab.com/iwanPlays",
+    assets: [
+      {
+        type: "3D Art",
+        name: "Industrial Bulkhead Wall Lamp Lowpoly",
+        url: "https://sketchfab.com/3d-models/industrial-bulkhead-wall-lamp-lowpoly-4c50439bcbc247629fe2194862d7acc9",
       },
     ],
   },

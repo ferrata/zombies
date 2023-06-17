@@ -1,18 +1,19 @@
+import PhaserRaycaster from "phaser-raycaster";
+import config from "../GameConfig";
 import PlayerInputs from "../controls/PlayerInputs";
 import Flashlight from "../objects/Flashlight";
 import Pointer from "../objects/Pointer";
 import Player from "../objects/Player";
 import { Event } from "./Event";
 import { Pointable } from "../types/Pointable";
+import { ILightAware, isLightAware, LightAware } from "../types/LightAware";
+import { IObstacle } from "../types/Obstacle";
 import { StaticMatterThing } from "../objects/StaticMatterThing";
 import {
   StaticMatterProjectionRectangle,
   StaticMatterProjectionCircle,
 } from "../objects/StaticMatterProjection";
-import { IObstacle } from "../types/Obstacle";
-import { ILightAware, isLightAware, LightAware } from "../types/LightAware";
-import PhaserRaycaster from "phaser-raycaster";
-import { config } from "../GameConfig";
+import EmergencyAlarmLight from "../objects/EmergencyAlarmLight";
 
 export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs;
@@ -29,12 +30,16 @@ export default class GameScene extends Phaser.Scene {
   private lightAwareObjects: ILightAware[] = [];
   private objects: any[] = [];
   private obstacles: IObstacle[] = [];
+  private redLight: {
+    light: EmergencyAlarmLight;
+    isOn: boolean;
+  };
 
   public get isDark(): boolean {
     return this._isDark;
   }
 
-  public get flashlightSceneGraphics(): Phaser.GameObjects.Graphics {
+  public get lightSceneGraphics(): Phaser.GameObjects.Graphics {
     if (this._flashlightSceneGraphics.postFX.list.length === 0) {
       this._flashlightSceneGraphics.setPipeline("Light2D");
     }
@@ -42,7 +47,7 @@ export default class GameScene extends Phaser.Scene {
     return this._flashlightSceneGraphics;
   }
 
-  public get flashlightShadowSceneGraphics(): Phaser.GameObjects.Graphics {
+  public get lightShadowSceneGraphics(): Phaser.GameObjects.Graphics {
     if (this._flashlightShadowSceneGraphics.postFX.list.length === 0) {
       this._flashlightShadowSceneGraphics.setPipeline("Light2D");
     }
@@ -194,16 +199,20 @@ export default class GameScene extends Phaser.Scene {
 
     // this.lights.enable();
 
-    const redLight = this.lights.addLight(0, 100, 600, 0xff0000);
+    this.redLight = {
+      light: new EmergencyAlarmLight(
+        this,
+        10,
+        200,
+        this.raycasterPlugin.createRaycaster()
+      ).setAngle(90),
+      isOn: false,
+    };
+
+    // const redLight = this.lights.addLight(0, 100, 600, 0xff0000);
     this.time.addEvent({
       delay: 1000,
-      callback: () => {
-        if (redLight.intensity == 0) {
-          redLight.setIntensity(3);
-        } else {
-          redLight.setIntensity(0);
-        }
-      },
+      callback: () => (this.redLight.isOn = !this.redLight.isOn),
       loop: true,
     });
 
@@ -266,8 +275,8 @@ export default class GameScene extends Phaser.Scene {
 
   darken() {
     this._isDark = true;
-    this.flashlightSceneGraphics.clear();
-    this.flashlightShadowSceneGraphics.clear();
+    this.lightSceneGraphics.clear();
+    this.lightShadowSceneGraphics.clear();
 
     this.field.setTint(config.colors.darkenTintColor);
 
@@ -281,8 +290,8 @@ export default class GameScene extends Phaser.Scene {
 
   lighten() {
     this._isDark = false;
-    this.flashlightSceneGraphics.clear();
-    this.flashlightShadowSceneGraphics.clear();
+    this.lightSceneGraphics.clear();
+    this.lightShadowSceneGraphics.clear();
 
     this.field.setTint();
 
@@ -335,6 +344,16 @@ export default class GameScene extends Phaser.Scene {
     this.lightAwareObjects.forEach((child) => {
       child.onLightOverReset();
     });
+
+    this.lightShadowSceneGraphics.clear();
+    this.lightSceneGraphics.clear();
+
+    // update lights
+    if (this.redLight.isOn) {
+      this.redLight.light.turnOn();
+    } else {
+      this.redLight.light.turnOff();
+    }
 
     // update player
     this.player.onUpdatePointer(this.pointer, distance);

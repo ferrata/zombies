@@ -1,6 +1,6 @@
 import { GameObjects } from "phaser";
+import config from "../GameConfig";
 import { IDebuggable, isDebuggable } from "../types/Debuggable";
-import { config } from "../GameConfig";
 
 type DebugInfoLevel = "all" | "physics" | "info" | "none";
 

@@ -125,8 +125,8 @@ export class LightSource implements ILightAware, IDebuggable {
   }
 
   public disable(): LightSource {
-    this.scene.flashlightSceneGraphics.clear();
-    this.scene.flashlightShadowSceneGraphics.clear();
+    this.scene.lightSceneGraphics.clear();
+    this.scene.lightShadowSceneGraphics.clear();
     this.ownGraphics.clear();
 
     this.ray?.destroy();
@@ -169,8 +169,7 @@ export class LightSource implements ILightAware, IDebuggable {
       .setAngle(this.ray.angle + this.ray.cone / 2)
       .add(this.ray.origin);
 
-    this.scene.flashlightShadowSceneGraphics
-      .clear()
+    this.scene.lightShadowSceneGraphics
       .fillStyle(0xffffff, 0)
       .fillTriangle(
         this.ray.origin.x,
@@ -182,9 +181,12 @@ export class LightSource implements ILightAware, IDebuggable {
       )
       .fillPoints(intersections);
 
-    this.scene.flashlightSceneGraphics
-      .clear()
+    this.scene.lightSceneGraphics
       .fillStyle(0xffffff, 0)
+      .fillPoints(intersections);
+
+    this.scene.lightSceneGraphics
+      .fillStyle(this.config.lightColor, this.config.lightAlpha)
       .fillPoints(intersections);
 
     const affectedObjects = initialIntersections.reduce((acc, intersection) => {

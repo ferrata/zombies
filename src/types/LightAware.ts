@@ -1,4 +1,4 @@
-import { config } from "../GameConfig";
+import config from "../GameConfig";
 import { GenericConstructor } from "./Constructor";
 import GameScene from "../scenes/GameScene";
 
@@ -10,7 +10,7 @@ export interface ILightAware {
   onLightOverReset(): ILightAware;
   onLightOver(
     light: Raycaster.Ray,
-    intersection: Phaser.Geom.Point[]
+    intersections: Phaser.Geom.Point[]
   ): ILightAware;
 
   setLightAwareShape(shape: LightAwareShape): ILightAware;
@@ -58,6 +58,7 @@ export function LightAware<TBase extends LightAwareObject>(
     private shadow: Phaser.FX.Shadow;
     private shape: LightAwareShape;
     private textureUnderLight: Phaser.GameObjects.RenderTexture;
+    private textureUnderLightMask: Phaser.GameObjects.Graphics;
 
     constructor(...args: any[]) {
       super(...args);
@@ -83,6 +84,7 @@ export function LightAware<TBase extends LightAwareObject>(
     }
 
     public onLightOverReset(): ILightAware {
+      this.textureUnderLightMask.clear();
       this.textureUnderLight.setCrop(0, 0, 0, 0);
       this.textureUnderLight.clearMask();
       return this;
@@ -116,11 +118,6 @@ export function LightAware<TBase extends LightAwareObject>(
       if (!effectiveIntersections.length) {
         return;
       }
-
-      const g = this.scene.make
-        .graphics()
-        .setDepth(config.depths.lightAwareShape)
-        .fillStyle(0xffffff, 1);
 
       if (effectiveIntersections.length > 1) {
         const firstIntersection = effectiveIntersections[0];
@@ -169,7 +166,7 @@ export function LightAware<TBase extends LightAwareObject>(
           .setAngle(lastIntersectionAngle + Math.PI / 128)
           .add(lastIntersection);
 
-        g.fillTriangle(
+        this.textureUnderLightMask.fillTriangle(
           light.origin.x,
           light.origin.y,
           boxTopLeft.x,
@@ -181,7 +178,7 @@ export function LightAware<TBase extends LightAwareObject>(
 
       this.textureUnderLight
         .setCrop(0, 0, this.width, this.height)
-        .setMask(g.createGeometryMask());
+        .setMask(this.textureUnderLightMask.createGeometryMask());
 
       return;
     }
@@ -199,6 +196,11 @@ export function LightAware<TBase extends LightAwareObject>(
         .setDepth(config.depths.lightAwareShape + 1);
 
       this.textureUnderLight.setPipeline("Light2D");
+
+      this.textureUnderLightMask = this.scene.make
+        .graphics()
+        .setDepth(config.depths.lightAwareShape)
+        .fillStyle(0xffffff, 1);
 
       this.shape = shape
         // @ts-ignore
