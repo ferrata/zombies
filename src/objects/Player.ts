@@ -44,7 +44,6 @@ export default class Player
 
   private matterSpot: MatterJS.BodyType;
   private lightAwareShape: LightAwareShape;
-  private textureUnderLight: Phaser.GameObjects.RenderTexture;
 
   private readonly runningSpeed: number = 500;
   private readonly walkingSpeed: number = 230;
@@ -55,6 +54,7 @@ export default class Player
   private legs: SpineGameObject;
   private flashlight: Flashlight;
   private shadow: Phaser.FX.Shadow;
+  private darkColorMatrix: Phaser.FX.ColorMatrix;
   private currentState: PlayerState = PlayerState.IDLE;
   private currentLegsState: PlayerLegsState = PlayerLegsState.IDLE;
   private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN;
@@ -87,24 +87,17 @@ export default class Player
     this.body.setDrag(1, 1);
 
     this.shadow = this.postFX.addShadow(0, 0, 0.1, 0.3, 0x000000, 2, 3);
+    this.postFX.remove(this.shadow);
+
+    this.darkColorMatrix = this.postFX
+      .addColorMatrix()
+      .brightness(config.colors.darkenColorMatrixBrightness);
 
     const bounds = this.spine.getBounds();
-    // this.scene.add.rectangle(
-    //   this.x,
-    //   this.y,
-    //   bounds.size.x,
-    //   bounds.size.y,
-    //   0xff0000,
-    //   0.5
-    // );
 
     this.body
-      // .setCircle(bounds.size.x / 2, 100, 100)
       .setOffset(-bounds.size.x / 3, -bounds.size.y / 3 - 15)
       .setCircle(bounds.size.x / 3)
-
-      // .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
-      // .setSize(bounds.size.x, bounds.size.y)
       .setCollideWorldBounds(true);
 
     this.matterSpot = this.scene.matter.add.circle(this.x, this.y, 50, {
@@ -115,28 +108,6 @@ export default class Player
     this.lightAwareShape = this.scene.add.circle(this.x, this.y, 50);
     // @ts-ignore
     this.lightAwareShape.owner = this;
-
-    this.textureUnderLight = this.scene.add.renderTexture(
-      0,
-      0,
-      // this.scene.cameras.main.width,
-      // this.scene.cameras.main.height
-      this.body.width,
-      this.body.height
-    );
-    // .setDepth(config.depths.player + 1)
-    // .setOrigin(this.originX, this.originY);
-    // .setScale(this.scaleX, this.scaleY);
-    // .setAngle(this.angle)
-    // // .setCrop(0, 0, 0, 0)
-    // .setDepth(config.depths.lightAwareShape + 1);
-
-    // .drawFrame(image.texture.key, image.frame.name)
-
-    // this.body
-    //   .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
-    //   .setSize(bounds.size.x, bounds.size.y)
-    //   .setCollideWorldBounds(true);
 
     this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
     this.selectWeapon(PlayerWeapon.HANDGUN);
@@ -175,10 +146,6 @@ export default class Player
     } else {
       this.stop();
     }
-
-    this.matterSpot.angle = this.angle;
-    this.matterSpot.position.x = this.x;
-    this.matterSpot.position.y = this.y;
 
     if (Phaser.Input.Keyboard.JustDown(keys.F)) {
       this.toggleFlashlight();
@@ -434,6 +401,8 @@ export default class Player
   }
 
   public onUpdatePointer(pointer: Pointer, distance: number) {
+    this.updateMatterSpot();
+
     this.updateLightAwareShape();
 
     this.updateFlashlightPosition(this.currentWeapon);
@@ -443,18 +412,20 @@ export default class Player
   }
 
   public onDarken(): ILightAware {
-    this.postFX.clear();
-    this.postFX
-      .addColorMatrix()
+    this.postFX.remove(this.shadow);
+    this.darkColorMatrix
+      .reset()
       .brightness(config.colors.darkenColorMatrixBrightness);
+
     this.casingEmitter.onDarken();
     this.flashlight?.onDarken();
     return this;
   }
 
   public onLighten(): ILightAware {
-    this.postFX.clear();
     this.postFX.add(this.shadow);
+    this.darkColorMatrix.reset();
+
     this.casingEmitter.onLighten();
     this.flashlight?.onLighten();
     return this;
@@ -462,9 +433,8 @@ export default class Player
 
   public onLightOverReset(): ILightAware {
     if (this.scene.isDark) {
-      this.postFX.clear();
-      this.postFX
-        .addColorMatrix()
+      this.darkColorMatrix
+        .reset()
         .brightness(config.colors.darkenColorMatrixBrightness);
     }
     return this;
@@ -474,7 +444,8 @@ export default class Player
     light: Raycaster.Ray,
     intersections: Phaser.Geom.Point[]
   ): ILightAware {
-    this.postFX.clear();
+    this.darkColorMatrix.reset();
+
     return this;
   }
 
@@ -510,6 +481,12 @@ export default class Player
 
   public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
     this.flashlight?.drawDebugPhysics(graphics);
+  }
+
+  private updateMatterSpot() {
+    this.matterSpot.angle = this.angle;
+    this.matterSpot.position.x = this.x;
+    this.matterSpot.position.y = this.y;
   }
 
   private updateLightAwareShape() {
