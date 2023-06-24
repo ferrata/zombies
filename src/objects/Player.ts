@@ -124,7 +124,18 @@ export default class Player
     this.casingEmitter.setDepth(config.depths.casingEmitter);
   }
 
-  public preUpdate(time: number, delta: number) {
+  public preRender() {
+    this.flashlight?.update();
+  }
+
+  public postUpdate() {
+    this.updateMatterSpotPosition();
+    this.updateFlashlightPosition(this.currentWeapon);
+    this.updateCasingEmitterPosition(this.currentWeapon);
+    this.updateLightAwareShapePosition();
+  }
+
+  public preUpdate() {
     const { up, down, left, right, keys } = this.scene.inputs;
 
     if (left) {
@@ -400,17 +411,6 @@ export default class Player
     this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
   }
 
-  public onUpdatePointer(pointer: Pointer, distance: number) {
-    this.updateMatterSpot();
-
-    this.updateLightAwareShape();
-
-    this.updateFlashlightPosition(this.currentWeapon);
-    this.flashlight?.pointTo(pointer.x, pointer.y, distance);
-
-    this.updateCasingEmitterPosition(this.currentWeapon);
-  }
-
   public onDarken(): ILightAware {
     this.postFX.remove(this.shadow);
     this.darkColorMatrix
@@ -483,13 +483,13 @@ export default class Player
     this.flashlight?.drawDebugPhysics(graphics);
   }
 
-  private updateMatterSpot() {
+  private updateMatterSpotPosition() {
     this.matterSpot.angle = this.angle;
     this.matterSpot.position.x = this.x;
     this.matterSpot.position.y = this.y;
   }
 
-  private updateLightAwareShape() {
+  private updateLightAwareShapePosition() {
     this.lightAwareShape.x = this.x;
     this.lightAwareShape.y = this.y;
   }

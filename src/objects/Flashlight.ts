@@ -93,7 +93,7 @@ export default class Flashlight
     return this;
   }
 
-  public pointTo(x: number, y: number, distance: number) {
+  public update() {
     this.light.emit();
   }
 
