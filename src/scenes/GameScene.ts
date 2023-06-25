@@ -33,6 +33,7 @@ export default class GameScene extends Phaser.Scene {
   private redLight: {
     light: EmergencyAlarmLight;
     isOn: boolean;
+    enabled: boolean;
   };
 
   public get isDark(): boolean {
@@ -205,6 +206,7 @@ export default class GameScene extends Phaser.Scene {
         this.raycasterPlugin.createRaycaster()
       ).setAngle(90),
       isOn: false,
+      enabled: false,
     };
 
     // const redLight = this.lights.addLight(0, 100, 600, 0xff0000);
@@ -280,6 +282,10 @@ export default class GameScene extends Phaser.Scene {
           this.darken();
         }
       }
+
+      if (Phaser.Input.Keyboard.JustDown(this.inputs.keys.nine)) {
+        this.redLight.enabled = !this.redLight.enabled;
+      }
     });
 
     this.events.on(Phaser.Scenes.Events.PRE_RENDER, () => {
@@ -294,10 +300,12 @@ export default class GameScene extends Phaser.Scene {
       this.player?.preRender();
 
       // update lights
-      if (this.redLight.isOn) {
-        this.redLight.light.turnOn();
-      } else {
-        this.redLight.light.turnOff();
+      if (this.redLight.enabled) {
+        if (this.redLight.isOn) {
+          this.redLight.light.turnOn();
+        } else {
+          this.redLight.light.turnOff();
+        }
       }
     });
   }

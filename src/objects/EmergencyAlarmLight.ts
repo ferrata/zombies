@@ -62,6 +62,7 @@ export default class EmergencyAlarmLight
       x: this.x,
       y: this.y,
       angle: this.angle,
+      isOn: this.isOn,
     };
   }
 

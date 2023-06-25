@@ -71,6 +71,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       .setText(
         [
           "F9       toggle debug info",
+          "9        toggle emergency light",
           "0        toggle lights",
           "1,2,3,4  toggle weapons",
           "A,W,S,D  move",
