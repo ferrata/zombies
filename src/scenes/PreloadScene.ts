@@ -6,6 +6,7 @@ export default class PreloadScene extends Phaser.Scene {
   preload() {
     this.load.image("flashlight", "assets/images/flashlight.png");
     this.load.image("background", "assets/images/floor.png");
+    this.load.image("wall-lamp", "assets/images/wall-lamp.png");
     this.load.image("green-dot", "assets/images/green-dot.png");
     this.load.atlas(
       "bullet-casings",

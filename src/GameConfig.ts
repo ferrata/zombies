@@ -1,14 +1,19 @@
-export const config = {
+export default {
   depths: {
     background: 0,
+
     player: 1000,
     pointer: 1000,
     casingEmitter: 500,
+
     matterThingBottom: 100,
     matterThingTop: 400,
+
     lightAwareShape: 200,
     pointableObject: 1000,
     light: 150,
+
+    ceiling: 3000,
 
     debug: 10000,
   },
@@ -19,6 +24,16 @@ export const config = {
 
     collisionRange: 900,
     coneDeg: 35,
+    coneRange: 2000,
+    closeRange: 800,
+  },
+
+  emergencyAlarmLight: {
+    lightColor: 0xff0000,
+    lightAlpha: 0.15,
+
+    collisionRange: 900,
+    coneDeg: 170,
     coneRange: 2000,
     closeRange: 800,
   },

@@ -1,3 +1,4 @@
+import config from "../GameConfig";
 import GameScene from "../scenes/GameScene";
 import { Event } from "../scenes/Event";
 import Flashlight from "./Flashlight";
@@ -6,7 +7,6 @@ import { CasingEmitter } from "./CasingEmitter";
 import { IDebuggable } from "../types/Debuggable";
 import Pointer from "./Pointer";
 import { ILightAware, LightAwareShape } from "../types/LightAware";
-import { config } from "../GameConfig";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -43,7 +43,7 @@ export default class Player
   public body: Phaser.Physics.Arcade.Body;
 
   private matterSpot: MatterJS.BodyType;
-  // private matterObjectsAround: MatterJS.BodyType[] = [];
+  private lightAwareShape: LightAwareShape;
 
   private readonly runningSpeed: number = 500;
   private readonly walkingSpeed: number = 230;
@@ -54,6 +54,7 @@ export default class Player
   private legs: SpineGameObject;
   private flashlight: Flashlight;
   private shadow: Phaser.FX.Shadow;
+  private darkColorMatrix: Phaser.FX.ColorMatrix;
   private currentState: PlayerState = PlayerState.IDLE;
   private currentLegsState: PlayerLegsState = PlayerLegsState.IDLE;
   private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN;
@@ -86,24 +87,17 @@ export default class Player
     this.body.setDrag(1, 1);
 
     this.shadow = this.postFX.addShadow(0, 0, 0.1, 0.3, 0x000000, 2, 3);
+    this.postFX.remove(this.shadow);
+
+    this.darkColorMatrix = this.postFX
+      .addColorMatrix()
+      .brightness(config.colors.darkenColorMatrixBrightness);
 
     const bounds = this.spine.getBounds();
-    // this.scene.add.rectangle(
-    //   this.x,
-    //   this.y,
-    //   bounds.size.x,
-    //   bounds.size.y,
-    //   0xff0000,
-    //   0.5
-    // );
 
     this.body
-      // .setCircle(bounds.size.x / 2, 100, 100)
       .setOffset(-bounds.size.x / 3, -bounds.size.y / 3 - 15)
       .setCircle(bounds.size.x / 3)
-
-      // .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
-      // .setSize(bounds.size.x, bounds.size.y)
       .setCollideWorldBounds(true);
 
     this.matterSpot = this.scene.matter.add.circle(this.x, this.y, 50, {
@@ -111,10 +105,9 @@ export default class Player
       label: "player-spot",
     });
 
-    // this.body
-    //   .setOffset(-bounds.size.x / 2, -bounds.size.y / 2)
-    //   .setSize(bounds.size.x, bounds.size.y)
-    //   .setCollideWorldBounds(true);
+    this.lightAwareShape = this.scene.add.circle(this.x, this.y, 50);
+    // @ts-ignore
+    this.lightAwareShape.owner = this;
 
     this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
     this.selectWeapon(PlayerWeapon.HANDGUN);
@@ -131,7 +124,18 @@ export default class Player
     this.casingEmitter.setDepth(config.depths.casingEmitter);
   }
 
-  public preUpdate(time: number, delta: number) {
+  public preRender() {
+    this.flashlight?.update();
+  }
+
+  public postUpdate() {
+    this.updateMatterSpotPosition();
+    this.updateFlashlightPosition(this.currentWeapon);
+    this.updateCasingEmitterPosition(this.currentWeapon);
+    this.updateLightAwareShapePosition();
+  }
+
+  public preUpdate() {
     const { up, down, left, right, keys } = this.scene.inputs;
 
     if (left) {
@@ -153,10 +157,6 @@ export default class Player
     } else {
       this.stop();
     }
-
-    this.matterSpot.angle = this.angle;
-    this.matterSpot.position.x = this.x;
-    this.matterSpot.position.y = this.y;
 
     if (Phaser.Input.Keyboard.JustDown(keys.F)) {
       this.toggleFlashlight();
@@ -411,36 +411,41 @@ export default class Player
     this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
   }
 
-  public onUpdatePointer(pointer: Pointer, distance: number) {
-    this.updateFlashlightPosition(this.currentWeapon);
-    this.flashlight?.pointTo(pointer.x, pointer.y, distance);
-
-    this.updateCasingEmitterPosition(this.currentWeapon);
-  }
-
   public onDarken(): ILightAware {
-    this.postFX.clear();
-    this.postFX
-      .addColorMatrix()
+    this.postFX.remove(this.shadow);
+    this.darkColorMatrix
+      .reset()
       .brightness(config.colors.darkenColorMatrixBrightness);
+
     this.casingEmitter.onDarken();
     this.flashlight?.onDarken();
     return this;
   }
 
   public onLighten(): ILightAware {
-    this.postFX.clear();
     this.postFX.add(this.shadow);
+    this.darkColorMatrix.reset();
+
     this.casingEmitter.onLighten();
     this.flashlight?.onLighten();
     return this;
   }
 
   public onLightOverReset(): ILightAware {
+    if (this.scene.isDark) {
+      this.darkColorMatrix
+        .reset()
+        .brightness(config.colors.darkenColorMatrixBrightness);
+    }
     return this;
   }
 
-  public onLightOver(): ILightAware {
+  public onLightOver(
+    light: Raycaster.Ray,
+    intersections: Phaser.Geom.Point[]
+  ): ILightAware {
+    this.darkColorMatrix.reset();
+
     return this;
   }
 
@@ -449,7 +454,7 @@ export default class Player
   }
 
   public getLightAwareShape(): LightAwareShape {
-    return null;
+    return this.lightAwareShape;
   }
 
   public getDebugInfo() {
@@ -476,6 +481,17 @@ export default class Player
 
   public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
     this.flashlight?.drawDebugPhysics(graphics);
+  }
+
+  private updateMatterSpotPosition() {
+    this.matterSpot.angle = this.angle;
+    this.matterSpot.position.x = this.x;
+    this.matterSpot.position.y = this.y;
+  }
+
+  private updateLightAwareShapePosition() {
+    this.lightAwareShape.x = this.x;
+    this.lightAwareShape.y = this.y;
   }
 
   private updateCasingEmitterPosition(weapon: PlayerWeapon) {

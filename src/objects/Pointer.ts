@@ -1,4 +1,4 @@
-import { config } from "../GameConfig";
+import config from "../GameConfig";
 import { IPointable, isPointable } from "../types/Pointable";
 import Player from "./Player";
 

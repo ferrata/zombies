@@ -1,6 +1,6 @@
+import config from "../GameConfig";
 import { GenericConstructor } from "./Constructor";
 import { Label } from "../objects/Label";
-import { config } from "../GameConfig";
 
 export interface IPointable {
   showHighlight(): IPointable;

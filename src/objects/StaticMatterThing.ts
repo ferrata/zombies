@@ -1,4 +1,4 @@
-import { config } from "../GameConfig";
+import config from "../GameConfig";
 
 export class StaticMatterThing extends Phaser.Physics.Matter.Image {
   private topImage: Phaser.GameObjects.Image;

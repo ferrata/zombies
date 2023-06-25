@@ -125,8 +125,6 @@ export class LightSource implements ILightAware, IDebuggable {
   }
 
   public disable(): LightSource {
-    this.scene.flashlightSceneGraphics.clear();
-    this.scene.flashlightShadowSceneGraphics.clear();
     this.ownGraphics.clear();
 
     this.ray?.destroy();
@@ -148,43 +146,36 @@ export class LightSource implements ILightAware, IDebuggable {
       return;
     }
 
-    const boxSize = Math.max(
-      this.scene.cameras.main.width,
-      this.scene.cameras.main.height
-    );
-
     const leftEdgePoint = new Phaser.Math.Vector2(
       this.ray.origin.x,
       this.ray.origin.y
     )
-      .setLength(boxSize)
+      .setLength(this.config.coneRange)
       .setAngle(this.ray.angle - this.ray.cone / 2)
       .add(this.ray.origin);
 
-    const rightEdgePoint = new Phaser.Math.Vector2(
-      this.ray.origin.x,
-      this.ray.origin.y
-    )
-      .setLength(boxSize)
-      .setAngle(this.ray.angle + this.ray.cone / 2)
-      .add(this.ray.origin);
-
-    this.scene.flashlightShadowSceneGraphics
-      .clear()
+    this.scene.lightShadowSceneGraphics
       .fillStyle(0xffffff, 0)
-      .fillTriangle(
+      .beginPath()
+      .moveTo(this.ray.origin.x, this.ray.origin.y)
+      .lineTo(leftEdgePoint.x, leftEdgePoint.y)
+      .arc(
         this.ray.origin.x,
         this.ray.origin.y,
-        leftEdgePoint.x,
-        leftEdgePoint.y,
-        rightEdgePoint.x,
-        rightEdgePoint.y
+        this.config.coneRange,
+        this.ray.angle - this.ray.cone / 2,
+        this.ray.angle + this.ray.cone / 2
       )
+      .lineTo(this.ray.origin.x, this.ray.origin.y)
+      .fillPath()
       .fillPoints(intersections);
 
-    this.scene.flashlightSceneGraphics
-      .clear()
+    this.scene.lightSceneGraphics
       .fillStyle(0xffffff, 0)
+      .fillPoints(intersections);
+
+    this.scene.lightSceneGraphics
+      .fillStyle(this.config.lightColor, this.config.lightAlpha)
       .fillPoints(intersections);
 
     const affectedObjects = initialIntersections.reduce((acc, intersection) => {
