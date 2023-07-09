@@ -8,6 +8,8 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.image("background", "assets/images/floor.png");
     this.load.image("wall-lamp", "assets/images/wall-lamp.png");
     this.load.image("green-dot", "assets/images/green-dot.png");
+
+    this.load.image("muzzle-flash", "assets/images/muzzle-flash.png");
     this.load.atlas(
       "bullet-casings",
       "assets/particles/bullet-casings.png",

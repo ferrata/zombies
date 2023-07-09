@@ -2,11 +2,11 @@ import config from "../GameConfig";
 import GameScene from "../scenes/GameScene";
 import { IDebuggable } from "../types/Debuggable";
 import { ILightAware, LightAwareShape } from "../types/LightAware";
-import { LightSource } from "../types/LightSource";
+import { ILightSource, LightSource } from "../types/LightSource";
 
 export default class Flashlight
   extends Phaser.Physics.Arcade.Sprite
-  implements ILightAware, IDebuggable
+  implements IDebuggable
 {
   public scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
@@ -15,7 +15,7 @@ export default class Flashlight
   private glitchy: boolean = false;
 
   public get isOn(): boolean {
-    return this.light.enabled;
+    return this.light.isEnabled;
   }
 
   public get isOff(): boolean {
@@ -38,13 +38,11 @@ export default class Flashlight
       .setDisplaySize(50, 30)
       .setDepth(config.depths.matterThingTop + 1);
 
-    this.light = new LightSource(
-      scene,
-      raycaster,
-      "flashlight-source",
-      config.flashlight
-    ).setDepth(config.depths.light);
+    this.light = scene
+      .createLightSource("flashlight-source", config.flashlight)
+      .setDepth(config.depths.light);
   }
+  isEnabled: boolean;
 
   public setPosition(x: number, y: number): this {
     super.setPosition(x, y);
@@ -56,6 +54,10 @@ export default class Flashlight
     super.setAngle(angle);
     this.light?.setAngleDeg(this.angle);
     return this;
+  }
+
+  public hasDebugInfo(): boolean {
+    return true;
   }
 
   public getDebugInfo(): object {
@@ -83,18 +85,13 @@ export default class Flashlight
       .setOrigin(this.x, this.y)
       .setAngleDeg(this.angle)
       .setConeDeg(config.flashlight.coneDeg)
-      .setRayRange(config.flashlight.coneRange)
-      .emit();
+      .setRayRange(config.flashlight.coneRange);
   }
 
   public setGlitchy(value: boolean) {
     // TODO: implement
     console.log("setGlitchy", value);
     return this;
-  }
-
-  public update() {
-    this.light.emit();
   }
 
   public onLighten(): ILightAware {
