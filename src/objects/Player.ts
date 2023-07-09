@@ -315,6 +315,7 @@ export default class Player
   public attack() {
     if (this.currentWeapon === PlayerWeapon.KNIFE) {
       this.spine.setAnimation(0, `meleeattack_${this.currentWeapon}`, false);
+      this.continueCurrentAnimation();
       return;
     }
 
@@ -351,6 +352,7 @@ export default class Player
     this.spine.setAnimation(0, `shoot_${this.currentWeapon}`, false);
     this.casingEmitter.emitOne(this.getCasingName(this.currentWeapon));
     this.muzzleFlash.flashOnce();
+    this.continueCurrentAnimation();
   }
 
   private reload() {
@@ -362,6 +364,8 @@ export default class Player
 
     // TODO: add reload time for shotgun
     // this.spine.addAnimation(0, `reload_${this.currentWeapon}`, false);
+
+    this.continueCurrentAnimation();
   }
 
   public interactWithObject(item: Phaser.GameObjects.GameObject) {
@@ -389,11 +393,7 @@ export default class Player
           `interact_take_${this.currentWeapon}`,
           false
         );
-        this.spine.addAnimation(
-          0,
-          `${this.currentState}_${this.currentWeapon}`,
-          true
-        );
+        this.continueCurrentAnimation();
 
         if (item) {
           this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
@@ -480,6 +480,14 @@ export default class Player
 
   public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
     this.flashlight?.drawDebugPhysics(graphics);
+  }
+
+  private continueCurrentAnimation() {
+    this.spine.addAnimation(
+      0,
+      `${this.currentState}_${this.currentWeapon}`,
+      true
+    );
   }
 
   private updateMatterSpotPosition() {
