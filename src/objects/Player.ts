@@ -566,12 +566,15 @@ export default class Player
       frontBone.y - rearBone.y
     ).setLength(attachedTo.shift);
 
-    const weaponAngle = Phaser.Math.Angle.Between(
-      rearBone.x,
-      rearBone.y,
-      frontBone.x,
-      frontBone.y
-    );
+    const weaponAngle =
+      attachedTo.frontBone === attachedTo.rearBone
+        ? this.rotation
+        : Phaser.Math.Angle.Between(
+            rearBone.x,
+            rearBone.y,
+            frontBone.x,
+            frontBone.y
+          );
 
     this.flashlight
       ?.setPosition(
