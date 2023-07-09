@@ -19,6 +19,8 @@ export default {
   },
 
   flashlight: {
+    emitOnDayLight: true,
+
     lightColor: 0xffffff,
     lightAlpha: 0.3,
 
@@ -26,9 +28,35 @@ export default {
     coneDeg: 35,
     coneRange: 2000,
     closeRange: 800,
+
+    forceLightOver: false,
+  },
+
+  weapon: {
+    shotDelay: 120,
+
+    muzzle: {
+      light: {
+        emitOnDayLight: false,
+
+        lightColor: 0xffffff,
+        lightAlpha: 0.3,
+
+        collisionRange: 900,
+        coneDeg: 360,
+        coneRange: 2000,
+        closeRange: 800,
+
+        forceLightOver: true,
+      },
+
+      duration: 100,
+    },
   },
 
   emergencyAlarmLight: {
+    emitOnDayLight: true,
+
     lightColor: 0xff0000,
     lightAlpha: 0.15,
 
@@ -36,6 +64,8 @@ export default {
     coneDeg: 170,
     coneRange: 2000,
     closeRange: 800,
+
+    forceLightOver: false,
   },
 
   colors: {

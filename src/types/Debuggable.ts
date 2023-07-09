@@ -1,4 +1,5 @@
 export interface IDebuggable {
+  hasDebugInfo(): boolean;
   getDebugInfo(): object;
   drawDebugPhysics(graphics: Phaser.GameObjects.Graphics): void;
 
@@ -6,5 +7,13 @@ export interface IDebuggable {
 }
 
 export function isDebuggable(object: any): object is IDebuggable {
-  return "getDebugInfo" in object;
+  if (!object) {
+    return false;
+  }
+
+  return (
+    "hasDebugInfo" in object &&
+    "getDebugInfo" in object &&
+    "drawDebugPhysics" in object
+  );
 }

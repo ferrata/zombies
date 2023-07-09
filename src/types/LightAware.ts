@@ -10,7 +10,8 @@ export interface ILightAware {
   onLightOverReset(): ILightAware;
   onLightOver(
     light: Raycaster.Ray,
-    intersections: Phaser.Geom.Point[]
+    intersections: Phaser.Geom.Point[],
+    force: boolean
   ): ILightAware;
 
   setLightAwareShape(shape: LightAwareShape): ILightAware;
@@ -92,7 +93,8 @@ export function LightAware<TBase extends LightAwareObject>(
 
     public onLightOver(
       light: Raycaster.Ray,
-      intersections: Point[]
+      intersections: Point[],
+      force: boolean
     ): ILightAware {
       if (!this.shape) {
         return;
@@ -115,7 +117,19 @@ export function LightAware<TBase extends LightAwareObject>(
         return overlapped.length > 0;
       });
 
-      if (!effectiveIntersections.length) {
+      if (!effectiveIntersections.length && force) {
+        // console.log("no effective intersections");
+
+        this.textureUnderLightMask.fillRect(
+          this.x - this.width / 2,
+          this.y - this.height / 2,
+          this.x + this.width,
+          this.y + this.height
+        );
+        this.textureUnderLight
+          .setCrop(0, 0, this.width, this.height)
+          .setMask(this.textureUnderLightMask.createGeometryMask());
+
         return;
       }
 

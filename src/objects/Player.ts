@@ -5,8 +5,8 @@ import Flashlight from "./Flashlight";
 import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
 import { IDebuggable } from "../types/Debuggable";
-import Pointer from "./Pointer";
 import { ILightAware, LightAwareShape } from "../types/LightAware";
+import MuzzleFlash from "./MuzzleFlash";
 
 enum PlayerWeapon {
   HANDGUN = "handgun",
@@ -64,6 +64,7 @@ export default class Player
     rifle: PlayerWeaponMode.BURST,
     knife: PlayerWeaponMode.NONE,
   };
+  private muzzleFlash: MuzzleFlash;
 
   constructor(scene: GameScene, x: number, y: number) {
     super(
@@ -119,18 +120,17 @@ export default class Player
       "bullet-casings",
       { from: 0.4, to: 0.3 }
     );
+    this.muzzleFlash = new MuzzleFlash(this.scene, this.x, this.y);
 
     this.setDepth(config.depths.player);
     this.casingEmitter.setDepth(config.depths.casingEmitter);
-  }
-
-  public preRender() {
-    this.flashlight?.update();
+    this.muzzleFlash.setDepth(config.depths.player + 1);
   }
 
   public postUpdate() {
     this.updateMatterSpotPosition();
     this.updateFlashlightPosition(this.currentWeapon);
+    this.updateMuzzleFlashPosition(this.currentWeapon);
     this.updateCasingEmitterPosition(this.currentWeapon);
     this.updateLightAwareShapePosition();
   }
@@ -323,21 +323,15 @@ export default class Player
       this.shoot();
     } else if (mode === PlayerWeaponMode.BURST) {
       this.shoot();
-      this.scene.time.addEvent({
-        delay: 100,
-        callback: () => {
-          this.shoot();
-        },
+      this.scene.time.delayedCall(config.weapon.shotDelay, () => {
+        this.shoot();
       });
-      this.scene.time.addEvent({
-        delay: 200,
-        callback: () => {
-          this.shoot();
-        },
+      this.scene.time.delayedCall(config.weapon.shotDelay * 2, () => {
+        this.shoot();
       });
     } else if (mode === PlayerWeaponMode.AUTO) {
       const shootEvent = this.scene.time.addEvent({
-        delay: 100,
+        delay: config.weapon.shotDelay,
         callback: () => {
           if (
             this.scene.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.SPACE]
@@ -356,6 +350,7 @@ export default class Player
   private shoot() {
     this.spine.setAnimation(0, `shoot_${this.currentWeapon}`, false);
     this.casingEmitter.emitOne(this.getCasingName(this.currentWeapon));
+    this.muzzleFlash.flashOnce();
   }
 
   private reload() {
@@ -457,6 +452,10 @@ export default class Player
     return this.lightAwareShape;
   }
 
+  public hasDebugInfo(): boolean {
+    return true;
+  }
+
   public getDebugInfo() {
     return {
       x: this.x,
@@ -510,6 +509,20 @@ export default class Player
     );
 
     this.casingEmitter.setEmitterAngle(this.angle);
+  }
+
+  private updateMuzzleFlashPosition(weapon: PlayerWeapon) {
+    const scaleByWeapon = {
+      [PlayerWeapon.HANDGUN]: { scale: 0.1 },
+      [PlayerWeapon.SHOTGUN]: { scale: 0.15 },
+      [PlayerWeapon.RIFLE]: { scale: 0.13 },
+      [PlayerWeapon.KNIFE]: { scale: 0 },
+    };
+
+    const scale = scaleByWeapon[weapon].scale;
+    const bone = this.getBonePosition("muzzle");
+    this.muzzleFlash.setScale(scale).setPosition(bone.x, bone.y);
+    this.muzzleFlash.setAngle(this.angle);
   }
 
   private updateFlashlightPosition(weapon: PlayerWeapon) {

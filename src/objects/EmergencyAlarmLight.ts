@@ -26,16 +26,16 @@ export default class EmergencyAlarmLight
       .setDisplaySize(60, 20)
       .setDepth(config.depths.ceiling);
 
-    this.light = new LightSource(
-      scene,
-      raycaster,
-      "emergency-alarm-light-source",
-      config.emergencyAlarmLight
-    ).setDepth(config.depths.light);
+    this.light = scene
+      .createLightSource(
+        "emergency-alarm-light-source",
+        config.emergencyAlarmLight
+      )
+      .setDepth(config.depths.light);
   }
 
   public get isOn(): boolean {
-    return this.light.enabled;
+    return this.light.isEnabled;
   }
 
   public turnOn(): EmergencyAlarmLight {
@@ -45,8 +45,7 @@ export default class EmergencyAlarmLight
       .setOrigin(this.x, this.y)
       .setAngleDeg(this.angle - 90)
       .setConeDeg(config.emergencyAlarmLight.coneDeg)
-      .setRayRange(config.emergencyAlarmLight.coneRange)
-      .emit();
+      .setRayRange(config.emergencyAlarmLight.coneRange);
     return this;
   }
 
@@ -54,6 +53,10 @@ export default class EmergencyAlarmLight
     this.setTint(this.scene.isDark ? 0x111111 : 0x505050);
     this.light.disable();
     return this;
+  }
+
+  public hasDebugInfo(): boolean {
+    return true;
   }
 
   public getDebugInfo(): object {
@@ -71,11 +74,13 @@ export default class EmergencyAlarmLight
   }
 
   public onLighten(): ILightAware {
+    this.setTint(this.scene.isDark ? 0x111111 : 0x505050);
     this.light.onLighten();
     return this;
   }
 
   public onDarken(): ILightAware {
+    this.setTint(this.scene.isDark ? 0x111111 : 0x505050);
     this.light.onDarken();
     return this;
   }

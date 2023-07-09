@@ -2,16 +2,34 @@ import GameScene from "../scenes/GameScene";
 import { IDebuggable } from "./Debuggable";
 import { ILightAware, LightAwareShape, isLightAware } from "./LightAware";
 
-type LightSourceConfig = {
+export type LightSourceConfig = {
+  emitOnDayLight: boolean;
   lightColor: number;
   lightAlpha: number;
   collisionRange: number;
   coneDeg: number;
   coneRange: number;
   closeRange: number;
+  forceLightOver: boolean;
 };
 
-export class LightSource implements ILightAware, IDebuggable {
+export interface ILightSource {
+  isEnabled: boolean;
+
+  enable(): ILightSource;
+  disable(): ILightSource;
+  emitLight(): ILightSource;
+}
+
+export function isLightSource(object: any): object is ILightSource {
+  if (object == null) {
+    return false;
+  }
+
+  return "enable" in object && "disable" in object && "emit" in object;
+}
+
+export class LightSource implements ILightSource, IDebuggable {
   private scene: GameScene;
   private raycaster: Raycaster;
   private config: LightSourceConfig;
@@ -86,7 +104,7 @@ export class LightSource implements ILightAware, IDebuggable {
     this.ray.angle = value;
   }
 
-  public get enabled(): boolean {
+  public get isEnabled(): boolean {
     return this.ray != null;
   }
 
@@ -132,18 +150,49 @@ export class LightSource implements ILightAware, IDebuggable {
     return this;
   }
 
-  public emit(): LightSource {
+  public emitLight(): LightSource {
     if (this.ray == null) {
-      return;
+      return this;
     }
 
-    const intersections = this.ray.castCone();
+    let mappedObjectUnderLight = null;
+
+    const mappedObjects = this.raycaster.mappedObjects.filter((object) => {
+      if (this.config.forceLightOver) {
+        if (object instanceof Phaser.GameObjects.Shape) {
+          // @ts-ignore
+          const ownerBody = object.owner
+            ?.body as Phaser.Types.Physics.Matter.MatterBody;
+
+          if (
+            // @ts-ignore
+            ownerBody.bounds &&
+            this.scene.matter.intersectPoint(
+              this.ray.origin.x,
+              this.ray.origin.y,
+              [ownerBody]
+            ).length > 0
+          ) {
+            mappedObjectUnderLight = object;
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
+
+    const intersections = this.ray.castCone({ objects: mappedObjects });
+
     const initialIntersections = intersections.slice();
     intersections.push(this.ray.origin);
 
     if (!this.scene.isDark) {
-      this.ownGraphics.clear().fillPoints(intersections);
-      return;
+      if (this.config.emitOnDayLight) {
+        this.ownGraphics.clear().fillPoints(intersections);
+      }
+
+      return this;
     }
 
     const leftEdgePoint = new Phaser.Math.Vector2(
@@ -192,9 +241,22 @@ export class LightSource implements ILightAware, IDebuggable {
     affectedObjects.forEach((object) => {
       const owner = object.owner as ILightAware;
       if (owner) {
-        owner.onLightOver(this.ray, initialIntersections);
+        owner.onLightOver(this.ray, initialIntersections, false);
       }
     });
+
+    if (mappedObjectUnderLight) {
+      const owner = mappedObjectUnderLight.owner as ILightAware;
+      if (owner) {
+        owner.onLightOver(this.ray, initialIntersections, true);
+      }
+    }
+
+    return this;
+  }
+
+  public hasDebugInfo(): boolean {
+    return false;
   }
 
   public getDebugInfo(): object {
