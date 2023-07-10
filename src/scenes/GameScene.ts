@@ -263,6 +263,10 @@ export default class GameScene extends Phaser.Scene {
       console.error(`${item.name} is too far`);
     });
 
+    this.events.on(Event.OBJECT_STILL_TOO_FAR, (item: any) => {
+      console.error(`Can't reach this damn ${item.name}. It is still too far`);
+    });
+
     this.events.on(Event.INTERACT_WITH_OBJECT, () => {
       const item = this.closestObject();
       if (item) {

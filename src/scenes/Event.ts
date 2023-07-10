@@ -5,6 +5,7 @@ export enum Event {
   OBJECT_PICKED_UP = "object:picked-up",
   INTERACT_WITH_OBJECT = "object:interact",
   OBJECT_TOO_FAR = "object:too-far",
+  OBJECT_STILL_TOO_FAR = "object:still-too-far",
 
   WEAPON_MODE_CHANGED = "weapon:mode-changed",
 }

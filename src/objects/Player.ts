@@ -365,6 +365,12 @@ export default class Player
   }
 
   public interactWithObject(item: Phaser.GameObjects.GameObject) {
+    if (this.isAlmostWithinReach(item)) {
+      this.almostTakeItem();
+      this.scene.events.emit(Event.OBJECT_STILL_TOO_FAR, item);
+      return;
+    }
+
     if (!this.isWithinReach(item)) {
       this.scene.events.emit(Event.OBJECT_TOO_FAR, item);
       return;
@@ -384,6 +390,23 @@ export default class Player
   }
 
   private isWithinReach(item: Phaser.GameObjects.GameObject): boolean {
+    const { distance, angle } = this.distanceTo(item);
+    return distance <= config.player.reach && angle <= config.player.reachAngle;
+  }
+
+  private isAlmostWithinReach(item: Phaser.GameObjects.GameObject): boolean {
+    const { distance, angle } = this.distanceTo(item);
+    return (
+      distance > config.player.reach &&
+      distance <= config.player.reachAlmost &&
+      angle <= config.player.reachAngle
+    );
+  }
+
+  private distanceTo(item: Phaser.GameObjects.GameObject): {
+    distance: number;
+    angle: number;
+  } {
     const itemBody = item.body as Phaser.Physics.Arcade.Body;
     const distance = Phaser.Math.Distance.Between(
       this.x,
@@ -400,10 +423,7 @@ export default class Player
     );
 
     const degreesAbs = Phaser.Math.RadToDeg(Math.abs(angle - this.rotation));
-
-    return (
-      distance <= config.player.reach && degreesAbs <= config.player.reachAngle
-    );
+    return { distance: distance, angle: degreesAbs };
   }
 
   private takeItem(fn: Function) {
@@ -422,6 +442,22 @@ export default class Player
         if (item) {
           this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
         }
+      },
+    };
+
+    this.spine.state.addListener(listener);
+
+    this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
+  }
+
+  private almostTakeItem() {
+    const listener = {
+      complete: (entry) => {
+        this.spine.state.removeListener(listener);
+        // pause for a while
+        this.scene.time.delayedCall(150, () => {
+          this.continueCurrentAnimation();
+        });
       },
     };
 

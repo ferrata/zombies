@@ -82,6 +82,7 @@ export default {
       strafeFast: 500,
     },
 
+    reachAlmost: 300,
     reach: 150,
     reachAngle: 15,
   },
