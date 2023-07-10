@@ -45,10 +45,6 @@ export default class Player
   private matterSpot: MatterJS.BodyType;
   private lightAwareShape: LightAwareShape;
 
-  private readonly runningSpeed: number = 500;
-  private readonly walkingSpeed: number = 230;
-  private readonly strafeSpeed: number = 230;
-  private readonly strafeFastSpeed: number = 500;
   private readonly casingEmitter: CasingEmitter;
 
   private legs: SpineGameObject;
@@ -225,7 +221,7 @@ export default class Player
     this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_RIGHT);
     this.scene.physics.velocityFromRotation(
       this.rotation + 0.5 * Math.PI,
-      fast ? this.strafeFastSpeed : this.strafeSpeed,
+      fast ? config.player.speed.strafeFast : config.player.speed.strafe,
       this.body.velocity
     );
   }
@@ -234,7 +230,7 @@ export default class Player
     this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_LEFT);
     this.scene.physics.velocityFromRotation(
       this.rotation + 0.5 * Math.PI,
-      -(fast ? this.strafeFastSpeed : this.strafeSpeed),
+      -(fast ? config.player.speed.strafeFast : config.player.speed.strafe),
       this.body.velocity
     );
   }
@@ -243,7 +239,7 @@ export default class Player
     this.setCurrentState(PlayerState.MOVE, PlayerLegsState.WALK);
     this.scene.physics.velocityFromRotation(
       this.rotation,
-      -this.walkingSpeed,
+      -config.player.speed.walk,
       this.body.velocity
     );
   }
@@ -252,7 +248,7 @@ export default class Player
     this.setCurrentState(PlayerState.MOVE, PlayerLegsState.WALK);
     this.scene.physics.velocityFromRotation(
       this.rotation,
-      this.walkingSpeed,
+      config.player.speed.walk,
       this.body.velocity
     );
   }
@@ -261,7 +257,7 @@ export default class Player
     this.setCurrentState(PlayerState.MOVE, PlayerLegsState.RUN);
     this.scene.physics.velocityFromRotation(
       this.rotation,
-      -this.runningSpeed,
+      -config.player.speed.run,
       this.body.velocity
     );
   }
@@ -270,7 +266,7 @@ export default class Player
     this.setCurrentState(PlayerState.MOVE, PlayerLegsState.RUN);
     this.scene.physics.velocityFromRotation(
       this.rotation,
-      this.runningSpeed,
+      config.player.speed.run,
       this.body.velocity
     );
   }
@@ -369,6 +365,17 @@ export default class Player
   }
 
   public interactWithObject(item: Phaser.GameObjects.GameObject) {
+    if (this.isAlmostWithinReach(item)) {
+      this.almostTakeItem();
+      this.scene.events.emit(Event.OBJECT_STILL_TOO_FAR, item);
+      return;
+    }
+
+    if (!this.isWithinReach(item)) {
+      this.scene.events.emit(Event.OBJECT_TOO_FAR, item);
+      return;
+    }
+
     if (item instanceof Flashlight) {
       this.takeItem(() => {
         this.scene.physics.world.remove(item.body);
@@ -380,6 +387,43 @@ export default class Player
     } else {
       this.scene.events.emit(Event.UNKNOWN_OBJECT, item);
     }
+  }
+
+  private isWithinReach(item: Phaser.GameObjects.GameObject): boolean {
+    const { distance, angle } = this.distanceTo(item);
+    return distance <= config.player.reach && angle <= config.player.reachAngle;
+  }
+
+  private isAlmostWithinReach(item: Phaser.GameObjects.GameObject): boolean {
+    const { distance, angle } = this.distanceTo(item);
+    return (
+      distance > config.player.reach &&
+      distance <= config.player.reachAlmost &&
+      angle <= config.player.reachAngle
+    );
+  }
+
+  private distanceTo(item: Phaser.GameObjects.GameObject): {
+    distance: number;
+    angle: number;
+  } {
+    const itemBody = item.body as Phaser.Physics.Arcade.Body;
+    const distance = Phaser.Math.Distance.Between(
+      this.x,
+      this.y,
+      itemBody.x,
+      itemBody.y
+    );
+
+    const angle = Phaser.Math.Angle.Between(
+      this.x,
+      this.y,
+      itemBody.x,
+      itemBody.y
+    );
+
+    const degreesAbs = Phaser.Math.RadToDeg(Math.abs(angle - this.rotation));
+    return { distance: distance, angle: degreesAbs };
   }
 
   private takeItem(fn: Function) {
@@ -398,6 +442,22 @@ export default class Player
         if (item) {
           this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
         }
+      },
+    };
+
+    this.spine.state.addListener(listener);
+
+    this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
+  }
+
+  private almostTakeItem() {
+    const listener = {
+      complete: (entry) => {
+        this.spine.state.removeListener(listener);
+        // pause for a while
+        this.scene.time.delayedCall(150, () => {
+          this.continueCurrentAnimation();
+        });
       },
     };
 

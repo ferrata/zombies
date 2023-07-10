@@ -252,11 +252,19 @@ export default class GameScene extends Phaser.Scene {
     });
 
     this.events.on(Event.UNKNOWN_OBJECT, (item: any) => {
-      console.error("Unknown item", item.name);
+      console.error("Unknown object", item.name);
     });
 
     this.events.on(Event.NO_OBJECT_IN_RANGE, () => {
-      console.error("No item in range");
+      console.error("No object in range");
+    });
+
+    this.events.on(Event.OBJECT_TOO_FAR, (item: any) => {
+      console.error(`${item.name} is too far`);
+    });
+
+    this.events.on(Event.OBJECT_STILL_TOO_FAR, (item: any) => {
+      console.error(`Can't reach this damn ${item.name}. It is still too far`);
     });
 
     this.events.on(Event.INTERACT_WITH_OBJECT, () => {
