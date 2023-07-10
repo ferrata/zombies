@@ -73,4 +73,16 @@ export default {
     darkenShadowTintColor: 0x323232,
     darkenColorMatrixBrightness: 0.2,
   },
+
+  player: {
+    speed: {
+      run: 500,
+      walk: 230,
+      strafe: 230,
+      strafeFast: 500,
+    },
+
+    reach: 150,
+    reachAngle: 15,
+  },
 };

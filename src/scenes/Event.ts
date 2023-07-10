@@ -4,6 +4,7 @@ export enum Event {
   NO_OBJECT_IN_RANGE = "object:none-in-range",
   OBJECT_PICKED_UP = "object:picked-up",
   INTERACT_WITH_OBJECT = "object:interact",
+  OBJECT_TOO_FAR = "object:too-far",
 
   WEAPON_MODE_CHANGED = "weapon:mode-changed",
 }
