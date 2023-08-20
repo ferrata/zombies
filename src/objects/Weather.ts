@@ -61,7 +61,7 @@ export class Snow implements IWeather {
 
           return Math.random() * 100 + 50;
         },
-        lifespan: Math.random() * 10000,
+        lifespan: 10000 - Math.random() * 3000,
         quantity: 10,
         angle: 30,
         alpha: { start: 1, end: 0.2 },
