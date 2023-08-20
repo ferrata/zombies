@@ -1,6 +1,7 @@
 import { GameObjects } from "phaser";
 import config from "../GameConfig";
 import { IDebuggable, isDebuggable } from "../types/Debuggable";
+import { isGameScene } from "../scenes/GameScene";
 
 type DebugInfoLevel = "all" | "physics" | "info" | "none";
 
@@ -71,6 +72,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       .setText(
         [
           "F9       toggle debug info",
+          "8        toggle weather",
           "9        toggle emergency light",
           "0        toggle lights",
           "1,2,3,4  toggle weapons",
@@ -215,15 +217,25 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   }
 
   private getSceneDebugInfo(scene: Phaser.Scene): object {
-    return {
+    const info = {
       fps: Math.round(scene.game.loop.actualFps),
+    };
+
+    if (isGameScene(scene)) {
+      const debugInfo = scene.getDebugInfo();
+      Object.assign(info, debugInfo);
+    }
+
+    Object.assign(info, {
       objects: scene.children.length,
       bodies: scene.physics.world.bodies.size,
       collisions: scene.physics.world.colliders.length,
       lights: scene.lights.lights.length,
       debugInfoLevel: this.debugInfoLevel,
       debugObjects: Object.keys(this.debugObjects),
-    };
+    });
+
+    return info;
   }
 }
 

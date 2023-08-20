@@ -6,7 +6,11 @@ import Pointer from "../objects/Pointer";
 import Player from "../objects/Player";
 import { Event } from "./Event";
 import { Pointable } from "../types/Pointable";
-import { isLightAware, LightAware } from "../types/LightAware";
+import {
+  getTintColorShift,
+  isLightAware,
+  LightAware,
+} from "../types/LightAware";
 import { IObstacle } from "../types/Obstacle";
 import { StaticMatterThing } from "../objects/StaticMatterThing";
 import {
@@ -19,8 +23,21 @@ import {
   LightSource,
   LightSourceConfig,
 } from "../types/LightSource";
+import { Rain, WeatherConditions } from "../objects/Weather";
 
-export default class GameScene extends Phaser.Scene {
+export interface IGameScene {
+  getDebugInfo(): object;
+}
+
+export function isGameScene(scene: object): scene is IGameScene {
+  if (typeof scene !== "object") {
+    return false;
+  }
+
+  return "getDebugInfo" in scene;
+}
+
+export default class GameScene extends Phaser.Scene implements IGameScene {
   private _inputs: PlayerInputs;
   private _isDark: boolean;
   private _lightSceneGraphics: Phaser.GameObjects.Graphics;
@@ -40,6 +57,7 @@ export default class GameScene extends Phaser.Scene {
     isOn: boolean;
     enabled: boolean;
   };
+  private weather: WeatherConditions;
 
   public get isDark(): boolean {
     return this._isDark;
@@ -201,13 +219,10 @@ export default class GameScene extends Phaser.Scene {
     this.player = new Player(this, 800, 600);
     this.pointer = new Pointer(this, 800, 500);
 
+    this.weather = new WeatherConditions(this, this.player);
+
     this.redLight = {
-      light: new EmergencyAlarmLight(
-        this,
-        10,
-        200,
-        this.raycasterPlugin.createRaycaster()
-      ).setAngle(90),
+      light: new EmergencyAlarmLight(this, 10, 200).setAngle(90),
       isOn: false,
       enabled: false,
     };
@@ -290,6 +305,10 @@ export default class GameScene extends Phaser.Scene {
       if (Phaser.Input.Keyboard.JustDown(this.inputs.keys.nine)) {
         this.redLight.enabled = !this.redLight.enabled;
       }
+
+      if (Phaser.Input.Keyboard.JustDown(this.inputs.keys.eight)) {
+        this.weather.toggle();
+      }
     });
 
     this.events.on(Phaser.Scenes.Events.PRE_RENDER, () => {
@@ -335,6 +354,12 @@ export default class GameScene extends Phaser.Scene {
     return lightSource;
   }
 
+  public getDebugInfo(): object {
+    return {
+      weather: this.weather.getDebugInfo(),
+    };
+  }
+
   darken() {
     this._isDark = true;
     this.lightSceneGraphics.clear();
@@ -361,6 +386,20 @@ export default class GameScene extends Phaser.Scene {
       if (isLightAware(child)) {
         // console.log("lighten", child.name);
         child.onLighten();
+      }
+    });
+  }
+
+  reactToLightning(progress: number) {
+    if (!this.isDark) {
+      return;
+    }
+
+    this.field.setTint(getTintColorShift(0xffffff, progress));
+
+    this.children.each((child) => {
+      if (isLightAware(child)) {
+        child.onLighningtOver(progress);
       }
     });
   }
