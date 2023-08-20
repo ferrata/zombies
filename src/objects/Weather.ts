@@ -7,7 +7,92 @@ export interface IWeather {
 
   start: () => void;
   stop: () => void;
-  toggle: () => void;
+}
+
+export class WeatherConditions {
+  private rain: Rain;
+  private snow: Snow;
+
+  constructor(scene: GameScene, player: Player) {
+    this.rain = new Rain(scene, player);
+    this.snow = new Snow(scene);
+  }
+
+  toggle() {
+    if (this.rain.isOn) {
+      this.rain.stop();
+      this.snow.start();
+    } else if (this.snow.isOn) {
+      this.snow.stop();
+    } else {
+      this.rain.start();
+    }
+  }
+
+  getDebugInfo() {
+    if (this.rain.isOn) {
+      return "rain";
+    }
+
+    if (this.snow.isOn) {
+      return "snow";
+    }
+
+    return "clear";
+  }
+}
+
+export class Snow implements IWeather {
+  private snow: Phaser.GameObjects.Particles.ParticleEmitter;
+
+  public isOn: boolean;
+
+  constructor(private scene: GameScene) {
+    const { width, height } = scene.physics.world.bounds;
+
+    this.snow = scene.add
+      .particles(0, 0, "rain-splash", {
+        x: -100,
+        y: -100,
+        speed: (particle) => {
+          if (particle.lifeCurrent < Math.random() * 500) {
+            return 0;
+          }
+
+          return Math.random() * 100 + 50;
+        },
+        lifespan: Math.random() * 10000,
+        quantity: 10,
+        angle: 30,
+        alpha: { start: 1, end: 0.2 },
+        scale: { start: 0.2, end: 0 },
+        tint: {
+          onEmit: () => this.getSnowColor(),
+          onUpdate: () => this.getSnowColor(),
+        },
+      })
+      .setDepth(config.depths.ceiling);
+
+    this.snow.addEmitZone({
+      source: new Phaser.Geom.Rectangle(0, 0, width, height),
+    });
+
+    this.snow.stop();
+  }
+
+  start() {
+    this.isOn = true;
+    this.snow.start();
+  }
+
+  stop() {
+    this.isOn = false;
+    this.snow.stop();
+  }
+
+  private getSnowColor() {
+    return this.scene.isDark ? 0x555555 : 0xffffff;
+  }
 }
 
 export class Rain implements IWeather {
@@ -126,13 +211,5 @@ export class Rain implements IWeather {
     this.rainDrops.stop();
 
     this.lightning?.destroy();
-  }
-
-  toggle() {
-    if (this.isOn) {
-      this.stop();
-    } else {
-      this.start();
-    }
   }
 }

@@ -23,7 +23,7 @@ import {
   LightSource,
   LightSourceConfig,
 } from "../types/LightSource";
-import { Rain } from "../objects/Weather";
+import { Rain, WeatherConditions } from "../objects/Weather";
 
 export interface IGameScene {
   getDebugInfo(): object;
@@ -57,7 +57,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     isOn: boolean;
     enabled: boolean;
   };
-  private rain: Rain;
+  private weather: WeatherConditions;
 
   public get isDark(): boolean {
     return this._isDark;
@@ -219,7 +219,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.player = new Player(this, 800, 600);
     this.pointer = new Pointer(this, 800, 500);
 
-    this.rain = new Rain(this, this.player);
+    this.weather = new WeatherConditions(this, this.player);
 
     this.redLight = {
       light: new EmergencyAlarmLight(this, 10, 200).setAngle(90),
@@ -307,7 +307,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       }
 
       if (Phaser.Input.Keyboard.JustDown(this.inputs.keys.eight)) {
-        this.rain.toggle();
+        this.weather.toggle();
       }
     });
 
@@ -356,7 +356,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
 
   public getDebugInfo(): object {
     return {
-      weather: this.rain.isOn ? "rain" : "clear",
+      weather: this.weather.getDebugInfo(),
     };
   }
 
