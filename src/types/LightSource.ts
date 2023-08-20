@@ -306,6 +306,10 @@ export class LightSource implements ILightSource, IDebuggable {
     return this;
   }
 
+  public onLighningtOver(): ILightAware {
+    return this;
+  }
+
   public setLightAwareShape(shape: LightAwareShape): ILightAware {
     return this;
   }

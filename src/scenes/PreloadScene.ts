@@ -15,6 +15,7 @@ export default class PreloadScene extends Phaser.Scene {
       "assets/particles/bullet-casings.png",
       "assets/particles/bullet-casings.json"
     );
+    this.load.image("rain-splash", "assets/particles/rain-splash.png");
 
     this.load.image("barrel", "assets/images/barrel.png");
     this.load.image("barrel-damaged", "assets/images/barrel-damaged.png");

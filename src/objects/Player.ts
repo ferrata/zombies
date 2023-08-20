@@ -5,7 +5,11 @@ import Flashlight from "./Flashlight";
 import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
 import { IDebuggable } from "../types/Debuggable";
-import { ILightAware, LightAwareShape } from "../types/LightAware";
+import {
+  ILightAware,
+  LightAwareShape,
+  getTintColorShift,
+} from "../types/LightAware";
 import MuzzleFlash from "./MuzzleFlash";
 
 enum PlayerWeapon {
@@ -61,6 +65,7 @@ export default class Player
     knife: PlayerWeaponMode.NONE,
   };
   private muzzleFlash: MuzzleFlash;
+  shadowAdded: boolean;
 
   constructor(scene: GameScene, x: number, y: number) {
     super(
@@ -84,7 +89,7 @@ export default class Player
     this.body.setDrag(1, 1);
 
     this.shadow = this.postFX.addShadow(0, 0, 0.1, 0.3, 0x000000, 2, 3);
-    this.postFX.remove(this.shadow);
+    this.removeShadow();
 
     this.darkColorMatrix = this.postFX
       .addColorMatrix()
@@ -467,7 +472,7 @@ export default class Player
   }
 
   public onDarken(): ILightAware {
-    this.postFX.remove(this.shadow);
+    this.removeShadow();
     this.darkColorMatrix
       .reset()
       .brightness(config.colors.darkenColorMatrixBrightness);
@@ -478,7 +483,8 @@ export default class Player
   }
 
   public onLighten(): ILightAware {
-    this.postFX.add(this.shadow);
+    this.ensureShadow();
+    this.shadow.color = 0x000000;
     this.darkColorMatrix.reset();
 
     this.casingEmitter.onLighten();
@@ -500,6 +506,27 @@ export default class Player
     intersections: Phaser.Geom.Point[]
   ): ILightAware {
     this.darkColorMatrix.reset();
+
+    return this;
+  }
+
+  public onLighningtOver(progress: number): ILightAware {
+    this.removeShadow();
+
+    if (progress < 1) {
+      this.ensureShadow();
+      this.shadow.color = getTintColorShift(0x000000, progress);
+    }
+
+    this.darkColorMatrix
+      .reset()
+      .brightness(
+        Phaser.Math.Linear(
+          0,
+          config.colors.darkenColorMatrixBrightness,
+          progress
+        )
+      );
 
     return this;
   }
@@ -540,6 +567,20 @@ export default class Player
 
   public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
     this.flashlight?.drawDebugPhysics(graphics);
+  }
+
+  private ensureShadow() {
+    if (this.shadowAdded) {
+      return;
+    }
+
+    this.shadowAdded = true;
+    this.postFX.add(this.shadow);
+  }
+
+  private removeShadow() {
+    this.postFX.remove(this.shadow);
+    this.shadowAdded = false;
   }
 
   private continueCurrentAnimation() {

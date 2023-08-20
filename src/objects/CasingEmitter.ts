@@ -133,6 +133,10 @@ export class CasingEmitter
     return this;
   }
 
+  public onLighningtOver(): ILightAware {
+    return this;
+  }
+
   public setLightAwareShape(shape: LightAwareShape): ILightAware {
     return this;
   }

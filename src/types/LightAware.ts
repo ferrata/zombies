@@ -13,6 +13,7 @@ export interface ILightAware {
     intersections: Phaser.Geom.Point[],
     force: boolean
   ): ILightAware;
+  onLighningtOver(progress: number): ILightAware;
 
   setLightAwareShape(shape: LightAwareShape): ILightAware;
   getLightAwareShape(): LightAwareShape;
@@ -28,9 +29,29 @@ export function isLightAware(object: any): object is ILightAware {
     "onDarken" in object &&
     "onLightOverReset" in object &&
     "onLightOver" in object &&
+    "onLighningtOver" in object &&
     "setLightAwareShape" in object &&
     "getLightAwareShape" in object
   );
+}
+
+export function getColorShift(
+  startColor: number,
+  endColor: number,
+  shift: number
+) {
+  const tintColor = Phaser.Display.Color.Interpolate.ColorWithColor(
+    Phaser.Display.Color.ValueToColor(startColor),
+    Phaser.Display.Color.ValueToColor(endColor),
+    100,
+    Math.round(shift * 100)
+  );
+
+  return Phaser.Display.Color.GetColor(tintColor.r, tintColor.g, tintColor.b);
+}
+
+export function getTintColorShift(startColor: number, shift: number) {
+  return getColorShift(startColor, config.colors.darkenTintColor, shift);
 }
 
 export type LightAwareObject = GenericConstructor<{
@@ -79,6 +100,7 @@ export function LightAware<TBase extends LightAwareObject>(
 
     public onDarken(): ILightAware {
       this.postFX.clear();
+      this.shadow = null;
 
       this.setTint(config.colors.darkenTintColor);
       return this;
@@ -97,12 +119,12 @@ export function LightAware<TBase extends LightAwareObject>(
       force: boolean
     ): ILightAware {
       if (!this.shape) {
-        return;
+        return this;
       }
 
       const gameScene = this.scene as GameScene;
       if (gameScene && !gameScene.isDark) {
-        return;
+        return this;
       }
 
       // @ts-ignore
@@ -130,7 +152,7 @@ export function LightAware<TBase extends LightAwareObject>(
           .setCrop(0, 0, this.width, this.height)
           .setMask(this.textureUnderLightMask.createGeometryMask());
 
-        return;
+        return this;
       }
 
       if (effectiveIntersections.length > 1) {
@@ -194,7 +216,30 @@ export function LightAware<TBase extends LightAwareObject>(
         .setCrop(0, 0, this.width, this.height)
         .setMask(this.textureUnderLightMask.createGeometryMask());
 
-      return;
+      return this;
+    }
+
+    public onLighningtOver(progress: number): ILightAware {
+      if (progress === 1) {
+        this.postFX.clear();
+        this.shadow = null;
+      }
+
+      if (progress < 1) {
+        const color = getTintColorShift(0x000000, progress);
+
+        if (!this.shadow) {
+          this.shadow = this.postFX.addShadow(0, 0, 0.1, 0.3, color, 2, 3);
+          this.postFX.clear();
+          this.postFX.add(this.shadow);
+        }
+
+        this.shadow.color = color;
+      }
+
+      this.setTint(getTintColorShift(0xffffff, progress));
+
+      return this;
     }
 
     public setLightAwareShape(shape: LightAwareShape): ILightAware {

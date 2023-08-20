@@ -12,9 +12,8 @@ export default class EmergencyAlarmLight
   public body: Phaser.Physics.Arcade.Body;
 
   private light: LightSource;
-  private glow: Phaser.FX.Glow;
 
-  constructor(scene: GameScene, x: number, y: number, raycaster: Raycaster) {
+  constructor(scene: GameScene, x: number, y: number) {
     super(scene, x, y, "wall-lamp");
 
     this.name = "emergency-alarm-light";
@@ -90,6 +89,10 @@ export default class EmergencyAlarmLight
   }
 
   public onLightOver(): ILightAware {
+    return this;
+  }
+
+  public onLighningtOver(): ILightAware {
     return this;
   }
 

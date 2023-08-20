@@ -2,7 +2,7 @@ import config from "../GameConfig";
 import GameScene from "../scenes/GameScene";
 import { IDebuggable } from "../types/Debuggable";
 import { ILightAware, LightAwareShape } from "../types/LightAware";
-import { ILightSource, LightSource } from "../types/LightSource";
+import { LightSource } from "../types/LightSource";
 
 export default class Flashlight
   extends Phaser.Physics.Arcade.Sprite
@@ -109,6 +109,10 @@ export default class Flashlight
   }
 
   public onLightOver(): ILightAware {
+    return this;
+  }
+
+  public onLighningtOver(): ILightAware {
     return this;
   }
 
