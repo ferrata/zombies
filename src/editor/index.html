@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Spine Editor</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .editor-container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    /* Toolbar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 8px 16px;
+      background-color: #2d2d2d;
+      border-bottom: 1px solid #3d3d3d;
+    }
+
+    .toolbar-tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .toolbar-tab {
+      padding: 8px 16px;
+      border: none;
+      background-color: transparent;
+      color: #888;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .toolbar-tab.active {
+      background-color: #3d3d3d;
+      color: #fff;
+    }
+
+    .toolbar-tab:hover:not(.active) {
+      background-color: #353535;
+      color: #ccc;
+    }
+
+    /* Main content */
+    .main-content {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background-color: #252525;
+      border-right: 1px solid #3d3d3d;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      overflow-y: auto;
+    }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #888;
+      /* text-transform: uppercase; */
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    /* Spine selector */
+    .spine-selector {
+      width: 100%;
+      padding: 10px 12px;
+      background-color: #3d3d3d;
+      border: 1px solid #4d4d4d;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 14px;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    .spine-selector:hover {
+      border-color: #5d5d5d;
+    }
+
+    .spine-selector:focus {
+      outline: none;
+      border-color: #0078d4;
+    }
+
+    /* Animation list */
+    .animation-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background-color: #2d2d2d;
+      border-radius: 6px;
+      border: 1px solid #3d3d3d;
+      max-height: calc(100vh - 280px);
+      overflow-y: auto;
+    }
+
+    .animation-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #3d3d3d;
+      transition: background-color 0.15s;
+    }
+
+    .animation-item:last-child {
+      border-bottom: none;
+    }
+
+    .animation-item:hover {
+      background-color: #353535;
+    }
+
+    .animation-item.active {
+      background-color: #0078d4;
+      color: #fff;
+    }
+
+    /* Preview canvas */
+    .preview-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #1a1a1a;
+      position: relative;
+    }
+
+    #preview-canvas {
+      border-radius: 8px;
+      background-color: #2d2d2d;
+    }
+
+    /* Loading state */
+    .loading-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: rgba(30, 30, 30, 0.9);
+      font-size: 16px;
+      color: #888;
+    }
+
+    .loading-overlay.hidden {
+      display: none;
+    }
+
+    /* Controls */
+    .preview-controls {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      background-color: rgba(45, 45, 45, 0.9);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid #3d3d3d;
+    }
+
+    .control-btn {
+      padding: 8px 16px;
+      background-color: #3d3d3d;
+      border: 1px solid #4d4d4d;
+      border-radius: 4px;
+      color: #e0e0e0;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    .control-btn:hover {
+      background-color: #4d4d4d;
+    }
+
+    .control-btn.active {
+      background-color: #0078d4;
+      border-color: #0078d4;
+    }
+
+    /* Checkbox toggle */
+    .checkbox-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+    .checkbox-control input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+
+    .checkbox-control label {
+      font-size: 13px;
+      cursor: pointer;
+      color: #888;
+    }
+
+    /* Delay control */
+    .delay-control {
+      margin-top: 12px;
+    }
+
+    .delay-control label {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 6px;
+      color: #888;
+    }
+
+    .delay-input-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .delay-input-wrapper input[type="number"] {
+      width: 80px;
+      padding: 8px 10px;
+      background-color: #3d3d3d;
+      border: 1px solid #4d4d4d;
+      border-radius: 4px;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .delay-input-wrapper input[type="number"]:focus {
+      outline: none;
+      border-color: #0078d4;
+    }
+
+    .delay-unit {
+      font-size: 12px;
+      color: #888;
+    }
+
+    /* Tab content panels */
+    .tab-content {
+      display: none;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tab-content.active {
+      display: flex;
+    }
+
+    /* State list for models tab */
+    .state-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background-color: #2d2d2d;
+      border-radius: 6px;
+      border: 1px solid #3d3d3d;
+      max-height: calc(100vh - 200px);
+      overflow-y: auto;
+    }
+
+    .state-item {
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      border-bottom: 1px solid #3d3d3d;
+      transition: background-color 0.15s;
+    }
+
+    .state-item:last-child {
+      border-bottom: none;
+    }
+
+    .state-item:hover {
+      background-color: #353535;
+    }
+
+    .state-item.active {
+      background-color: #0078d4;
+      color: #fff;
+    }
+
+    .state-item.playing {
+      background-color: #2a5d2a;
+      color: #fff;
+    }
+
+    .state-item.playing.active {
+      background-color: #0078d4;
+    }
+
+    /* State info badge */
+    .state-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 10px;
+      border-radius: 3px;
+      margin-left: 8px;
+      background-color: #4d4d4d;
+      color: #aaa;
+    }
+
+    .state-badge.weapon {
+      background-color: #3d5a80;
+    }
+
+    .state-badge.action {
+      background-color: #5a3d80;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="editor-container">
+    <div class="toolbar">
+      <div class="toolbar-tabs">
+        <button class="toolbar-tab active" data-tab="spine">spine</button>
+        <button class="toolbar-tab" data-tab="models">models</button>
+        <button class="toolbar-tab" disabled>assets</button>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <!-- Spine Tab Content -->
+      <div class="tab-content active" id="tab-spine">
+        <div class="sidebar">
+          <div class="sidebar-section">
+            <div class="sidebar-label">Select Spine</div>
+            <select class="spine-selector" id="spine-selector">
+              <option value="">Loading...</option>
+            </select>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="checkbox-control">
+              <input type="checkbox" id="loop-toggle" checked>
+              <label for="loop-toggle">Loop animation</label>
+            </div>
+            <div class="delay-control">
+              <label for="loop-delay">Delay between loops (when possible)</label>
+              <div class="delay-input-wrapper">
+                <input type="number" id="loop-delay" min="0" max="5000" step="100" value="500">
+                <span class="delay-unit">ms</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-label">Animations</div>
+            <ul class="animation-list" id="animation-list">
+              <li class="animation-item">Select a spine to view animations</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="preview-container">
+          <div id="preview-canvas"></div>
+          <div class="loading-overlay" id="loading-overlay">
+            Loading...
+          </div>
+        </div>
+      </div>
+
+      <!-- Models Tab Content -->
+      <div class="tab-content" id="tab-models">
+        <div class="sidebar">
+          <div class="sidebar-section">
+            <div class="sidebar-label">Player Model</div>
+            <p style="font-size: 13px; color: #888; margin: 0 0 8px 0;">
+              Preview player states as used in game
+            </p>
+          </div>
+
+          <div class="sidebar-section">
+            <div class="sidebar-label">States</div>
+            <ul class="state-list" id="state-list">
+              <li class="state-item">Loading...</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="preview-container">
+          <div id="models-preview-canvas"></div>
+          <div class="loading-overlay" id="models-loading-overlay">
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>

@@ -4,7 +4,10 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const package = require("./package.json");
 
 module.exports = {
-  entry: path.resolve(__dirname, "./src/index.ts"),
+  entry: {
+    main: path.resolve(__dirname, "./src/index.ts"),
+    editor: path.resolve(__dirname, "./src/editor/index.ts"),
+  },
   module: {
     rules: [
       {
@@ -54,6 +57,9 @@ module.exports = {
   },
   devServer: {
     static: path.resolve(__dirname, "./dist"),
+    historyApiFallback: {
+      rewrites: [{ from: /^\/editor/, to: "/editor.html" }],
+    },
   },
   plugins: [
     new CopyWebpackPlugin({
@@ -70,6 +76,15 @@ module.exports = {
       title: package.description,
       inject: "body",
       hot: true,
+      chunks: ["main"],
+    }),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, "./src/editor/index.html"),
+      filename: "editor.html",
+      title: "Spine Editor",
+      inject: "body",
+      hot: true,
+      chunks: ["editor"],
     }),
   ],
 };
