@@ -4,10 +4,7 @@
     "eslint.validate": [
       "javascript",
       "javascriptreact",
-      {
-        "language": "typescript",
-        "autoFix": true
-      },
+      "typescript"
     ],
     "[javascript]": {
       "editor.formatOnSave": true
@@ -19,6 +16,6 @@
       "editor.formatOnSave": true
     },
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": true
+      "source.fixAll.eslint": "always"
     },
   }
