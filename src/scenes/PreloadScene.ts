@@ -24,6 +24,7 @@ export default class PreloadScene extends Phaser.Scene {
     this.load.setPath("assets/spine/");
     this.load.spine("player", "player.json", "player.atlas");
     this.load.spine("player-legs", "player-legs.json", "player-legs.atlas");
+    this.load.spine("zombie", "zombie.json", "zombie.atlas");
   }
 
   create() {
