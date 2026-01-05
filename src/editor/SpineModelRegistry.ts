@@ -23,6 +23,12 @@ export class SpineModelRegistry {
       jsonFile: "player-legs.json",
       atlasFile: "player-legs.atlas",
     },
+    {
+      key: "zombie",
+      name: "Zombie",
+      jsonFile: "zombie.json",
+      atlasFile: "zombie.atlas",
+    },
   ];
 
   static getModels(): SpineModelInfo[] {
