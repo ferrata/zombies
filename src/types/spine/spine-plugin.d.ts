@@ -1,7 +1,6 @@
 /// <reference path="./spine.d.ts" />
-/// <reference path="./SpineFile.d.ts" />
-/// <reference path="./SpineGameObject.d.ts" />
-/// <reference path="./SpineContainer.d.ts" />
+/// <reference path="./spine-file.d.ts" />
+/// <reference path="./spine-game-object.d.ts" />
 
 declare namespace Phaser.Loader {
     interface LoaderPlugin extends Phaser.Events.EventEmitter {

@@ -1,10 +1,10 @@
 import "phaser";
 import "phaser/plugins/spine/dist/SpinePlugin";
-import EditorPreloadScene from "./scenes/EditorPreloadScene";
-import EditorScene from "./scenes/EditorScene";
-import ModelsPreloadScene from "./scenes/ModelsPreloadScene";
-import ModelsScene from "./scenes/ModelsScene";
-import { editorState, EditorTab } from "./EditorState";
+import EditorPreloadScene from "./scenes/editor-preload.scene";
+import EditorScene from "./scenes/editor.scene";
+import ModelsPreloadScene from "./scenes/models-preload.scene";
+import ModelsScene from "./scenes/models.scene";
+import { editorState, EditorTab } from "./editor-state";
 
 // Spine tab game configuration
 const spineConfig: Phaser.Types.Core.GameConfig = {

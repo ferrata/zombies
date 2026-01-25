@@ -1,5 +1,5 @@
 /// <reference path="./spine.d.ts" />
-/// <reference path="./SpinePlugin.d.ts" />
+/// <reference path="./spine-plugin.d.ts" />
 
 declare type SpineGameObject = Phaser.GameObjects.GameObject & {
   // hasTransformComponent: boolean;

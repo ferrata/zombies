@@ -1,4 +1,4 @@
-import SpineContainer from "../types/SpineContainer";
+import SpineContainer from "../types/spine-container";
 
 export enum PlayerWeapon {
   HANDGUN = "handgun",

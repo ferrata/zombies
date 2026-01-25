@@ -1,7 +1,14 @@
-import { StaticMatterThing } from "./StaticMatterThing";
-import { IProjection } from "../types/Projection";
+export interface IProjection {
+  shift(diff: Phaser.Types.Math.Vector2Like): IProjection;
+}
 
-// TODO: refactor this for better performance. right now it creates a lot of objects
+interface MatterObjectLike {
+  getCenter(): Phaser.Math.Vector2;
+  getTopLeft(): Phaser.Math.Vector2;
+  getTopRight(): Phaser.Math.Vector2;
+  getBottomLeft(): Phaser.Math.Vector2;
+  getBottomRight(): Phaser.Math.Vector2;
+}
 
 export class StaticMatterProjectionCircle
   extends Phaser.Physics.Arcade.StaticGroup
@@ -11,7 +18,7 @@ export class StaticMatterProjectionCircle
 
   constructor(
     scene: Phaser.Scene,
-    matterObject: StaticMatterThing,
+    matterObject: MatterObjectLike,
     radius: number,
     minDotsDistance: number = 20
   ) {
@@ -74,7 +81,7 @@ export class StaticMatterProjectionRectangle
 
   constructor(
     scene: Phaser.Scene,
-    matterObject: StaticMatterThing,
+    matterObject: MatterObjectLike,
     minDotsDistance: number = 20
   ) {
     super(scene.physics.world, scene);

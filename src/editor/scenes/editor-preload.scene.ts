@@ -1,4 +1,4 @@
-import { SpineModelRegistry } from "../SpineModelRegistry";
+import { SpineModelRegistry } from "../spine-model-registry";
 
 export default class EditorPreloadScene extends Phaser.Scene {
   constructor() {

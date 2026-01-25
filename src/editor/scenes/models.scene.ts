@@ -1,5 +1,5 @@
 import PlayerPuppet, { PlayerWeapon } from "../../objects/player.puppet";
-import { editorState } from "../EditorState";
+import { editorState } from "../editor-state";
 
 /**
  * Overview sequence step - uses PlayerPuppet methods directly.

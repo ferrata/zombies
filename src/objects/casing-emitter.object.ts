@@ -1,9 +1,13 @@
-import GameScene from "../scenes/GameScene";
-import { ILightAware, LightAwareShape } from "../types/LightAware";
+import GameScene from "../scenes/game.scene";
+
+export interface CasingEmitterLightCallbacks {
+  onLighten(): void;
+  onDarken(): void;
+}
 
 export class CasingEmitter
   extends Phaser.GameObjects.Container
-  implements ILightAware
+  implements CasingEmitterLightCallbacks
 {
   private emitter: Phaser.GameObjects.Particles.ParticleEmitter;
   private emitterAngle: number;
@@ -113,36 +117,14 @@ export class CasingEmitter
     this.debug.setAngle(angle).setVisible(this.scene.physics.world.drawDebug);
   }
 
-  public onLighten(): ILightAware {
+  public onLighten(): void {
     this.isDark = false;
     this.updateTintForAllAlive(0xffffff);
-    return this;
   }
 
-  public onDarken(): ILightAware {
+  public onDarken(): void {
     this.isDark = true;
     this.updateTintForAllAlive(0x000000);
-    return this;
-  }
-
-  public onLightOverReset(): ILightAware {
-    return this;
-  }
-
-  public onLightOver(): ILightAware {
-    return this;
-  }
-
-  public onLighningtOver(): ILightAware {
-    return this;
-  }
-
-  public setLightAwareShape(shape: LightAwareShape): ILightAware {
-    return this;
-  }
-
-  public getLightAwareShape(): LightAwareShape {
-    return null;
   }
 
   public emitOne(casingName: string) {

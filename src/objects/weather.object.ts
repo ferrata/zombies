@@ -1,6 +1,9 @@
-import config from "../GameConfig";
-import GameScene from "../scenes/GameScene";
-import Player from "./player";
+import config from "../game-config";
+import GameScene from "../scenes/game.scene";
+
+interface PlayerLike {
+  body: Phaser.Physics.Arcade.Body;
+}
 
 export interface IWeather {
   isOn: boolean;
@@ -13,7 +16,7 @@ export class WeatherConditions {
   private rain: Rain;
   private snow: Snow;
 
-  constructor(scene: GameScene, player: Player) {
+  constructor(scene: GameScene, player: PlayerLike) {
     this.rain = new Rain(scene, player);
     this.snow = new Snow(scene);
   }
@@ -102,7 +105,7 @@ export class Rain implements IWeather {
 
   public isOn: boolean;
 
-  constructor(private scene: GameScene, private player: Player) {
+  constructor(private scene: GameScene, private player: PlayerLike) {
     const { width, height } = scene.physics.world.bounds;
 
     this.rainSplashParticles = scene.add

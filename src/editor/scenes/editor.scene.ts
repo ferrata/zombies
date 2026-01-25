@@ -1,5 +1,5 @@
-import { SpineModelRegistry } from "../SpineModelRegistry";
-import { editorState } from "../EditorState";
+import { SpineModelRegistry } from "../spine-model-registry";
+import { editorState } from "../editor-state";
 
 export default class EditorScene extends Phaser.Scene {
   private currentSpine: SpineGameObject | null = null;
@@ -263,7 +263,7 @@ export default class EditorScene extends Phaser.Scene {
     if (!this.currentSpine) return;
 
     // Listen for animation complete
-    this.currentSpine.state.addListener({
+    const listener: any = {
       complete: () => {
         // Only restart if this is still the current animation and looping is enabled
         if (
@@ -282,7 +282,8 @@ export default class EditorScene extends Phaser.Scene {
           }, delay);
         }
       },
-    });
+    };
+    this.currentSpine.state.addListener(listener);
   }
 
   private clearLoopTimer() {

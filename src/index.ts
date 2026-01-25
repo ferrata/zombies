@@ -1,9 +1,10 @@
 import "phaser";
 import "phaser/plugins/spine/dist/SpinePlugin";
-import DebugScreenPlugin from "./plugins/DebugScreenPlugin";
+// Game entry point
+import DebugScreenPlugin from "./plugins/debug-screen.plugin";
 import PhaserRaycaster from "phaser-raycaster";
-import PreloadScene from "./scenes/PreloadScene";
-import GameScene from "./scenes/GameScene";
+import PreloadScene from "./scenes/preload.scene";
+import GameScene from "./scenes/game.scene";
 
 const allowDebug = true;
 

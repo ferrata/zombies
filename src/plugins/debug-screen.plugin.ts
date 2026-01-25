@@ -1,7 +1,7 @@
 import { GameObjects } from "phaser";
-import config from "../GameConfig";
-import { IDebuggable, isDebuggable } from "../types/Debuggable";
-import { isGameScene } from "../scenes/GameScene";
+import config from "../game-config";
+import { DebuggableProps, isDebuggable } from "../mixins/debuggable.mixin";
+import { isGameScene } from "../scenes/game.scene";
 
 type DebugInfoLevel = "all" | "physics" | "info" | "none";
 
@@ -12,7 +12,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   private debugGraphics: Phaser.GameObjects.Graphics;
   private debugObjects: {
     [key: string]: {
-      object: IDebuggable;
+      object: DebuggableProps & { body?: any };
       window: DebugInfoWindow;
     };
   } = {};
@@ -88,19 +88,24 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       this.displayBorder
     );
 
+    const registerDebuggable = (object: Phaser.GameObjects.GameObject) => {
+      if (isDebuggable(object) && !this.debugObjects[object.name]) {
+        this.debugObjects[object.name] = {
+          object: object as DebuggableProps,
+          window: object.hasDebugInfo()
+            ? new DebugInfoWindow(this.scene, object.name)
+            : null,
+        };
+      }
+    };
+
     this.scene.events.on(
       Phaser.Scenes.Events.ADDED_TO_SCENE,
-      (object: Phaser.GameObjects.GameObject) => {
-        if (isDebuggable(object)) {
-          this.debugObjects[object.name] = {
-            object: object as IDebuggable,
-            window: object.hasDebugInfo()
-              ? new DebugInfoWindow(this.scene, object.name)
-              : null,
-          };
-        }
-      }
+      registerDebuggable
     );
+
+    // Also listen for objects that become debuggable after being added to scene
+    this.scene.events.on("debuggable-added", registerDebuggable);
 
     this.scene.events.on(
       Phaser.Scenes.Events.REMOVED_FROM_SCENE,
@@ -154,8 +159,10 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       this.debugInfoLevel === "all" || this.debugInfoLevel === "info";
 
     for (const key in this.debugObjects) {
+      const obj = this.debugObjects[key].object as any;
+      const isActive = obj?.active !== false;
       if (this.debugObjects[key].window) {
-        this.debugObjects[key].window.visible = drawDebugInfo;
+        this.debugObjects[key].window.visible = drawDebugInfo && isActive;
       }
     }
 
@@ -171,9 +178,14 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
         continue;
       }
 
+      // Skip inactive objects
+      if ((object as any).active === false) {
+        continue;
+      }
+
       const objectSize = {
-        width: object.body.width,
-        height: object.body.height,
+        width: object.body?.width ?? 0,
+        height: object.body?.height ?? 0,
       };
 
       const objectInfo = this.debugObjects[key].window;
@@ -183,8 +195,8 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
 
       objectInfo.setDebuggable(object);
       objectInfo.setPosition(
-        object.body.position.x + objectSize.width + 10,
-        object.body.position.y + objectSize.height + 10
+        (object.body?.position?.x ?? 0) + objectSize.width + 10,
+        (object.body?.position?.y ?? 0) + objectSize.height + 10
       );
     }
   }
@@ -265,7 +277,7 @@ class DebugInfoWindow extends Phaser.GameObjects.Container {
     this.resize();
   }
 
-  public setDebuggable(debuggable: IDebuggable): DebugInfoWindow {
+  public setDebuggable(debuggable: DebuggableProps): DebugInfoWindow {
     const debugInfo = debuggable?.getDebugInfo();
     if (!debugInfo) {
       this.setText("no debug info available");

@@ -1,10 +1,13 @@
-import config from "../GameConfig";
-import { IPointable, isPointable } from "../types/Pointable";
-import Player from "./player";
+import config from "../game-config";
+import { isPointable, PointableProps } from "../mixins/pointable.mixin";
+
+interface PlayerLike {
+  body: Phaser.Physics.Arcade.Body;
+}
 
 export default class Pointer extends Phaser.GameObjects.GameObject {
   private dot: Phaser.GameObjects.Arc;
-  private currentlyHighlighted: IPointable | null = null;
+  private currentlyHighlighted: PointableProps | null = null;
 
   public get x(): number {
     return this.dot.x;
@@ -33,7 +36,7 @@ export default class Pointer extends Phaser.GameObjects.GameObject {
     this.dot.setDepth(config.depths.pointer);
   }
 
-  public update(player: Player) {
+  public update(player: PlayerLike) {
     this.dot.body.velocity.x = player.body.velocity.x;
     this.dot.body.velocity.y = player.body.velocity.y;
 
@@ -52,20 +55,20 @@ export default class Pointer extends Phaser.GameObjects.GameObject {
     )[0];
 
     const gameObject = body?.gameObject;
-    const pointableGameObject = isPointable(gameObject);
 
-    if (pointableGameObject && gameObject != this.currentlyHighlighted) {
-      // console.log("highlighting", gameObject);
-
+    if (isPointable(gameObject) && gameObject != this.currentlyHighlighted) {
       this.dot.visible = false;
-      this.currentlyHighlighted?.removeHighlight().removeInfo();
-      gameObject.showHighlight().showInfo();
+      if (this.currentlyHighlighted) {
+        this.currentlyHighlighted.removeHighlight();
+        this.currentlyHighlighted.removeInfo();
+      }
+      gameObject.showHighlight();
+      gameObject.showInfo();
 
       this.currentlyHighlighted = gameObject;
-    } else if (!pointableGameObject && this.currentlyHighlighted) {
-      // console.log("removing highlight", this.currentlyHighlighted);
-
-      this.currentlyHighlighted.removeHighlight().removeInfo();
+    } else if (!isPointable(gameObject) && this.currentlyHighlighted) {
+      this.currentlyHighlighted.removeHighlight();
+      this.currentlyHighlighted.removeInfo();
       this.currentlyHighlighted = null;
       this.dot.visible = true;
     }

@@ -1,40 +1,35 @@
 import PhaserRaycaster from "phaser-raycaster";
-import config from "../GameConfig";
-import PlayerInputs from "../controls/PlayerInputs";
-import Flashlight from "../objects/Flashlight";
-import Pointer from "../objects/Pointer";
-import Player from "../objects/player";
-import { Event } from "./Event";
-import { Pointable } from "../types/Pointable";
+import config from "../game-config";
+import PlayerInputs from "../controls/player-inputs";
+import Pointer from "../objects/pointer.object";
+import { Event } from "./event";
 import {
-  getTintColorShift,
-  isLightAware,
-  LightAware,
-} from "../types/LightAware";
-import { IObstacle } from "../types/Obstacle";
-import { StaticMatterThing } from "../objects/StaticMatterThing";
-import {
+  IProjection,
   StaticMatterProjectionRectangle,
   StaticMatterProjectionCircle,
-} from "../objects/StaticMatterProjection";
-import EmergencyAlarmLight from "../objects/EmergencyAlarmLight";
-import {
-  ILightSource,
-  LightSource,
-  LightSourceConfig,
-} from "../types/LightSource";
-import { Rain, WeatherConditions } from "../objects/Weather";
+} from "../objects/static-matter-projection.object";
+import { WeatherConditions } from "../objects/weather.object";
+
+// Core imports for new architecture
+import "../core/display-object.ext";
+import { setGlobals, setPlayer, clearGlobals } from "../core/globals";
+import { runStepCallbacks, clearStepCallbacks } from "../core/display-object.ext";
+import { clearAllInstances, Instances } from "../core/instances";
+import { lightAwareMixin, getTintColorShift } from "../mixins/light-aware.mixin";
+import { lightSourceMixin } from "../mixins/light-source.mixin";
+
+// New factory functions
+import { createPlayer, PlayerObject } from "../objects/player.object";
+import { createFlashlight, FlashlightObject } from "../objects/flashlight.object";
+import { createEmergencyLight, EmergencyLightObject } from "../objects/emergency-light.object";
+import { createBarrel, BarrelObject } from "../objects/barrel.object";
 
 export interface IGameScene {
   getDebugInfo(): object;
 }
 
 export function isGameScene(scene: object): scene is IGameScene {
-  if (typeof scene !== "object") {
-    return false;
-  }
-
-  return "getDebugInfo" in scene;
+  return typeof scene === "object" && "getDebugInfo" in scene;
 }
 
 export default class GameScene extends Phaser.Scene implements IGameScene {
@@ -48,15 +43,10 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
   private fieldUnderLightShadow: Phaser.GameObjects.TileSprite;
   private field: Phaser.GameObjects.TileSprite;
   private pointer: Pointer;
-  private player: Player;
-  private lightSources: ILightSource[] = [];
+  private player: PlayerObject;
   private objects: any[] = [];
-  private obstacles: IObstacle[] = [];
-  private redLight: {
-    light: EmergencyAlarmLight;
-    isOn: boolean;
-    enabled: boolean;
-  };
+  private obstacles: IProjection[] = [];
+  private redLight: { light: EmergencyLightObject; isOn: boolean; enabled: boolean };
   private weather: WeatherConditions;
 
   public get isDark(): boolean {
@@ -67,7 +57,6 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     if (this._lightSceneGraphics.postFX.list.length === 0) {
       this._lightSceneGraphics.setPipeline("Light2D");
     }
-
     return this._lightSceneGraphics;
   }
 
@@ -75,7 +64,6 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     if (this._lightShadowSceneGraphics.postFX.list.length === 0) {
       this._lightShadowSceneGraphics.setPipeline("Light2D");
     }
-
     return this._lightShadowSceneGraphics;
   }
 
@@ -108,6 +96,9 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.physics.world.setBounds(0, 0, width, height);
     this.matter.world.setBounds(0, 0, width, height);
 
+    this._inputs = new PlayerInputs(this.input);
+    setGlobals(this as any);
+
     this.fieldUnderLight = this.add
       .tileSprite(800, 600, width, height, "background")
       .setDepth(config.depths.background - 2);
@@ -127,13 +118,8 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.lights.enable();
     this.lights.setAmbientColor(0xffffff);
 
-    this._lightSceneGraphics = this.add
-      .graphics()
-      .setName("lightSceneGraphics");
-
-    this._lightShadowSceneGraphics = this.add
-      .graphics()
-      .setName("lightShadowSceneGraphics");
+    this._lightSceneGraphics = this.add.graphics().setName("lightSceneGraphics");
+    this._lightShadowSceneGraphics = this.add.graphics().setName("lightShadowSceneGraphics");
 
     this.field.setMask(
       this._lightShadowSceneGraphics.createGeometryMask().setInvertAlpha(true)
@@ -143,12 +129,8 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       this._lightSceneGraphics.createGeometryMask().setInvertAlpha(true)
     );
 
-    const barrel = new (LightAware(StaticMatterThing))(
-      this,
-      970,
-      400,
-      "barrel-damaged"
-    )
+    // Create barrels using new factory functions
+    const barrel = createBarrel(this, 970, 400, "barrel-damaged")
       .setScale(0.3)
       .setOrigin(0.5, 0.5)
       .setAngle(25);
@@ -175,12 +157,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       ])
     );
 
-    const barrel2 = new (LightAware(StaticMatterThing))(
-      this,
-      770,
-      350,
-      "barrel"
-    )
+    const barrel2 = createBarrel(this, 770, 350, "barrel")
       .setScale(0.3)
       .setCircle(80)
       .setAngle(-15)
@@ -188,12 +165,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
 
     barrel2.setLightAwareShape(barrel2.createCircle(73));
 
-    const barrel3 = new (LightAware(StaticMatterThing))(
-      this,
-      900,
-      220,
-      "barrel-damaged-2"
-    )
+    const barrel3 = createBarrel(this, 900, 220, "barrel-damaged-2")
       .setScale(0.3)
       .setCircle(75)
       .setAngle(165)
@@ -205,26 +177,23 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.obstacles.push(new StaticMatterProjectionCircle(this, barrel2, 75));
     this.obstacles.push(new StaticMatterProjectionCircle(this, barrel3, 70));
 
-    this.objects.push(
-      new (Pointable(Flashlight))(
-        this,
-        820,
-        360,
-        this.createRaycaster()
-      ).setAngle(-45),
-      barrel,
-      barrel2
-    );
+    // Create flashlight using new factory function
+    const flashlight = createFlashlight(this, 820, 360, this.createRaycaster()).setAngle(-45);
+    this.objects.push(flashlight, barrel, barrel2);
 
-    this.player = new Player(this, 800, 600);
+    // Create player using new factory function
+    this.player = createPlayer(this, 800, 600, this.createRaycaster());
+    setPlayer(this.player);
+
     this.pointer = new Pointer(this, 800, 500);
-
     this.weather = new WeatherConditions(this, this.player);
 
+    // Create emergency light using new factory function
+    const emergencyLight = createEmergencyLight(this, 10, 200, this.createRaycaster()).setAngle(90);
+    emergencyLight.mapLightAwareObject(this.player);
+
     this.redLight = {
-      light: new EmergencyAlarmLight(this, 10, 200)
-        .setAngle(90)
-        .mapLightAwareObject(this.player),
+      light: emergencyLight,
       isOn: false,
       enabled: false,
     };
@@ -235,18 +204,13 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       loop: true,
     });
 
-    // this.darken();
     this.lighten();
-
-    // Set camera zoom
     this.cameras.main.zoom = 1;
 
-    // Locks pointer on mousedown
     this.game.canvas.addEventListener("mousedown", () => {
       this.game.input.mouse.requestPointerLock();
     });
 
-    // Move player pointer upon locked pointer move
     this.input.on(
       Phaser.Input.Events.POINTER_MOVE,
       function (pointer: Phaser.Input.Pointer) {
@@ -257,8 +221,6 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       },
       this
     );
-
-    this._inputs = new PlayerInputs(this.input);
 
     this.events.on(Event.FLASHLIGHT_MISSING, () => {
       console.error("Flashlight is missing");
@@ -314,20 +276,15 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     });
 
     this.events.on(Phaser.Scenes.Events.PRE_RENDER, () => {
-      // reset light effects
-      this.children.each((child) => {
-        if (isLightAware(child)) {
-          child.onLightOverReset();
-        }
-      });
-
-      // Player is not a scene child, handle separately
+      // Reset light effects using new mixin system
+      for (const obj of Instances(lightAwareMixin)) {
+        obj.onLightOverReset();
+      }
       this.player?.onLightOverReset();
 
       this.lightShadowSceneGraphics.clear();
       this.lightSceneGraphics.clear();
 
-      // update lights
       if (this.redLight?.enabled) {
         if (this.redLight.isOn) {
           this.redLight.light.turnOn();
@@ -336,27 +293,17 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
         }
       }
 
-      this.lightSources.forEach((child) => {
-        if (child.isEnabled) {
-          child.emitLight();
+      // Emit light from all light sources using new mixin system
+      for (const source of Instances(lightSourceMixin)) {
+        if (source.isLightEnabled) {
+          source.emitLight();
         }
-      });
+      }
     });
   }
 
   public createRaycaster(): Raycaster {
     return this.raycasterPlugin.createRaycaster();
-  }
-
-  public createLightSource(name: string, config: LightSourceConfig) {
-    const lightSource = new LightSource(
-      this,
-      this.createRaycaster(),
-      name,
-      config
-    );
-    this.lightSources.push(lightSource);
-    return lightSource;
   }
 
   public getDebugInfo(): object {
@@ -370,16 +317,17 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.lightSceneGraphics.clear();
     this.lightShadowSceneGraphics.clear();
 
+    // Clear all light source graphics (removes day-mode light cones)
+    for (const source of Instances(lightSourceMixin)) {
+      source.lightGraphics.clear();
+    }
+
     this.field.setTint(config.colors.darkenTintColor);
 
-    this.children.each((child) => {
-      if (isLightAware(child)) {
-        // console.log("darken", child.name);
-        child.onDarken();
-      }
-    });
+    for (const obj of Instances(lightAwareMixin)) {
+      obj.onDarken();
+    }
 
-    // Player is not a scene child, handle separately
     this.player?.onDarken();
   }
 
@@ -388,16 +336,17 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.lightSceneGraphics.clear();
     this.lightShadowSceneGraphics.clear();
 
+    // Clear all light source graphics (removes night-mode light effects)
+    for (const source of Instances(lightSourceMixin)) {
+      source.lightGraphics.clear();
+    }
+
     this.field.setTint();
 
-    this.children.each((child) => {
-      if (isLightAware(child)) {
-        // console.log("lighten", child.name);
-        child.onLighten();
-      }
-    });
+    for (const obj of Instances(lightAwareMixin)) {
+      obj.onLighten();
+    }
 
-    // Player is not a scene child, handle separately
     this.player?.onLighten();
   }
 
@@ -408,26 +357,23 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
 
     this.field.setTint(getTintColorShift(0xffffff, progress));
 
-    this.children.each((child) => {
-      if (isLightAware(child)) {
-        child.onLighningtOver(progress);
-      }
-    });
+    for (const obj of Instances(lightAwareMixin)) {
+      obj.onLightningOver(progress);
+    }
 
-    // Player is not a scene child, handle separately
-    this.player?.onLighningtOver(progress);
+    this.player?.onLightningOver(progress);
   }
 
-  update(_time, _delta) {
-    // Process player input
+  update(_time: number, _delta: number) {
+    runStepCallbacks();
+
     this.player?.preUpdate();
 
     if (this.obstacles.length > 0) {
-      const obstacles = this.obstacles as Phaser.Physics.Arcade.Group[];
+      const obstacles = this.obstacles as unknown as Phaser.Physics.Arcade.Group[];
       this.physics.world.collide(this.player.puppet, obstacles);
     }
 
-    // Rotates player to face towards reticle
     this.player.rotation = Phaser.Math.Angle.Between(
       this.player.x,
       this.player.y,
@@ -435,7 +381,6 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       this.pointer.y
     );
 
-    // Camera follows player ( can be set in create )
     this.cameras.main.startFollow(this.player.puppet);
 
     this.pointer.update(this.player);
@@ -444,7 +389,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.constrainPointer(this.pointer);
   }
 
-  constrainVelocity(player: Player, maxVelocity: number) {
+  constrainVelocity(player: PlayerObject, maxVelocity: number) {
     if (!player || !player.body) {
       return;
     }
@@ -470,7 +415,6 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       return;
     }
 
-    // can't move pointer offscreen
     if (pointer.x < this.cameras.main.worldView.x) {
       pointer.x = this.cameras.main.worldView.x;
     } else if (pointer.x > this.cameras.main.worldView.right) {
@@ -482,5 +426,11 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     } else if (pointer.y > this.cameras.main.worldView.bottom) {
       pointer.y = this.cameras.main.worldView.bottom;
     }
+  }
+
+  shutdown() {
+    clearStepCallbacks();
+    clearAllInstances();
+    clearGlobals();
   }
 }
