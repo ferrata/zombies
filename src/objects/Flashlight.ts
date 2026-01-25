@@ -88,6 +88,15 @@ export default class Flashlight
       .setRayRange(config.flashlight.coneRange);
   }
 
+  /**
+   * Map additional light-aware objects to this light source's raycaster.
+   * Use this for objects that are not direct scene children (like Player).
+   */
+  public mapLightAwareObject(lightAware: ILightAware): Flashlight {
+    this.light.mapLightAwareObject(lightAware);
+    return this;
+  }
+
   public setGlitchy(value: boolean) {
     // TODO: implement
     console.log("setGlitchy", value);

@@ -1,6 +1,6 @@
 import config from "../GameConfig";
 import GameScene from "../scenes/GameScene";
-import Player from "./Player";
+import Player from "./player";
 
 export interface IWeather {
   isOn: boolean;

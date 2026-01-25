@@ -3,7 +3,7 @@ import config from "../GameConfig";
 import PlayerInputs from "../controls/PlayerInputs";
 import Flashlight from "../objects/Flashlight";
 import Pointer from "../objects/Pointer";
-import Player from "../objects/Player";
+import Player from "../objects/player";
 import { Event } from "./Event";
 import { Pointable } from "../types/Pointable";
 import {
@@ -95,7 +95,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
 
   public closestObject(): Phaser.GameObjects.GameObject {
     return this.physics.closest(
-      this.player,
+      this.player.puppet,
       this.physics.world.bodies.entries.filter(
         (body) => this.objects.indexOf(body.gameObject) > -1
       )
@@ -222,7 +222,9 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.weather = new WeatherConditions(this, this.player);
 
     this.redLight = {
-      light: new EmergencyAlarmLight(this, 10, 200).setAngle(90),
+      light: new EmergencyAlarmLight(this, 10, 200)
+        .setAngle(90)
+        .mapLightAwareObject(this.player),
       isOn: false,
       enabled: false,
     };
@@ -319,6 +321,9 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
         }
       });
 
+      // Player is not a scene child, handle separately
+      this.player?.onLightOverReset();
+
       this.lightShadowSceneGraphics.clear();
       this.lightSceneGraphics.clear();
 
@@ -373,6 +378,9 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
         child.onDarken();
       }
     });
+
+    // Player is not a scene child, handle separately
+    this.player?.onDarken();
   }
 
   lighten() {
@@ -388,6 +396,9 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
         child.onLighten();
       }
     });
+
+    // Player is not a scene child, handle separately
+    this.player?.onLighten();
   }
 
   reactToLightning(progress: number) {
@@ -402,12 +413,18 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
         child.onLighningtOver(progress);
       }
     });
+
+    // Player is not a scene child, handle separately
+    this.player?.onLighningtOver(progress);
   }
 
   update(_time, _delta) {
+    // Process player input
+    this.player?.preUpdate();
+
     if (this.obstacles.length > 0) {
       const obstacles = this.obstacles as Phaser.Physics.Arcade.Group[];
-      this.physics.world.collide(this.player, obstacles);
+      this.physics.world.collide(this.player.puppet, obstacles);
     }
 
     // Rotates player to face towards reticle
@@ -419,7 +436,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     );
 
     // Camera follows player ( can be set in create )
-    this.cameras.main.startFollow(this.player);
+    this.cameras.main.startFollow(this.player.puppet);
 
     this.pointer.update(this.player);
 

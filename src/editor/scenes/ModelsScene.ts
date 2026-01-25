@@ -1,62 +1,101 @@
-import { PlayerModelRegistry, PlayerStateInfo } from "../PlayerModelRegistry";
+import PlayerPuppet, { PlayerWeapon } from "../../objects/player.puppet";
 import { editorState } from "../EditorState";
 
 /**
- * Overview sequence step - defines what the player does in the demo loop.
+ * Overview sequence step - uses PlayerPuppet methods directly.
  */
 interface OverviewStep {
-  upperAnimation: string;
-  legsAnimation: string;
-  duration: number; // Duration in ms before next step
+  action: (puppet: PlayerPuppet) => void;
+  duration: number;
 }
 
 /**
- * Scripted overview sequence that showcases the player model.
+ * Creates the overview sequence using PlayerPuppet's API.
+ * This ensures the editor uses the exact same code as the game.
  */
-const OVERVIEW_SEQUENCE: OverviewStep[] = [
-  // Idle with handgun
-  { upperAnimation: "idle_handgun", legsAnimation: "idle", duration: 1500 },
-  // Walk forward
-  { upperAnimation: "move_handgun", legsAnimation: "walk", duration: 2000 },
-  // Stop and shoot
-  { upperAnimation: "shoot_handgun", legsAnimation: "idle", duration: 400 },
-  { upperAnimation: "shoot_handgun", legsAnimation: "idle", duration: 400 },
-  { upperAnimation: "idle_handgun", legsAnimation: "idle", duration: 800 },
-  // Reload
-  { upperAnimation: "reload_handgun", legsAnimation: "idle", duration: 1500 },
-  // Switch to rifle, strafe
-  { upperAnimation: "idle_rifle", legsAnimation: "idle", duration: 500 },
-  { upperAnimation: "move_rifle", legsAnimation: "strafe_right", duration: 1500 },
-  { upperAnimation: "move_rifle", legsAnimation: "strafe_left", duration: 1500 },
-  // Shoot rifle
-  { upperAnimation: "shoot_rifle", legsAnimation: "idle", duration: 300 },
-  { upperAnimation: "shoot_rifle", legsAnimation: "idle", duration: 300 },
-  { upperAnimation: "shoot_rifle", legsAnimation: "idle", duration: 300 },
-  { upperAnimation: "idle_rifle", legsAnimation: "idle", duration: 800 },
-  // Switch to shotgun, run
-  { upperAnimation: "idle_shotgun", legsAnimation: "idle", duration: 500 },
-  { upperAnimation: "move_shotgun", legsAnimation: "run", duration: 2000 },
-  // Shoot shotgun
-  { upperAnimation: "shoot_shotgun", legsAnimation: "idle", duration: 600 },
-  { upperAnimation: "shoot_shotgun", legsAnimation: "idle", duration: 600 },
-  { upperAnimation: "idle_shotgun", legsAnimation: "idle", duration: 800 },
-  // Reload shotgun
-  { upperAnimation: "reload_shotgun", legsAnimation: "idle", duration: 2000 },
-  // Switch to knife
-  { upperAnimation: "idle_knife", legsAnimation: "idle", duration: 500 },
-  { upperAnimation: "move_knife", legsAnimation: "walk", duration: 1500 },
-  // Melee attack
-  { upperAnimation: "meleeattack_knife", legsAnimation: "idle", duration: 600 },
-  { upperAnimation: "meleeattack_knife", legsAnimation: "idle", duration: 600 },
-  { upperAnimation: "idle_knife", legsAnimation: "idle", duration: 1000 },
-];
+function createOverviewSequence(): OverviewStep[] {
+  return [
+    // Idle with handgun
+    { action: (p) => { p.selectWeapon(PlayerWeapon.HANDGUN); p.idle(); }, duration: 1500 },
+    // Walk forward
+    { action: (p) => p.walk(), duration: 2000 },
+    // Stop and shoot
+    { action: (p) => { p.idle(); p.shoot(); }, duration: 400 },
+    { action: (p) => p.shoot(), duration: 400 },
+    { action: (p) => p.idle(), duration: 800 },
+    // Reload
+    { action: (p) => p.reload(), duration: 1500 },
+    // Switch to rifle, strafe
+    { action: (p) => { p.selectWeapon(PlayerWeapon.RIFLE); p.idle(); }, duration: 500 },
+    { action: (p) => p.strafeRight(), duration: 1500 },
+    { action: (p) => p.strafeLeft(), duration: 1500 },
+    // Shoot rifle
+    { action: (p) => { p.idle(); p.shoot(); }, duration: 300 },
+    { action: (p) => p.shoot(), duration: 300 },
+    { action: (p) => p.shoot(), duration: 300 },
+    { action: (p) => p.idle(), duration: 800 },
+    // Switch to shotgun, run
+    { action: (p) => { p.selectWeapon(PlayerWeapon.SHOTGUN); p.idle(); }, duration: 500 },
+    { action: (p) => p.run(), duration: 2000 },
+    // Shoot shotgun
+    { action: (p) => { p.idle(); p.shoot(); }, duration: 600 },
+    { action: (p) => p.shoot(), duration: 600 },
+    { action: (p) => p.idle(), duration: 800 },
+    // Reload shotgun
+    { action: (p) => p.reload(), duration: 2000 },
+    // Switch to knife
+    { action: (p) => { p.selectWeapon(PlayerWeapon.KNIFE); p.idle(); }, duration: 500 },
+    { action: (p) => p.walk(), duration: 1500 },
+    // Melee attack
+    { action: (p) => { p.idle(); p.meleeAttack(); }, duration: 600 },
+    { action: (p) => p.meleeAttack(), duration: 600 },
+    { action: (p) => p.idle(), duration: 1000 },
+  ];
+}
+
+/**
+ * State item for the sidebar list.
+ */
+interface StateItem {
+  key: string;
+  name: string;
+  category: "state" | "action";
+  action: (puppet: PlayerPuppet) => void;
+}
+
+/**
+ * Creates the list of states for the sidebar.
+ */
+function createStateItems(): StateItem[] {
+  return [
+    // Idle states
+    { key: "idle_handgun", name: "Idle (Handgun)", category: "state", action: (p) => { p.selectWeapon(PlayerWeapon.HANDGUN); p.idle(); } },
+    { key: "idle_shotgun", name: "Idle (Shotgun)", category: "state", action: (p) => { p.selectWeapon(PlayerWeapon.SHOTGUN); p.idle(); } },
+    { key: "idle_rifle", name: "Idle (Rifle)", category: "state", action: (p) => { p.selectWeapon(PlayerWeapon.RIFLE); p.idle(); } },
+    { key: "idle_knife", name: "Idle (Knife)", category: "state", action: (p) => { p.selectWeapon(PlayerWeapon.KNIFE); p.idle(); } },
+    // Move states
+    { key: "walk_handgun", name: "Walk (Handgun)", category: "state", action: (p) => { p.selectWeapon(PlayerWeapon.HANDGUN); p.walk(); } },
+    { key: "walk_rifle", name: "Walk (Rifle)", category: "state", action: (p) => { p.selectWeapon(PlayerWeapon.RIFLE); p.walk(); } },
+    { key: "run_handgun", name: "Run (Handgun)", category: "state", action: (p) => { p.selectWeapon(PlayerWeapon.HANDGUN); p.run(); } },
+    { key: "strafe_rifle", name: "Strafe (Rifle)", category: "state", action: (p) => { p.selectWeapon(PlayerWeapon.RIFLE); p.strafeRight(); } },
+    // Actions
+    { key: "shoot_handgun", name: "Shoot (Handgun)", category: "action", action: (p) => { p.selectWeapon(PlayerWeapon.HANDGUN); p.idle(); p.shoot(); } },
+    { key: "shoot_shotgun", name: "Shoot (Shotgun)", category: "action", action: (p) => { p.selectWeapon(PlayerWeapon.SHOTGUN); p.idle(); p.shoot(); } },
+    { key: "shoot_rifle", name: "Shoot (Rifle)", category: "action", action: (p) => { p.selectWeapon(PlayerWeapon.RIFLE); p.idle(); p.shoot(); } },
+    { key: "reload_handgun", name: "Reload (Handgun)", category: "action", action: (p) => { p.selectWeapon(PlayerWeapon.HANDGUN); p.idle(); p.reload(); } },
+    { key: "reload_shotgun", name: "Reload (Shotgun)", category: "action", action: (p) => { p.selectWeapon(PlayerWeapon.SHOTGUN); p.idle(); p.reload(); } },
+    { key: "reload_rifle", name: "Reload (Rifle)", category: "action", action: (p) => { p.selectWeapon(PlayerWeapon.RIFLE); p.idle(); p.reload(); } },
+    { key: "melee_knife", name: "Melee Attack (Knife)", category: "action", action: (p) => { p.selectWeapon(PlayerWeapon.KNIFE); p.idle(); p.meleeAttack(); } },
+  ];
+}
 
 export default class ModelsScene extends Phaser.Scene {
-  private playerSpine: SpineGameObject | null = null;
-  private legsSpine: SpineGameObject | null = null;
+  private puppet: PlayerPuppet | null = null;
   private stateList!: HTMLUListElement;
   private loadingOverlay!: HTMLElement;
 
+  private overviewSequence: OverviewStep[] = [];
+  private stateItems: StateItem[] = [];
   private overviewStepIndex: number = 0;
   private overviewTimer: Phaser.Time.TimerEvent | null = null;
   private isPlayingOverview: boolean = false;
@@ -75,8 +114,12 @@ export default class ModelsScene extends Phaser.Scene {
     // Set up the scene background
     this.cameras.main.setBackgroundColor(0x2d2d2d);
 
-    // Create the player model
-    this.createPlayerModel();
+    // Create the player puppet (uses same code as the game!)
+    this.createPlayerPuppet();
+
+    // Create sequences and state items
+    this.overviewSequence = createOverviewSequence();
+    this.stateItems = createStateItems();
 
     // Initialize UI
     this.populateStateList();
@@ -88,21 +131,15 @@ export default class ModelsScene extends Phaser.Scene {
     this.loadingOverlay.classList.add("hidden");
   }
 
-  private createPlayerModel() {
+  private createPlayerPuppet() {
     const centerX = this.cameras.main.width / 2;
     const centerY = this.cameras.main.height / 2;
 
-    // Create legs first (behind the body)
-    this.legsSpine = this.add.spine(centerX, centerY, "player-legs", "idle", true);
-    this.legsSpine.setScale(0.7);
-
-    // Create player body
-    this.playerSpine = this.add.spine(centerX, centerY, "player", "idle_handgun", true);
-    this.playerSpine.setScale(0.7);
+    // Create the puppet - same class used by the game!
+    this.puppet = new PlayerPuppet(this, centerX, centerY);
   }
 
   private populateStateList() {
-    const states = PlayerModelRegistry.getStates();
     this.stateList.innerHTML = "";
 
     // Add Overview item first
@@ -137,7 +174,7 @@ export default class ModelsScene extends Phaser.Scene {
     this.stateList.appendChild(separator);
 
     // Add individual states
-    states.forEach((state) => {
+    this.stateItems.forEach((state) => {
       const item = document.createElement("li");
       item.className = "state-item";
       item.dataset.key = state.key;
@@ -168,18 +205,16 @@ export default class ModelsScene extends Phaser.Scene {
     const savedState = editorState.modelsSelectedState;
 
     if (savedState === "overview" || !savedState) {
-      // Start with overview
       this.startOverview();
       this.highlightState("overview");
       return;
     }
 
-    const state = PlayerModelRegistry.getState(savedState);
+    const state = this.stateItems.find((s) => s.key === savedState);
     if (state) {
       this.playState(state);
       this.highlightState(savedState);
     } else {
-      // Fallback to overview
       this.startOverview();
       this.highlightState("overview");
     }
@@ -193,19 +228,18 @@ export default class ModelsScene extends Phaser.Scene {
   }
 
   private playOverviewStep() {
-    if (!this.isPlayingOverview || !this.playerSpine || !this.legsSpine) return;
+    if (!this.isPlayingOverview || !this.puppet) return;
 
-    const step = OVERVIEW_SEQUENCE[this.overviewStepIndex];
+    const step = this.overviewSequence[this.overviewStepIndex];
 
-    // Play the animations
-    this.playerSpine.play(step.upperAnimation, false);
-    this.legsSpine.play(step.legsAnimation, true);
+    // Execute the action on the puppet
+    step.action(this.puppet);
 
     // Schedule next step
     this.overviewTimer = this.time.addEvent({
       delay: step.duration,
       callback: () => {
-        this.overviewStepIndex = (this.overviewStepIndex + 1) % OVERVIEW_SEQUENCE.length;
+        this.overviewStepIndex = (this.overviewStepIndex + 1) % this.overviewSequence.length;
         this.playOverviewStep();
       },
     });
@@ -219,32 +253,11 @@ export default class ModelsScene extends Phaser.Scene {
     }
   }
 
-  private playState(state: PlayerStateInfo) {
-    if (!this.playerSpine || !this.legsSpine) return;
+  private playState(state: StateItem) {
+    if (!this.puppet) return;
 
     try {
-      // Clear any listeners
-      this.playerSpine.state.clearListeners();
-
-      // Play upper body animation
-      this.playerSpine.play(state.upperAnimation, state.loop);
-
-      // Play legs animation
-      this.legsSpine.play(state.legsAnimation, true);
-
-      // If it's a non-looping action, return to idle after completion
-      if (!state.loop) {
-        this.playerSpine.state.addListener({
-          complete: () => {
-            if (this.playerSpine) {
-              // Extract weapon from the animation name
-              const weapon = state.upperAnimation.split("_").pop() || "handgun";
-              this.playerSpine.play(`idle_${weapon}`, true);
-              this.playerSpine.state.clearListeners();
-            }
-          },
-        });
-      }
+      state.action(this.puppet);
     } catch (error) {
       console.error("Failed to play state:", error);
     }
@@ -259,20 +272,15 @@ export default class ModelsScene extends Phaser.Scene {
     const selected = this.stateList.querySelector(`[data-key="${stateKey}"]`);
     if (selected) {
       selected.classList.add("active");
-      // Scroll into view if needed
       selected.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
   }
 
   shutdown() {
     this.stopOverview();
-    if (this.playerSpine) {
-      this.playerSpine.destroy();
-      this.playerSpine = null;
-    }
-    if (this.legsSpine) {
-      this.legsSpine.destroy();
-      this.legsSpine = null;
+    if (this.puppet) {
+      this.puppet.destroy();
+      this.puppet = null;
     }
   }
 }

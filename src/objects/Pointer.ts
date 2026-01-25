@@ -1,6 +1,6 @@
 import config from "../GameConfig";
 import { IPointable, isPointable } from "../types/Pointable";
-import Player from "./Player";
+import Player from "./player";
 
 export default class Pointer extends Phaser.GameObjects.GameObject {
   private dot: Phaser.GameObjects.Arc;

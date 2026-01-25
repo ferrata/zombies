@@ -133,6 +133,18 @@ export class LightSource implements ILightSource, IDebuggable {
     return this;
   }
 
+  /**
+   * Map additional light-aware objects to this light source's raycaster.
+   * Use this for objects that are not direct scene children (like Player).
+   */
+  public mapLightAwareObject(lightAware: ILightAware): LightSource {
+    const shape = lightAware.getLightAwareShape();
+    if (shape) {
+      this.raycaster.mapGameObjects([shape]);
+    }
+    return this;
+  }
+
   public enable(): LightSource {
     this.ray = this.raycaster.createRay({
       collisionRange: this.config.collisionRange,

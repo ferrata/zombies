@@ -54,6 +54,15 @@ export default class EmergencyAlarmLight
     return this;
   }
 
+  /**
+   * Map additional light-aware objects to this light source's raycaster.
+   * Use this for objects that are not direct scene children (like Player).
+   */
+  public mapLightAwareObject(lightAware: ILightAware): EmergencyAlarmLight {
+    this.light.mapLightAwareObject(lightAware);
+    return this;
+  }
+
   public hasDebugInfo(): boolean {
     return true;
   }

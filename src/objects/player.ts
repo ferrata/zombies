@@ -2,7 +2,6 @@ import config from "../GameConfig";
 import GameScene from "../scenes/GameScene";
 import { Event } from "../scenes/Event";
 import Flashlight from "./Flashlight";
-import SpineContainer from "../types/SpineContainer";
 import { CasingEmitter } from "./CasingEmitter";
 import { IDebuggable } from "../types/Debuggable";
 import {
@@ -11,13 +10,7 @@ import {
   getTintColorShift,
 } from "../types/LightAware";
 import MuzzleFlash from "./MuzzleFlash";
-
-enum PlayerWeapon {
-  HANDGUN = "handgun",
-  SHOTGUN = "shotgun",
-  RIFLE = "rifle",
-  KNIFE = "knife",
-}
+import PlayerPuppet, { PlayerWeapon } from "./player.puppet";
 
 enum PlayerWeaponMode {
   NONE = "none",
@@ -26,117 +19,142 @@ enum PlayerWeaponMode {
   AUTO = "auto",
 }
 
-enum PlayerState {
-  IDLE = "idle",
-  MOVE = "move",
-}
-
-enum PlayerLegsState {
-  IDLE = "idle",
-  WALK = "walk",
-  STRAFE_LEFT = "strafe_left",
-  STRAFE_RIGHT = "strafe_right",
-  RUN = "run",
-}
-
-export default class Player
-  extends SpineContainer
-  implements ILightAware, IDebuggable
-{
-  public scene: GameScene;
+/**
+ * Player - Game layer for the player character.
+ *
+ * Composes PlayerPuppet (animation) and adds:
+ * - Physics body
+ * - Input handling
+ * - Flashlight, CasingEmitter, MuzzleFlash
+ * - Matter.js spot for collision detection
+ * - Light awareness
+ * - Game events
+ */
+export default class Player implements ILightAware, IDebuggable {
+  public readonly puppet: PlayerPuppet;
+  public readonly scene: GameScene;
   public body: Phaser.Physics.Arcade.Body;
 
   private matterSpot: MatterJS.BodyType;
   private lightAwareShape: LightAwareShape;
 
   private readonly casingEmitter: CasingEmitter;
-
-  private legs: SpineGameObject;
   private flashlight: Flashlight;
   private shadow: Phaser.FX.Shadow;
   private darkColorMatrix: Phaser.FX.ColorMatrix;
-  private currentState: PlayerState = PlayerState.IDLE;
-  private currentLegsState: PlayerLegsState = PlayerLegsState.IDLE;
-  private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN;
+  private shadowAdded: boolean = false;
+
   private currentWeaponMode: { [key in PlayerWeapon]: PlayerWeaponMode } = {
-    handgun: PlayerWeaponMode.SINGLE,
-    shotgun: PlayerWeaponMode.SINGLE,
-    rifle: PlayerWeaponMode.BURST,
-    knife: PlayerWeaponMode.NONE,
+    [PlayerWeapon.HANDGUN]: PlayerWeaponMode.SINGLE,
+    [PlayerWeapon.SHOTGUN]: PlayerWeaponMode.SINGLE,
+    [PlayerWeapon.RIFLE]: PlayerWeaponMode.BURST,
+    [PlayerWeapon.KNIFE]: PlayerWeaponMode.NONE,
   };
   private muzzleFlash: MuzzleFlash;
-  shadowAdded: boolean;
 
   constructor(scene: GameScene, x: number, y: number) {
-    super(
-      scene,
-      x,
-      y,
-      "player",
-      `${PlayerState.IDLE}_${PlayerWeapon.HANDGUN}`,
-      true
-    );
+    this.scene = scene;
 
-    this.name = "player";
+    // Create the puppet (handles all animation)
+    this.puppet = new PlayerPuppet(scene, x, y);
+    this.puppet.name = "player";
 
-    this.setScale(0.7, 0.7);
-
-    this.legs = scene.add.spine(0, 0, "player-legs", PlayerState.IDLE, true);
-    this.addSpine(this.legs, 0);
-
-    this.scene.add.existing(this);
-    this.scene.physics.world.enable(this);
+    // Enable physics on the puppet container
+    scene.physics.world.enable(this.puppet);
+    this.body = this.puppet.body as Phaser.Physics.Arcade.Body;
     this.body.setDrag(1, 1);
 
-    this.shadow = this.postFX.addShadow(0, 0, 0.1, 0.3, 0x000000, 2, 3);
+    // Setup visual effects
+    this.shadow = this.puppet.postFX.addShadow(0, 0, 0.1, 0.3, 0x000000, 2, 3);
     this.removeShadow();
 
-    this.darkColorMatrix = this.postFX
+    this.darkColorMatrix = this.puppet.postFX
       .addColorMatrix()
       .brightness(config.colors.darkenColorMatrixBrightness);
 
-    const bounds = this.spine.getBounds();
-
+    // Setup physics body
+    const bounds = this.puppet.spine.getBounds();
     this.body
       .setOffset(-bounds.size.x / 3, -bounds.size.y / 3 - 15)
       .setCircle(bounds.size.x / 3)
       .setCollideWorldBounds(true);
 
-    this.matterSpot = this.scene.matter.add.circle(this.x, this.y, 50, {
+    // Setup matter.js collision spot
+    this.matterSpot = scene.matter.add.circle(x, y, 50, {
       isSensor: true,
       label: "player-spot",
     });
 
-    this.lightAwareShape = this.scene.add.circle(this.x, this.y, 50);
+    // Setup light awareness
+    this.lightAwareShape = scene.add.circle(x, y, 50);
     // @ts-ignore
     this.lightAwareShape.owner = this;
 
-    this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
-    this.selectWeapon(PlayerWeapon.HANDGUN);
+    // Initialize state
+    this.puppet.idle();
+    this.puppet.selectWeapon(PlayerWeapon.HANDGUN);
 
+    // Create effects
     this.casingEmitter = new CasingEmitter(
-      this.scene,
-      this.x,
-      this.y,
+      scene,
+      x,
+      y,
       "bullet-casings",
       { from: 0.4, to: 0.3 }
     );
-    this.muzzleFlash = new MuzzleFlash(this.scene, this.x, this.y);
+    this.muzzleFlash = new MuzzleFlash(scene, x, y);
 
-    this.setDepth(config.depths.player);
+    // Set depths
+    this.puppet.setDepth(config.depths.player);
     this.casingEmitter.setDepth(config.depths.casingEmitter);
     this.muzzleFlash.setDepth(config.depths.player + 1);
   }
 
-  public postUpdate() {
+  // --- Proxy getters for common puppet container properties ---
+
+  get x(): number {
+    return this.puppet.x;
+  }
+
+  set x(value: number) {
+    this.puppet.x = value;
+  }
+
+  get y(): number {
+    return this.puppet.y;
+  }
+
+  set y(value: number) {
+    this.puppet.y = value;
+  }
+
+  get rotation(): number {
+    return this.puppet.rotation;
+  }
+
+  set rotation(value: number) {
+    this.puppet.rotation = value;
+  }
+
+  get angle(): number {
+    return this.puppet.angle;
+  }
+
+  set angle(value: number) {
+    this.puppet.angle = value;
+  }
+
+  // --- Update Loop ---
+
+  public postUpdate(): void {
     this.updateMatterSpotPosition();
-    this.updateFlashlightPosition(this.currentWeapon);
-    this.updateMuzzleFlashPosition(this.currentWeapon);
-    this.updateCasingEmitterPosition(this.currentWeapon);
+    this.updateFlashlightPosition();
+    this.updateMuzzleFlashPosition();
+    this.updateCasingEmitterPosition();
     this.updateLightAwareShapePosition();
   }
 
-  public preUpdate() {
+  public preUpdate(): void {
     const { up, down, left, right, keys } = this.scene.inputs;
 
     if (left) {
@@ -192,38 +210,15 @@ export default class Player
     }
   }
 
-  private toggleFlashlight() {
-    if (!this.flashlight) {
-      this.scene.events.emit(Event.FLASHLIGHT_MISSING);
-      return;
-    }
+  // --- Movement (animation + physics) ---
 
-    if (this.flashlight.isOff) {
-      this.flashlight.turnOn();
-    } else {
-      this.flashlight.turnOff();
-    }
-  }
-
-  private setCurrentState(state: PlayerState, legsState: PlayerLegsState) {
-    if (this.currentState !== state) {
-      this.currentState = state;
-      this.spine.setAnimation(0, `${state}_${this.currentWeapon}`, true);
-    }
-
-    if (this.currentLegsState !== legsState) {
-      this.currentLegsState = legsState;
-      this.legs.setAnimation(0, legsState, true);
-    }
-  }
-
-  private stop() {
-    this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
+  private stop(): void {
+    this.puppet.idle();
     this.body.setVelocity(0);
   }
 
-  private strafeRight(fast: boolean = false) {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_RIGHT);
+  private strafeRight(fast: boolean = false): void {
+    this.puppet.strafeRight();
     this.scene.physics.velocityFromRotation(
       this.rotation + 0.5 * Math.PI,
       fast ? config.player.speed.strafeFast : config.player.speed.strafe,
@@ -231,8 +226,8 @@ export default class Player
     );
   }
 
-  private strafeLeft(fast: boolean = false) {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_LEFT);
+  private strafeLeft(fast: boolean = false): void {
+    this.puppet.strafeLeft();
     this.scene.physics.velocityFromRotation(
       this.rotation + 0.5 * Math.PI,
       -(fast ? config.player.speed.strafeFast : config.player.speed.strafe),
@@ -240,8 +235,8 @@ export default class Player
     );
   }
 
-  private moveBackward() {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.WALK);
+  private moveBackward(): void {
+    this.puppet.walk();
     this.scene.physics.velocityFromRotation(
       this.rotation,
       -config.player.speed.walk,
@@ -249,8 +244,8 @@ export default class Player
     );
   }
 
-  private moveForward() {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.WALK);
+  private moveForward(): void {
+    this.puppet.walk();
     this.scene.physics.velocityFromRotation(
       this.rotation,
       config.player.speed.walk,
@@ -258,8 +253,8 @@ export default class Player
     );
   }
 
-  private runBackward() {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.RUN);
+  private runBackward(): void {
+    this.puppet.run();
     this.scene.physics.velocityFromRotation(
       this.rotation,
       -config.player.speed.run,
@@ -267,8 +262,8 @@ export default class Player
     );
   }
 
-  private runForward() {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.RUN);
+  private runForward(): void {
+    this.puppet.run();
     this.scene.physics.velocityFromRotation(
       this.rotation,
       config.player.speed.run,
@@ -276,15 +271,20 @@ export default class Player
     );
   }
 
-  public selectWeapon(weapon: PlayerWeapon) {
-    if (this.currentWeapon === weapon) {
-      const oldMode = this.currentWeaponMode[this.currentWeapon];
-      const newMode = this.nextWeaponMode(this.currentWeapon, oldMode);
-      this.currentWeaponMode[this.currentWeapon] = newMode;
+  // --- Weapon ---
+
+  public selectWeapon(weapon: PlayerWeapon): void {
+    const currentWeapon = this.puppet.getWeapon();
+
+    if (currentWeapon === weapon) {
+      // Toggle weapon mode
+      const oldMode = this.currentWeaponMode[currentWeapon];
+      const newMode = this.nextWeaponMode(currentWeapon, oldMode);
+      this.currentWeaponMode[currentWeapon] = newMode;
 
       if (oldMode !== newMode) {
         this.scene.events.emit(Event.WEAPON_MODE_CHANGED, {
-          weapon: this.currentWeapon,
+          weapon: currentWeapon,
           mode: newMode,
         });
       }
@@ -292,8 +292,7 @@ export default class Player
       return;
     }
 
-    this.currentWeapon = weapon;
-    this.spine.setAnimation(0, `${this.currentState}_${weapon}`, true);
+    this.puppet.selectWeapon(weapon);
   }
 
   private nextWeaponMode(
@@ -311,16 +310,21 @@ export default class Player
     } else if (currentMode === PlayerWeaponMode.AUTO) {
       return PlayerWeaponMode.SINGLE;
     }
+
+    return PlayerWeaponMode.SINGLE;
   }
 
-  public attack() {
-    if (this.currentWeapon === PlayerWeapon.KNIFE) {
-      this.spine.setAnimation(0, `meleeattack_${this.currentWeapon}`, false);
-      this.continueCurrentAnimation();
+  // --- Actions ---
+
+  public attack(): void {
+    const weapon = this.puppet.getWeapon();
+
+    if (weapon === PlayerWeapon.KNIFE) {
+      this.puppet.meleeAttack();
       return;
     }
 
-    const mode = this.currentWeaponMode[this.currentWeapon];
+    const mode = this.currentWeaponMode[weapon];
     if (mode === PlayerWeaponMode.SINGLE) {
       this.shoot();
     } else if (mode === PlayerWeaponMode.BURST) {
@@ -336,7 +340,7 @@ export default class Player
         delay: config.weapon.shotDelay,
         callback: () => {
           if (
-            this.scene.input.keyboard.keys[Phaser.Input.Keyboard.KeyCodes.SPACE]
+            this.scene.input.keyboard!.keys[Phaser.Input.Keyboard.KeyCodes.SPACE]
               .isDown
           ) {
             this.shoot();
@@ -349,27 +353,34 @@ export default class Player
     }
   }
 
-  private shoot() {
-    this.spine.setAnimation(0, `shoot_${this.currentWeapon}`, false);
-    this.casingEmitter.emitOne(this.getCasingName(this.currentWeapon));
+  private shoot(): void {
+    this.puppet.shoot();
+    this.casingEmitter.emitOne(this.getCasingName());
     this.muzzleFlash.flashOnce();
-    this.continueCurrentAnimation();
   }
 
-  private reload() {
-    if (this.currentWeapon === PlayerWeapon.KNIFE) {
+  private reload(): void {
+    this.puppet.reload();
+  }
+
+  // --- Flashlight ---
+
+  private toggleFlashlight(): void {
+    if (!this.flashlight) {
+      this.scene.events.emit(Event.FLASHLIGHT_MISSING);
       return;
     }
 
-    this.spine.setAnimation(0, `reload_${this.currentWeapon}`, false);
-
-    // TODO: add reload time for shotgun
-    // this.spine.addAnimation(0, `reload_${this.currentWeapon}`, false);
-
-    this.continueCurrentAnimation();
+    if (this.flashlight.isOff) {
+      this.flashlight.turnOn();
+    } else {
+      this.flashlight.turnOff();
+    }
   }
 
-  public interactWithObject(item: Phaser.GameObjects.GameObject) {
+  // --- Interaction ---
+
+  public interactWithObject(item: Phaser.GameObjects.GameObject): void {
     if (this.isAlmostWithinReach(item)) {
       this.almostTakeItem();
       this.scene.events.emit(Event.OBJECT_STILL_TOO_FAR, item);
@@ -387,6 +398,8 @@ export default class Player
         this.scene.children.remove(item);
 
         this.flashlight = item as Flashlight;
+        // Register player with flashlight so it can light the player
+        this.flashlight.mapLightAwareObject(this);
         return item;
       });
     } else {
@@ -428,21 +441,16 @@ export default class Player
     );
 
     const degreesAbs = Phaser.Math.RadToDeg(Math.abs(angle - this.rotation));
-    return { distance: distance, angle: degreesAbs };
+    return { distance, angle: degreesAbs };
   }
 
-  private takeItem(fn: Function) {
+  private takeItem(fn: Function): void {
     const listener = {
-      complete: (entry) => {
-        this.spine.state.removeListener(listener);
+      complete: () => {
+        this.puppet.spine.state.removeListener(listener);
 
         const item = fn();
-        this.spine.addAnimation(
-          0,
-          `interact_take_${this.currentWeapon}`,
-          false
-        );
-        this.continueCurrentAnimation();
+        this.puppet.interactTake();
 
         if (item) {
           this.scene.events.emit(Event.OBJECT_PICKED_UP, item);
@@ -450,26 +458,26 @@ export default class Player
       },
     };
 
-    this.spine.state.addListener(listener);
-
-    this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
+    this.puppet.spine.state.addListener(listener);
+    this.puppet.interactReach();
   }
 
-  private almostTakeItem() {
+  private almostTakeItem(): void {
     const listener = {
-      complete: (entry) => {
-        this.spine.state.removeListener(listener);
-        // pause for a while
+      complete: () => {
+        this.puppet.spine.state.removeListener(listener);
+        // pause for a while, then return arm to current state
         this.scene.time.delayedCall(150, () => {
-          this.continueCurrentAnimation();
+          this.puppet.returnToCurrentState();
         });
       },
     };
 
-    this.spine.state.addListener(listener);
-
-    this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
+    this.puppet.spine.state.addListener(listener);
+    this.puppet.interactReach();
   }
+
+  // --- Light Awareness ---
 
   public onDarken(): ILightAware {
     this.removeShadow();
@@ -506,7 +514,6 @@ export default class Player
     intersections: Phaser.Geom.Point[]
   ): ILightAware {
     this.darkColorMatrix.reset();
-
     return this;
   }
 
@@ -539,6 +546,8 @@ export default class Player
     return this.lightAwareShape;
   }
 
+  // --- Debug ---
+
   public hasDebugInfo(): boolean {
     return true;
   }
@@ -550,59 +559,47 @@ export default class Player
       size: { width: this.body.width, height: this.body.height },
       angle: this.angle,
       velocity: this.body.velocity,
-
-      // matterSpot: {
-      //   x: this.matterSpot.position.x,
-      //   y: this.matterSpot.position.y,
-      //   velocity: this.matterSpot.velocity,
-      // },
-
-      currentState: this.currentState,
-      currentLegsState: this.currentLegsState,
-      currentWeapon: this.currentWeapon,
-      currentWeaponMode: this.currentWeaponMode[this.currentWeapon],
+      currentState: this.puppet.getState(),
+      currentLegsState: this.puppet.getLegsState(),
+      currentWeapon: this.puppet.getWeapon(),
+      currentWeaponMode: this.currentWeaponMode[this.puppet.getWeapon()],
       flashlight: this.flashlight?.getDebugInfo(),
     };
   }
 
-  public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics) {
+  public drawDebugPhysics(graphics: Phaser.GameObjects.Graphics): void {
     this.flashlight?.drawDebugPhysics(graphics);
   }
 
-  private ensureShadow() {
+  // --- Private Helpers ---
+
+  private ensureShadow(): void {
     if (this.shadowAdded) {
       return;
     }
 
     this.shadowAdded = true;
-    this.postFX.add(this.shadow);
+    this.puppet.postFX.add(this.shadow);
   }
 
-  private removeShadow() {
-    this.postFX.remove(this.shadow);
+  private removeShadow(): void {
+    this.puppet.postFX.remove(this.shadow);
     this.shadowAdded = false;
   }
 
-  private continueCurrentAnimation() {
-    this.spine.addAnimation(
-      0,
-      `${this.currentState}_${this.currentWeapon}`,
-      true
-    );
-  }
-
-  private updateMatterSpotPosition() {
+  private updateMatterSpotPosition(): void {
     this.matterSpot.angle = this.angle;
     this.matterSpot.position.x = this.x;
     this.matterSpot.position.y = this.y;
   }
 
-  private updateLightAwareShapePosition() {
+  private updateLightAwareShapePosition(): void {
     this.lightAwareShape.x = this.x;
     this.lightAwareShape.y = this.y;
   }
 
-  private updateCasingEmitterPosition(weapon: PlayerWeapon) {
+  private updateCasingEmitterPosition(): void {
+    const weapon = this.puppet.getWeapon();
     const adjustByWeapon = {
       [PlayerWeapon.HANDGUN]: { length: 80, angle: 35 },
       [PlayerWeapon.SHOTGUN]: { length: 70, angle: 30 },
@@ -620,7 +617,8 @@ export default class Player
     this.casingEmitter.setEmitterAngle(this.angle);
   }
 
-  private updateMuzzleFlashPosition(weapon: PlayerWeapon) {
+  private updateMuzzleFlashPosition(): void {
+    const weapon = this.puppet.getWeapon();
     const scaleByWeapon = {
       [PlayerWeapon.HANDGUN]: { scale: 0.1 },
       [PlayerWeapon.SHOTGUN]: { scale: 0.15 },
@@ -634,7 +632,8 @@ export default class Player
     this.muzzleFlash.setAngle(this.angle);
   }
 
-  private updateFlashlightPosition(weapon: PlayerWeapon) {
+  private updateFlashlightPosition(): void {
+    const weapon = this.puppet.getWeapon();
     const attachedToByWeapon = {
       [PlayerWeapon.HANDGUN]: {
         frontBone: "muzzle",
@@ -685,11 +684,11 @@ export default class Player
       .setAngle(Phaser.Math.RadToDeg(weaponAngle));
   }
 
-  private getBonePosition(boneName: string) {
-    const bone = this.spine.skeleton.findBone(boneName);
+  private getBonePosition(boneName: string): Phaser.Math.Vector2 {
+    const bone = this.puppet.spine.skeleton.findBone(boneName);
     const boneInnerPosition = new Phaser.Math.Vector2(
-      bone.worldX + this.x - this.spine.skeleton.x,
-      bone.worldY + this.y - this.spine.skeleton.y
+      bone.worldX + this.x - this.puppet.spine.skeleton.x,
+      bone.worldY + this.y - this.puppet.spine.skeleton.y
     );
 
     const distance = Phaser.Math.Distance.Between(
@@ -717,8 +716,8 @@ export default class Player
     return bonePosition;
   }
 
-  private getCasingName(weapon: PlayerWeapon) {
-    // names are based on the spritesheet "bullet-casings"
+  private getCasingName(): string | undefined {
+    const weapon = this.puppet.getWeapon();
     return {
       [PlayerWeapon.HANDGUN]: "8mm-bullet-case",
       [PlayerWeapon.SHOTGUN]: "12gauge-bullet-case",
