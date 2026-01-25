@@ -1,3 +1,3 @@
-import Inputs from "./inputs";
+import Inputs from './inputs'
 
 export default class PlayerInputs extends Inputs {}

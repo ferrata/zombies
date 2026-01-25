@@ -1,16 +1,16 @@
-import "phaser";
-import "phaser/plugins/spine/dist/SpinePlugin";
+import 'phaser'
+import 'phaser/plugins/spine/dist/SpinePlugin'
 // Game entry point
-import DebugScreenPlugin from "./plugins/debug-screen.plugin";
-import PhaserRaycaster from "phaser-raycaster";
-import PreloadScene from "./scenes/preload.scene";
-import GameScene from "./scenes/game.scene";
+import DebugScreenPlugin from './plugins/debug-screen.plugin'
+import PhaserRaycaster from 'phaser-raycaster'
+import PreloadScene from './scenes/preload.scene'
+import GameScene from './scenes/game.scene'
 
-const allowDebug = true;
+const allowDebug = true
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  parent: "game",
+  parent: 'game',
   scale: {
     mode: Phaser.Scale.ScaleModes.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
@@ -27,7 +27,7 @@ const config: Phaser.Types.Core.GameConfig = {
     antialiasGL: false,
   },
   physics: {
-    default: "arcade",
+    default: 'arcade',
 
     arcade: {
       debug: allowDebug,
@@ -41,15 +41,15 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [PreloadScene, GameScene],
   plugins: {
     scene: [
-      { key: "DebugScreen", plugin: DebugScreenPlugin, start: true },
-      { key: "SpinePlugin", plugin: window.SpinePlugin, mapping: "spine" },
+      { key: 'DebugScreen', plugin: DebugScreenPlugin, start: true },
+      { key: 'SpinePlugin', plugin: window.SpinePlugin, mapping: 'spine' },
       {
-        key: "PhaserRaycaster",
+        key: 'PhaserRaycaster',
         plugin: PhaserRaycaster,
-        mapping: "raycasterPlugin",
+        mapping: 'raycasterPlugin',
       },
     ],
   },
-};
+}
 
-window.addEventListener("load", () => new Phaser.Game(config));
+window.addEventListener('load', () => new Phaser.Game(config))

@@ -1,23 +1,23 @@
-import SpineContainer from "../types/spine-container";
+import SpineContainer from '../types/spine-container'
 
 export enum PlayerWeapon {
-  HANDGUN = "handgun",
-  SHOTGUN = "shotgun",
-  RIFLE = "rifle",
-  KNIFE = "knife",
+  HANDGUN = 'handgun',
+  SHOTGUN = 'shotgun',
+  RIFLE = 'rifle',
+  KNIFE = 'knife',
 }
 
 export enum PlayerState {
-  IDLE = "idle",
-  MOVE = "move",
+  IDLE = 'idle',
+  MOVE = 'move',
 }
 
 export enum PlayerLegsState {
-  IDLE = "idle",
-  WALK = "walk",
-  STRAFE_LEFT = "strafe_left",
-  STRAFE_RIGHT = "strafe_right",
-  RUN = "run",
+  IDLE = 'idle',
+  WALK = 'walk',
+  STRAFE_LEFT = 'strafe_left',
+  STRAFE_RIGHT = 'strafe_right',
+  RUN = 'run',
 }
 
 /**
@@ -32,103 +32,96 @@ export enum PlayerLegsState {
  * - Editor - direct control for previewing animations
  */
 export default class PlayerPuppet extends SpineContainer {
-  private legs: SpineGameObject;
-  private currentState: PlayerState = PlayerState.IDLE;
-  private currentLegsState: PlayerLegsState = PlayerLegsState.IDLE;
-  private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN;
+  private legs: SpineGameObject
+  private currentState: PlayerState = PlayerState.IDLE
+  private currentLegsState: PlayerLegsState = PlayerLegsState.IDLE
+  private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(
-      scene,
-      x,
-      y,
-      "player",
-      `${PlayerState.IDLE}_${PlayerWeapon.HANDGUN}`,
-      true
-    );
+    super(scene, x, y, 'player', `${PlayerState.IDLE}_${PlayerWeapon.HANDGUN}`, true)
 
-    this.setScale(0.7, 0.7);
+    this.setScale(0.7, 0.7)
 
-    this.legs = scene.add.spine(0, 0, "player-legs", PlayerLegsState.IDLE, true);
-    this.addSpine(this.legs, 0);
+    this.legs = scene.add.spine(0, 0, 'player-legs', PlayerLegsState.IDLE, true)
+    this.addSpine(this.legs, 0)
 
-    scene.add.existing(this);
+    scene.add.existing(this)
   }
 
   // --- State Getters ---
 
   getState(): PlayerState {
-    return this.currentState;
+    return this.currentState
   }
 
   getLegsState(): PlayerLegsState {
-    return this.currentLegsState;
+    return this.currentLegsState
   }
 
   getWeapon(): PlayerWeapon {
-    return this.currentWeapon;
+    return this.currentWeapon
   }
 
   // --- Movement States ---
 
   idle(): void {
-    this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE);
+    this.setCurrentState(PlayerState.IDLE, PlayerLegsState.IDLE)
   }
 
   walk(): void {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.WALK);
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.WALK)
   }
 
   run(): void {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.RUN);
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.RUN)
   }
 
   strafeLeft(): void {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_LEFT);
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_LEFT)
   }
 
   strafeRight(): void {
-    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_RIGHT);
+    this.setCurrentState(PlayerState.MOVE, PlayerLegsState.STRAFE_RIGHT)
   }
 
   // --- Weapon ---
 
   selectWeapon(weapon: PlayerWeapon): void {
     if (this.currentWeapon === weapon) {
-      return;
+      return
     }
 
-    this.currentWeapon = weapon;
-    this.spine.setAnimation(0, `${this.currentState}_${weapon}`, true);
+    this.currentWeapon = weapon
+    this.spine.setAnimation(0, `${this.currentState}_${weapon}`, true)
   }
 
   // --- Actions (one-shot animations that return to current state) ---
 
   shoot(): void {
     if (this.currentWeapon === PlayerWeapon.KNIFE) {
-      return;
+      return
     }
 
-    this.spine.setAnimation(0, `shoot_${this.currentWeapon}`, false);
-    this.continueCurrentAnimation();
+    this.spine.setAnimation(0, `shoot_${this.currentWeapon}`, false)
+    this.continueCurrentAnimation()
   }
 
   reload(): void {
     if (this.currentWeapon === PlayerWeapon.KNIFE) {
-      return;
+      return
     }
 
-    this.spine.setAnimation(0, `reload_${this.currentWeapon}`, false);
-    this.continueCurrentAnimation();
+    this.spine.setAnimation(0, `reload_${this.currentWeapon}`, false)
+    this.continueCurrentAnimation()
   }
 
   meleeAttack(): void {
-    this.spine.setAnimation(0, `meleeattack_${this.currentWeapon}`, false);
-    this.continueCurrentAnimation();
+    this.spine.setAnimation(0, `meleeattack_${this.currentWeapon}`, false)
+    this.continueCurrentAnimation()
   }
 
   interactReach(): void {
-    this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false);
+    this.spine.setAnimation(0, `interact_reach_${this.currentWeapon}`, false)
   }
 
   /**
@@ -136,33 +129,29 @@ export default class PlayerPuppet extends SpineContainer {
    * Use after one-shot actions that don't automatically continue.
    */
   returnToCurrentState(): void {
-    this.continueCurrentAnimation();
+    this.continueCurrentAnimation()
   }
 
   interactTake(): void {
-    this.spine.addAnimation(0, `interact_take_${this.currentWeapon}`, false);
-    this.continueCurrentAnimation();
+    this.spine.addAnimation(0, `interact_take_${this.currentWeapon}`, false)
+    this.continueCurrentAnimation()
   }
 
   // --- Internal ---
 
   private setCurrentState(state: PlayerState, legsState: PlayerLegsState): void {
     if (this.currentState !== state) {
-      this.currentState = state;
-      this.spine.setAnimation(0, `${state}_${this.currentWeapon}`, true);
+      this.currentState = state
+      this.spine.setAnimation(0, `${state}_${this.currentWeapon}`, true)
     }
 
     if (this.currentLegsState !== legsState) {
-      this.currentLegsState = legsState;
-      this.legs.setAnimation(0, legsState, true);
+      this.currentLegsState = legsState
+      this.legs.setAnimation(0, legsState, true)
     }
   }
 
   private continueCurrentAnimation(): void {
-    this.spine.addAnimation(
-      0,
-      `${this.currentState}_${this.currentWeapon}`,
-      true
-    );
+    this.spine.addAnimation(0, `${this.currentState}_${this.currentWeapon}`, true)
   }
 }

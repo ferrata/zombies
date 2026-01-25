@@ -86,4 +86,4 @@ export default {
     reach: 150,
     reachAngle: 15,
   },
-};
+}

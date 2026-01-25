@@ -1,8 +1,8 @@
 export interface SpineModelInfo {
-  key: string;
-  name: string;
-  jsonFile: string;
-  atlasFile: string;
+  key: string
+  name: string
+  jsonFile: string
+  atlasFile: string
 }
 
 /**
@@ -12,28 +12,28 @@ export interface SpineModelInfo {
 export class SpineModelRegistry {
   private static spines: SpineModelInfo[] = [
     {
-      key: "player",
-      name: "Player (Upper Body)",
-      jsonFile: "player.json",
-      atlasFile: "player.atlas",
+      key: 'player',
+      name: 'Player (Upper Body)',
+      jsonFile: 'player.json',
+      atlasFile: 'player.atlas',
     },
     {
-      key: "player-legs",
-      name: "Player Legs",
-      jsonFile: "player-legs.json",
-      atlasFile: "player-legs.atlas",
+      key: 'player-legs',
+      name: 'Player Legs',
+      jsonFile: 'player-legs.json',
+      atlasFile: 'player-legs.atlas',
     },
-  ];
+  ]
 
   static getSpines(): SpineModelInfo[] {
-    return this.spines;
+    return this.spines
   }
 
   static getSpine(key: string): SpineModelInfo | undefined {
-    return this.spines.find((m) => m.key === key);
+    return this.spines.find((m) => m.key === key)
   }
 
   static getSpineKeys(): string[] {
-    return this.spines.map((m) => m.key);
+    return this.spines.map((m) => m.key)
   }
 }
