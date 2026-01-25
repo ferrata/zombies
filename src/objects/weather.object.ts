@@ -5,7 +5,7 @@ interface PlayerLike {
   body: Phaser.Physics.Arcade.Body
 }
 
-export interface IWeather {
+export interface Weather {
   isOn: boolean
 
   start: () => void
@@ -45,7 +45,7 @@ export class WeatherConditions {
   }
 }
 
-export class Snow implements IWeather {
+export class Snow implements Weather {
   private snow: Phaser.GameObjects.Particles.ParticleEmitter
 
   public isOn: boolean
@@ -98,7 +98,7 @@ export class Snow implements IWeather {
   }
 }
 
-export class Rain implements IWeather {
+export class Rain implements Weather {
   private rainSplashParticles: Phaser.GameObjects.Particles.ParticleEmitter
   private rainDrops: Phaser.GameObjects.Particles.ParticleEmitter
   private lightning: Phaser.Time.TimerEvent

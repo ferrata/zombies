@@ -260,7 +260,6 @@ export function createPlayer(
           flashlightItem.setVisible(false)
           flashlightItem.setActive(false)
           player.flashlight = flashlightItem
-          player.flashlight.mapLightAwareObject(player)
           return item
         })
       } else {

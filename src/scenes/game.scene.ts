@@ -4,7 +4,7 @@ import PlayerInputs from '../controls/player-inputs'
 import Pointer from '../objects/pointer.object'
 import { Event } from './event'
 import {
-  IProjection,
+  Projection,
   StaticMatterProjectionRectangle,
   StaticMatterProjectionCircle,
 } from '../objects/static-matter-projection.object'
@@ -28,15 +28,11 @@ import { createFlashlight, FlashlightObject } from '../objects/flashlight.object
 import { createEmergencyLight, EmergencyLightObject } from '../objects/emergency-light.object'
 import { createBarrel, BarrelObject } from '../objects/barrel.object'
 
-export interface IGameScene {
-  getDebugInfo(): object
-}
-
-export function isGameScene(scene: object): scene is IGameScene {
+export function isGameScene(scene: object): scene is GameScene {
   return typeof scene === 'object' && 'getDebugInfo' in scene
 }
 
-export default class GameScene extends Phaser.Scene implements IGameScene {
+export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs
   private _isDark: boolean
   private _lightSceneGraphics: Phaser.GameObjects.Graphics
@@ -49,7 +45,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
   private pointer: Pointer
   private player: PlayerObject
   private objects: Phaser.GameObjects.GameObject[] = []
-  private obstacles: IProjection[] = []
+  private obstacles: Projection[] = []
   private redLight: { light: EmergencyLightObject; isOn: boolean; enabled: boolean }
   private weather: WeatherConditions
 

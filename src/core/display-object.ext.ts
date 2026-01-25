@@ -75,7 +75,7 @@ Phaser.GameObjects.GameObject.prototype.mixin = function <T extends object, C = 
 Phaser.GameObjects.GameObject.prototype.merge = function <T extends object>(
   props: T,
 ): Phaser.GameObjects.GameObject & T {
-  Object.assign(this, props)
+  Object.defineProperties(this, Object.getOwnPropertyDescriptors(props))
   return this as Phaser.GameObjects.GameObject & T
 }
 

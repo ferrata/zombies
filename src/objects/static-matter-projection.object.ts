@@ -1,5 +1,5 @@
-export interface IProjection {
-  shift(diff: Phaser.Types.Math.Vector2Like): IProjection
+export interface Projection {
+  shift(diff: Phaser.Types.Math.Vector2Like): Projection
 }
 
 interface MatterObjectLike {
@@ -12,7 +12,7 @@ interface MatterObjectLike {
 
 export class StaticMatterProjectionCircle
   extends Phaser.Physics.Arcade.StaticGroup
-  implements IProjection
+  implements Projection
 {
   private coordinates: Phaser.Types.Math.Vector2Like[]
 
@@ -34,7 +34,7 @@ export class StaticMatterProjectionCircle
     this.setVisible(false)
   }
 
-  public shift(diff: Phaser.Types.Math.Vector2Like): IProjection {
+  public shift(diff: Phaser.Types.Math.Vector2Like): Projection {
     this.getChildren().forEach((child) => {
       const dot = child as Phaser.Physics.Arcade.Sprite
       dot.setPosition(dot.x + diff.x, dot.y + diff.y).refreshBody()
@@ -67,7 +67,7 @@ export class StaticMatterProjectionCircle
 
 export class StaticMatterProjectionRectangle
   extends Phaser.Physics.Arcade.StaticGroup
-  implements IProjection
+  implements Projection
 {
   private coordinates: Phaser.Types.Math.Vector2Like[]
 
@@ -92,7 +92,7 @@ export class StaticMatterProjectionRectangle
     this.setVisible(false)
   }
 
-  public shift(diff: Phaser.Types.Math.Vector2Like): IProjection {
+  public shift(diff: Phaser.Types.Math.Vector2Like): Projection {
     this.getChildren().forEach((child) => {
       const dot = child as Phaser.Physics.Arcade.Sprite
       dot.setPosition(dot.x + diff.x, dot.y + diff.y).refreshBody()
