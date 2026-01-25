@@ -11,7 +11,9 @@ export default class SpineContainer extends Phaser.GameObjects.Container {
 
     this.mainSpine = scene.add.spine(0, 0, key, anim, loop)
 
-    scene.physics.add.existing(this)
+    if (scene.physics) {
+      scene.physics.add.existing(this)
+    }
 
     this.add(this.mainSpine)
   }
