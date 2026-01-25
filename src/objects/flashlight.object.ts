@@ -1,30 +1,74 @@
 import config from '../game-config'
-import { lightSourceMixin, LightSourceProps } from '../mixins/light-source.mixin'
-import { pointableMixin, PointableProps } from '../mixins/pointable.mixin'
-import { interactableMixin, InteractableProps } from '../mixins/interactable.mixin'
-import { debuggableMixin, DebuggableProps } from '../mixins/debuggable.mixin'
+import { lightSourceMixin, LightSource } from '../mixins/light-source.mixin'
+import { pointableMixin } from '../mixins/pointable.mixin'
+import { interactableMixin } from '../mixins/interactable.mixin'
+import { debuggableMixin, Debuggable } from '../mixins/debuggable.mixin'
 
-export interface FlashlightObject
-  extends
-    Phaser.Physics.Arcade.Sprite,
-    LightSourceProps,
-    PointableProps,
-    InteractableProps,
-    DebuggableProps {
-  isOn: boolean
-  isOff: boolean
-  isGlitchy: boolean
-  turnOn(): void
-  turnOff(): void
-  setGlitchy(value: boolean): void
+function flashlightMixin<T extends Phaser.GameObjects.Sprite & LightSource & Debuggable>(obj: T) {
+  let glitchy = false
+
+  const originalSetPosition = obj.setPosition.bind(obj)
+  const originalSetAngle = obj.setAngle.bind(obj)
+
+  obj.setPosition = function (x: number, y: number) {
+    originalSetPosition(x, y)
+    obj.setLightOrigin(x, y)
+    return this
+  }
+
+  obj.setAngle = function (angle: number) {
+    originalSetAngle(angle)
+    obj.setLightAngleDeg(obj.angle)
+    return this
+  }
+
+  obj.getDebugInfo = function () {
+    return {
+      name: obj.name,
+      x: obj.x,
+      y: obj.y,
+      isOn: obj.isLightEnabled,
+      rotation: obj.rotation,
+      glitchy: glitchy,
+    }
+  }
+
+  obj.drawDebugPhysics = function (graphics: Phaser.GameObjects.Graphics) {
+    if (!obj.lightRay) return
+    graphics.fillStyle(0xff0000, 0.5)
+    obj.lightRay.intersections.forEach((intersection: Phaser.Geom.Point) => {
+      graphics.fillCircle(intersection.x, intersection.y, 3)
+    })
+  }
+
+  return obj.merge({
+    get isOn() {
+      return obj.isLightEnabled
+    },
+    get isOff() {
+      return !obj.isLightEnabled
+    },
+    get isGlitchy() {
+      return glitchy
+    },
+    turnOn() {
+      obj.enableLight()
+      obj.setLightOrigin(obj.x, obj.y)
+      obj.setLightAngleDeg(obj.angle)
+      obj.lightRay?.setConeDeg(config.flashlight.coneDeg)
+      obj.lightRay?.setRayRange(config.flashlight.coneRange)
+    },
+    turnOff() {
+      obj.disableLight()
+    },
+    setGlitchy(value: boolean) {
+      glitchy = value
+      return obj
+    },
+  })
 }
 
-export function createFlashlight(
-  scene: Phaser.Scene,
-  x: number,
-  y: number,
-  raycaster: Raycaster,
-): FlashlightObject {
+export function createFlashlight(scene: Phaser.Scene, x: number, y: number, raycaster: Raycaster) {
   const gameScene = scene as Phaser.Scene & { physics: Phaser.Physics.Arcade.ArcadePhysics }
   const sprite = gameScene.physics.add.sprite(x, y, 'flashlight') as Phaser.Physics.Arcade.Sprite
 
@@ -37,79 +81,12 @@ export function createFlashlight(
     .mixin(lightSourceMixin, { raycaster, config: config.flashlight })
     .mixin(pointableMixin, { info: 'Flashlight' })
     .mixin(interactableMixin, { range: 150 })
-    .mixin(debuggableMixin) as unknown as FlashlightObject
+    .mixin(debuggableMixin)
+    .mixin(flashlightMixin)
 
   result.lightGraphics.setDepth(config.depths.light)
 
-  let glitchy = false
-
-  Object.defineProperties(result, {
-    isOn: {
-      get() {
-        return this.isLightEnabled
-      },
-    },
-    isOff: {
-      get() {
-        return !this.isLightEnabled
-      },
-    },
-    isGlitchy: {
-      get() {
-        return glitchy
-      },
-    },
-  })
-
-  const originalSetPosition = result.setPosition.bind(result)
-  result.setPosition = function (x: number, y: number) {
-    originalSetPosition(x, y)
-    this.setLightOrigin(x, y)
-    return this
-  }
-
-  const originalSetAngle = result.setAngle.bind(result)
-  result.setAngle = function (angle: number) {
-    originalSetAngle(angle)
-    this.setLightAngleDeg(this.angle)
-    return this
-  }
-
-  result.turnOn = function () {
-    this.enableLight()
-    this.setLightOrigin(this.x, this.y)
-    this.setLightAngleDeg(this.angle)
-    this.lightRay?.setConeDeg(config.flashlight.coneDeg)
-    this.lightRay?.setRayRange(config.flashlight.coneRange)
-  }
-
-  result.turnOff = function () {
-    this.disableLight()
-  }
-
-  result.setGlitchy = function (value: boolean) {
-    glitchy = value
-    return this
-  }
-
-  result.getDebugInfo = function () {
-    return {
-      name: this.name,
-      x: this.x,
-      y: this.y,
-      isOn: this.isOn,
-      rotation: this.rotation,
-      glitchy: glitchy,
-    }
-  }
-
-  result.drawDebugPhysics = function (graphics: Phaser.GameObjects.Graphics) {
-    if (!this.lightRay) return
-    graphics.fillStyle(0xff0000, 0.5)
-    this.lightRay.intersections.forEach((intersection: Phaser.Geom.Point) => {
-      graphics.fillCircle(intersection.x, intersection.y, 3)
-    })
-  }
-
   return result
 }
+
+export type FlashlightObject = ReturnType<typeof createFlashlight>

@@ -1,24 +1,19 @@
 import { MIXIN_INTERACTABLE } from '../core/instances'
 
-export interface InteractableConfig {
-  onInteract?: () => void
-  range?: number
-}
-
-export interface InteractableProps {
+export type Interactable = {
   interactRange: number
   onInteract(): void
   canInteract(): boolean
 }
 
-export function isInteractable(obj: unknown): obj is InteractableProps {
+export function isInteractable(obj: unknown): obj is Interactable {
   return obj != null && typeof obj === 'object' && 'onInteract' in obj && 'canInteract' in obj
 }
 
 export function interactableMixin<
   T extends Phaser.GameObjects.GameObject & { x: number; y: number },
->(obj: T, cfg?: InteractableConfig): T & InteractableProps {
-  const result = obj as T & InteractableProps
+>(obj: T, cfg?: { onInteract?: () => void; range?: number }) {
+  const result = obj as T & Interactable
 
   result.interactRange = cfg?.range ?? 150
 

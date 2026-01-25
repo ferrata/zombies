@@ -1,9 +1,13 @@
 import { GameObjects } from 'phaser'
 import config from '../game-config'
-import { DebuggableProps, isDebuggable } from '../mixins/debuggable.mixin'
+import { Debuggable, isDebuggable } from '../mixins/debuggable.mixin'
 import { isGameScene } from '../scenes/game.scene'
 
 type DebugInfoLevel = 'all' | 'physics' | 'info' | 'none'
+type DebuggableObject = Debuggable & {
+  active?: boolean
+  body?: Phaser.Physics.Arcade.Body
+}
 
 export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   private debugInfoLevel: DebugInfoLevel = 'none'
@@ -12,7 +16,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   private debugGraphics: Phaser.GameObjects.Graphics
   private debugObjects: {
     [key: string]: {
-      object: DebuggableProps & { active?: boolean; body?: Phaser.Physics.Arcade.Body }
+      object: DebuggableObject
       window: DebugInfoWindow | null
     }
   } = {}
@@ -79,7 +83,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     const registerDebuggable = (object: Phaser.GameObjects.GameObject) => {
       if (isDebuggable(object) && !this.debugObjects[object.name]) {
         this.debugObjects[object.name] = {
-          object: object as DebuggableProps,
+          object: object as DebuggableObject,
           window: object.hasDebugInfo() ? new DebugInfoWindow(this.scene, object.name) : null,
         }
       }
@@ -254,7 +258,7 @@ class DebugInfoWindow extends Phaser.GameObjects.Container {
     this.resize()
   }
 
-  public setDebuggable(debuggable: DebuggableProps): DebugInfoWindow {
+  public setDebuggable(debuggable: Debuggable): DebugInfoWindow {
     const debugInfo = debuggable?.getDebugInfo()
     if (!debugInfo) {
       this.setText('no debug info available')

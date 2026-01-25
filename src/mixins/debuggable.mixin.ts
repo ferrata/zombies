@@ -1,12 +1,12 @@
 import { MIXIN_DEBUGGABLE } from '../core/instances'
 
-export interface DebuggableProps {
+export type Debuggable = {
   hasDebugInfo(): boolean
   getDebugInfo(): Record<string, unknown>
   drawDebugPhysics(graphics: Phaser.GameObjects.Graphics): void
 }
 
-export function isDebuggable(obj: unknown): obj is DebuggableProps {
+export function isDebuggable(obj: unknown): obj is Debuggable {
   return (
     obj != null &&
     typeof obj === 'object' &&
@@ -18,8 +18,8 @@ export function isDebuggable(obj: unknown): obj is DebuggableProps {
 
 export function debuggableMixin<
   T extends Phaser.GameObjects.GameObject & { x: number; y: number; name?: string },
->(obj: T, cfg?: { debugInfo?: () => Record<string, unknown> }): T & DebuggableProps {
-  const result = obj as T & DebuggableProps
+>(obj: T, cfg?: { debugInfo?: () => Record<string, unknown> }) {
+  const result = obj as T & Debuggable
 
   result.hasDebugInfo = function () {
     return true

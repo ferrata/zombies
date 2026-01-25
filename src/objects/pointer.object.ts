@@ -1,5 +1,5 @@
 import config from '../game-config'
-import { isPointable, PointableProps } from '../mixins/pointable.mixin'
+import { isPointable, Pointable } from '../mixins/pointable.mixin'
 
 interface PlayerLike {
   body: Phaser.Physics.Arcade.Body
@@ -7,7 +7,7 @@ interface PlayerLike {
 
 export default class Pointer extends Phaser.GameObjects.GameObject {
   private dot: Phaser.GameObjects.Arc
-  private currentlyHighlighted: PointableProps | null = null
+  private currentlyHighlighted: Pointable | null = null
 
   public get x(): number {
     return this.dot.x

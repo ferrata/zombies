@@ -1,6 +1,6 @@
 import config from '../game-config'
 import { Instances, MIXIN_LIGHT_AWARE, MIXIN_LIGHT_SOURCE } from '../core/instances'
-import { LightAwareProps, isLightAware, LightAwareShape } from './light-aware.mixin'
+import { lightAwareMixin, isLightAware, LightAwareShape } from './light-aware.mixin'
 import { GameSceneInterface } from '../types/game-scene'
 
 export interface LightSourceConfig {
@@ -14,25 +14,24 @@ export interface LightSourceConfig {
   forceLightOver: boolean
 }
 
-export interface LightSourceProps {
+export type LightSource = {
   lightConfig: LightSourceConfig
   lightRay: Raycaster.Ray | null
   lightGraphics: Phaser.GameObjects.Graphics
   lightRaycaster: Raycaster
-
-  get isLightEnabled(): boolean
+  readonly isLightEnabled: boolean
   enableLight(): void
   disableLight(): void
   emitLight(): void
   setLightOrigin(x: number, y: number): void
   setLightAngleDeg(angle: number): void
-  mapLightAwareObject(obj: LightAwareProps): void
+  mapLightAwareObject(obj: { getLightAwareShape(): LightAwareShape }): void
 }
 
 export function lightSourceMixin<
   T extends Phaser.GameObjects.GameObject & { x: number; y: number; name?: string },
->(obj: T, cfg: { raycaster: Raycaster; config: LightSourceConfig }): T & LightSourceProps {
-  const result = obj as T & LightSourceProps
+>(obj: T, cfg: { raycaster: Raycaster; config: LightSourceConfig }) {
+  const result = obj as T & LightSource
 
   result.lightConfig = cfg.config
   result.lightRaycaster = cfg.raycaster
@@ -80,7 +79,7 @@ export function lightSourceMixin<
     this.lightRay?.setAngleDeg(angle)
   }
 
-  result.mapLightAwareObject = function (lightAwareObj: LightAwareProps) {
+  result.mapLightAwareObject = function (lightAwareObj: { getLightAwareShape(): LightAwareShape }) {
     const shape = lightAwareObj.getLightAwareShape()
     if (shape) {
       this.lightRaycaster.mapGameObjects([shape])
@@ -94,7 +93,10 @@ export function lightSourceMixin<
     let mappedObjectUnderLight: LightAwareShape = null
 
     type MappedObject = Phaser.GameObjects.GameObject & {
-      owner?: LightAwareProps & { body?: MatterJS.BodyType }
+      owner?: {
+        onLightOver(ray: Raycaster.Ray, intersections: Phaser.Geom.Point[], force: boolean): void
+        body?: MatterJS.BodyType
+      }
     }
 
     const mappedObjects = this.lightRaycaster.mappedObjects.filter((object: MappedObject) => {

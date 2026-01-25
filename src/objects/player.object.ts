@@ -4,8 +4,8 @@ import { Event } from '../scenes/event'
 import { CasingEmitter } from './casing-emitter.object'
 import { createMuzzleFlash } from './muzzle-flash.object'
 import PlayerPuppet, { PlayerWeapon } from './player.puppet'
-import { LightAwareProps, getTintColorShift, LightAwareShape } from '../mixins/light-aware.mixin'
-import { DebuggableProps } from '../mixins/debuggable.mixin'
+import { LightAware, getTintColorShift, LightAwareShape } from '../mixins/light-aware.mixin'
+import { Debuggable } from '../mixins/debuggable.mixin'
 import { FlashlightObject } from './flashlight.object'
 import { GameSceneInterface } from '../types/game-scene'
 import { createSpineListener } from '../types/spine-listener'
@@ -17,7 +17,7 @@ enum PlayerWeaponMode {
   AUTO = 'auto',
 }
 
-export interface PlayerObject extends LightAwareProps, DebuggableProps {
+export interface PlayerObject extends LightAware, Debuggable {
   puppet: PlayerPuppet
   body: Phaser.Physics.Arcade.Body
   x: number

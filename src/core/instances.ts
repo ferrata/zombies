@@ -1,6 +1,6 @@
-import { LightAwarePropsBase, LightSourcePropsBase } from '../types/mixin-props'
+import { LightAware } from '../mixins/light-aware.mixin'
+import { LightSource } from '../mixins/light-source.mixin'
 
-// Registry uses symbols as keys for type safety
 export const MIXIN_LIGHT_AWARE = Symbol('lightAware')
 export const MIXIN_LIGHT_SOURCE = Symbol('lightSource')
 export const MIXIN_POINTABLE = Symbol('pointable')
@@ -15,8 +15,8 @@ type MixinSymbol =
   | typeof MIXIN_INTERACTABLE
 
 interface MixinTypeMap {
-  [MIXIN_LIGHT_AWARE]: LightAwarePropsBase
-  [MIXIN_LIGHT_SOURCE]: LightSourcePropsBase
+  [MIXIN_LIGHT_AWARE]: LightAware
+  [MIXIN_LIGHT_SOURCE]: LightSource
 }
 
 const instanceRegistry = new Map<MixinSymbol, Set<Phaser.GameObjects.GameObject>>()

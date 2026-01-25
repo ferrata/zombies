@@ -2,18 +2,14 @@ import config from '../game-config'
 import { Label } from '../objects/label.object'
 import { MIXIN_POINTABLE } from '../core/instances'
 
-export interface PointableProps {
-  pointableInfo: string | null
+export type Pointable = {
   showHighlight(): void
   removeHighlight(): void
   showInfo(): void
   removeInfo(): void
-  setInfo(info: string): void
-  hasInfo(): boolean
-  getInfo(): string
 }
 
-export function isPointable(obj: unknown): obj is PointableProps {
+export function isPointable(obj: unknown): obj is Pointable {
   return (
     obj != null && typeof obj === 'object' && 'showHighlight' in obj && 'removeHighlight' in obj
   )
@@ -28,12 +24,19 @@ export function pointableMixin<
     height?: number
     name?: string
   },
->(obj: T, cfg?: { info?: string }): T & PointableProps {
-  const result = obj as T &
-    PointableProps & {
-      _highlight: Phaser.FX.Glow | null
-      _label: Label | null
-    }
+>(obj: T, cfg?: { info?: string }) {
+  const result = obj as T & {
+    pointableInfo: string | null
+    showHighlight(): void
+    removeHighlight(): void
+    showInfo(): void
+    removeInfo(): void
+    setInfo(info: string): void
+    hasInfo(): boolean
+    getInfo(): string
+    _highlight: Phaser.FX.Glow | null
+    _label: Label | null
+  }
 
   result.pointableInfo = cfg?.info ?? null
   result._highlight = null

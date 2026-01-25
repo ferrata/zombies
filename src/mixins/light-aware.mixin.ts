@@ -2,14 +2,7 @@ import config from '../game-config'
 import { GameSceneInterface } from '../types/game-scene'
 import { MIXIN_LIGHT_AWARE } from '../core/instances'
 
-export type LightAwareShape = (Phaser.GameObjects.Shape & { owner?: LightAwareProps }) | null
-
-export interface LightAwareConfig {
-  shape?: LightAwareShape
-  depth?: number
-}
-
-export interface LightAwareProps {
+export type LightAware = {
   lightShape: LightAwareShape
   onLighten(): void
   onDarken(): void
@@ -19,6 +12,10 @@ export interface LightAwareProps {
   setLightAwareShape(shape: LightAwareShape): void
   getLightAwareShape(): LightAwareShape
 }
+
+export type LightAwareShape =
+  | (Phaser.GameObjects.Shape & { owner?: LightAware & { body?: unknown } })
+  | null
 
 export function getColorShift(startColor: number, endColor: number, shift: number): number {
   const tintColor = Phaser.Display.Color.Interpolate.ColorWithColor(
@@ -34,15 +31,15 @@ export function getTintColorShift(startColor: number, shift: number): number {
   return getColorShift(startColor, config.colors.darkenTintColor, shift)
 }
 
-export function isLightAware(obj: unknown): obj is LightAwareProps {
+export function isLightAware(obj: unknown): obj is LightAware {
   return obj != null && typeof obj === 'object' && 'onLighten' in obj && 'onDarken' in obj
 }
 
 export function lightAwareMixin<
   T extends Phaser.GameObjects.GameObject & {
     postFX?: Phaser.GameObjects.Components.FX
-    setTint?: (color?: number) => any
-    setDepth?: (depth: number) => any
+    setTint?: (color?: number) => unknown
+    setDepth?: (depth: number) => unknown
     x: number
     y: number
     width?: number
@@ -53,9 +50,9 @@ export function lightAwareMixin<
     scaleY?: number
     angle?: number
   },
->(obj: T, cfg?: LightAwareConfig): T & LightAwareProps {
+>(obj: T, cfg?: { shape?: LightAwareShape; depth?: number }) {
   const result = obj as T &
-    LightAwareProps & {
+    LightAware & {
       _lightAwareShadow: Phaser.FX.Shadow | null
       _textureUnderLight: Phaser.GameObjects.RenderTexture | null
       _textureUnderLightMask: Phaser.GameObjects.Graphics | null
