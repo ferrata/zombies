@@ -48,7 +48,7 @@ export default class Pointer extends Phaser.GameObjects.GameObject {
 
     const gameObject = body?.gameObject
 
-    if (isPointable(gameObject) && gameObject != this.currentlyHighlighted) {
+    if (isPointable(gameObject) && gameObject.active && gameObject != this.currentlyHighlighted) {
       this.dot.visible = false
       if (this.currentlyHighlighted) {
         this.currentlyHighlighted.removeHighlight()

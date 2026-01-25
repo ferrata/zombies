@@ -255,6 +255,8 @@ export function createPlayer(
           const flashlightItem = item as FlashlightObject
           // Disable physics and hide the sprite instead of removing from scene
           flashlightItem.body?.enable && (flashlightItem.body.enable = false)
+          flashlightItem.removeHighlight()
+          flashlightItem.removeInfo()
           flashlightItem.setVisible(false)
           flashlightItem.setActive(false)
           player.flashlight = flashlightItem
