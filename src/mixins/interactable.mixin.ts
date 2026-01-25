@@ -1,3 +1,5 @@
+import { MIXIN_INTERACTABLE } from "../core/instances";
+
 export interface InteractableConfig {
   onInteract?: () => void;
   range?: number;
@@ -9,8 +11,8 @@ export interface InteractableProps {
   canInteract(): boolean;
 }
 
-export function isInteractable(obj: any): obj is InteractableProps {
-  return obj != null && "onInteract" in obj && "canInteract" in obj;
+export function isInteractable(obj: unknown): obj is InteractableProps {
+  return obj != null && typeof obj === "object" && "onInteract" in obj && "canInteract" in obj;
 }
 
 export function interactableMixin<
@@ -26,7 +28,7 @@ export function interactableMixin<
     return this.active;
   };
 
-  result.track(interactableMixin);
+  result.track(MIXIN_INTERACTABLE);
 
   return result;
 }

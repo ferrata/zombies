@@ -12,8 +12,8 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   private debugGraphics: Phaser.GameObjects.Graphics;
   private debugObjects: {
     [key: string]: {
-      object: DebuggableProps & { body?: any };
-      window: DebugInfoWindow;
+      object: DebuggableProps & { active?: boolean; body?: Phaser.Physics.Arcade.Body };
+      window: DebugInfoWindow | null;
     };
   } = {};
 
@@ -159,7 +159,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       this.debugInfoLevel === "all" || this.debugInfoLevel === "info";
 
     for (const key in this.debugObjects) {
-      const obj = this.debugObjects[key].object as any;
+      const obj = this.debugObjects[key].object;
       const isActive = obj?.active !== false;
       if (this.debugObjects[key].window) {
         this.debugObjects[key].window.visible = drawDebugInfo && isActive;
@@ -179,7 +179,7 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       }
 
       // Skip inactive objects
-      if ((object as any).active === false) {
+      if (object.active === false) {
         continue;
       }
 
@@ -228,8 +228,8 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
     }
   }
 
-  private getSceneDebugInfo(scene: Phaser.Scene): object {
-    const info = {
+  private getSceneDebugInfo(scene: Phaser.Scene): Record<string, unknown> {
+    const info: Record<string, unknown> = {
       fps: Math.round(scene.game.loop.actualFps),
     };
 
@@ -287,12 +287,12 @@ class DebugInfoWindow extends Phaser.GameObjects.Container {
     return this.setDebugInfo(debugInfo);
   }
 
-  public setDebugInfo(debugInfo: object) {
+  public setDebugInfo(debugInfo: Record<string, unknown>) {
     const text = this.formatDebugInfo(debugInfo);
     return this.setText(text);
   }
 
-  private formatDebugInfo(debugInfo: object, indent = 0) {
+  private formatDebugInfo(debugInfo: Record<string, unknown>, indent = 0): string {
     const maxSpace =
       Math.max(...Object.keys(debugInfo).map((key) => key.length)) + 2;
     const indentString = indent ? " ".repeat(indent) : "";
@@ -301,8 +301,8 @@ class DebugInfoWindow extends Phaser.GameObjects.Container {
         (key) =>
           `${indentString}${key}${" ".repeat(maxSpace - key.length)}${
             debugInfo[key] instanceof Object
-              ? "\n" + this.formatDebugInfo(debugInfo[key], indent + 4)
-              : debugInfo[key]
+              ? "\n" + this.formatDebugInfo(debugInfo[key] as Record<string, unknown>, indent + 4)
+              : String(debugInfo[key])
           }`
       )
       .join("\n");

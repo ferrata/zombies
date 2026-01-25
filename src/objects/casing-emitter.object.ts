@@ -1,4 +1,4 @@
-import GameScene from "../scenes/game.scene";
+import { GameSceneInterface } from "../types/game-scene";
 
 export interface CasingEmitterLightCallbacks {
   onLighten(): void;
@@ -16,7 +16,7 @@ export class CasingEmitter
   private debug: Phaser.GameObjects.Rectangle;
 
   constructor(
-    scene: GameScene,
+    scene: GameSceneInterface,
     x: number,
     y: number,
     casingsTexture: string,

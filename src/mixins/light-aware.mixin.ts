@@ -1,6 +1,8 @@
 import config from "../game-config";
+import { GameSceneInterface } from "../types/game-scene";
+import { MIXIN_LIGHT_AWARE } from "../core/instances";
 
-export type LightAwareShape = null | Phaser.GameObjects.Shape;
+export type LightAwareShape = (Phaser.GameObjects.Shape & { owner?: LightAwareProps }) | null;
 
 export interface LightAwareConfig {
   shape?: LightAwareShape;
@@ -32,7 +34,7 @@ export function getTintColorShift(startColor: number, shift: number): number {
   return getColorShift(startColor, config.colors.darkenTintColor, shift);
 }
 
-export function isLightAware(obj: any): obj is LightAwareProps {
+export function isLightAware(obj: unknown): obj is LightAwareProps {
   return obj != null && typeof obj === "object" && "onLighten" in obj && "onDarken" in obj;
 }
 
@@ -70,7 +72,7 @@ export function lightAwareMixin<
   result.lightShape = cfg?.shape ?? null;
 
   if (result.lightShape) {
-    (result.lightShape as any).owner = result;
+    result.lightShape.owner = result;
     result.lightShape.setDepth(depth);
   }
 
@@ -99,10 +101,11 @@ export function lightAwareMixin<
 
   result.onLightOver = function (ray: Raycaster.Ray, intersections: Phaser.Geom.Point[], force: boolean) {
     if (!this.lightShape) return;
-    if (this.scene && !(this.scene as any).isDark) return;
+    const gameScene = this.scene as GameSceneInterface | undefined;
+    if (gameScene && !gameScene.isDark) return;
 
-    const owner = (this.lightShape as any).owner;
-    const ownerBody = owner?.body as MatterJS.BodyType;
+    const owner = this.lightShape.owner;
+    const ownerBody = (owner as { body?: MatterJS.BodyType } | undefined)?.body;
     if (!ownerBody) return;
 
     const effectiveIntersections = intersections.filter((intersection) => {
@@ -167,7 +170,7 @@ export function lightAwareMixin<
   };
 
   // Alias for backwards compatibility with old isLightAware() check (has a typo)
-  (result as any).onLighningtOver = result.onLightningOver;
+  (result as unknown as { onLighningtOver: typeof result.onLightningOver }).onLighningtOver = result.onLightningOver;
 
   result.setLightAwareShape = function (shape: LightAwareShape) {
     const image = this as unknown as Phaser.GameObjects.Image;
@@ -190,9 +193,10 @@ export function lightAwareMixin<
 
     this.lightShape = shape;
     if (shape) {
-      (shape as any).setName?.(`${(this as any).name ?? "object"}-shape`);
+      const namedObj = this as { name?: string };
+      shape.setName?.(`${namedObj.name ?? "object"}-shape`);
       shape.setDepth(depth);
-      (shape as any).owner = this;
+      shape.owner = this;
     }
   };
 
@@ -200,7 +204,7 @@ export function lightAwareMixin<
     return this.lightShape;
   };
 
-  result.track(lightAwareMixin);
+  result.track(MIXIN_LIGHT_AWARE);
 
   return result;
 }

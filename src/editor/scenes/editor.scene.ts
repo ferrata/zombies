@@ -262,8 +262,13 @@ export default class EditorScene extends Phaser.Scene {
   private setupDelayedLoop(animationName: string, delay: number) {
     if (!this.currentSpine) return;
 
-    // Listen for animation complete
-    const listener: any = {
+    // Listen for animation complete - use full listener interface
+    const listener: spine.AnimationStateListener2 = {
+      start: () => {},
+      interrupt: () => {},
+      end: () => {},
+      dispose: () => {},
+      event: () => {},
       complete: () => {
         // Only restart if this is still the current animation and looping is enabled
         if (

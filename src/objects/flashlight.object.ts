@@ -100,7 +100,7 @@ export function createFlashlight(scene: Phaser.Scene, x: number, y: number, rayc
   result.drawDebugPhysics = function (graphics: Phaser.GameObjects.Graphics) {
     if (!this.lightRay) return;
     graphics.fillStyle(0xff0000, 0.5);
-    this.lightRay.intersections.forEach((intersection: any) => {
+    this.lightRay.intersections.forEach((intersection: Phaser.Geom.Point) => {
       graphics.fillCircle(intersection.x, intersection.y, 3);
     });
   };

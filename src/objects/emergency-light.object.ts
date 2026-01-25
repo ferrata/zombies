@@ -1,7 +1,9 @@
 import config from "../game-config";
 import { lightSourceMixin, LightSourceProps } from "../mixins/light-source.mixin";
 import { debuggableMixin, DebuggableProps } from "../mixins/debuggable.mixin";
-import { lightAwareMixin, LightAwareProps } from "../mixins/light-aware.mixin";
+import { LightAwareProps } from "../mixins/light-aware.mixin";
+import { GameSceneInterface } from "../types/game-scene";
+import { MIXIN_LIGHT_AWARE } from "../core/instances";
 
 export interface EmergencyLightObject
   extends Phaser.Physics.Arcade.Sprite,
@@ -44,8 +46,8 @@ export function createEmergencyLight(scene: Phaser.Scene, x: number, y: number, 
   };
 
   result.turnOff = function () {
-    const gameScene = this.scene as any;
-    this.setTint(gameScene.isDark ? 0x111111 : 0x505050);
+    const gameScene = this.scene as GameSceneInterface | undefined;
+    this.setTint(gameScene?.isDark ? 0x111111 : 0x505050);
     this.disableLight();
   };
 
@@ -64,13 +66,13 @@ export function createEmergencyLight(scene: Phaser.Scene, x: number, y: number, 
   result.onLightOverReset = function () {};
   result.onLightOver = function () {};
   result.onLightningOver = function () {};
-  (result as any).onLighningtOver = result.onLightningOver; // Typo alias for backwards compat
+  (result as EmergencyLightObject & { onLighningtOver: typeof result.onLightningOver }).onLighningtOver = result.onLightningOver;
   result.setLightAwareShape = function () {};
   result.getLightAwareShape = function () { return null; };
-  (result as any).lightShape = null;
+  result.lightShape = null;
 
   // Track for light awareness so onLighten/onDarken get called
-  result.track(lightAwareMixin);
+  result.track(MIXIN_LIGHT_AWARE);
 
   result.getDebugInfo = function () {
     return {
@@ -85,13 +87,13 @@ export function createEmergencyLight(scene: Phaser.Scene, x: number, y: number, 
   result.drawDebugPhysics = function (graphics: Phaser.GameObjects.Graphics) {
     if (!this.lightRay) return;
     graphics.fillStyle(0xff0000, 0.5);
-    this.lightRay.intersections.forEach((intersection: any) => {
+    this.lightRay.intersections.forEach((intersection: Phaser.Geom.Point) => {
       graphics.fillCircle(intersection.x, intersection.y, 3);
     });
   };
 
   // Start in off state with darkened tint
-  const isDark = (scene as any).isDark ?? false;
+  const isDark = (scene as GameSceneInterface | undefined)?.isDark ?? false;
   result.setTint(isDark ? 0x111111 : 0x505050);
 
   return result;

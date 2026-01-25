@@ -1,27 +1,24 @@
 import PlayerInputs from "../controls/player-inputs";
+import { GameSceneInterface } from "../types/game-scene";
+import { PlayerObject } from "../objects/player.object";
 
-export type GameScene = Phaser.Scene & {
-  isDark: boolean;
-  inputs: PlayerInputs;
-  lightSceneGraphics: Phaser.GameObjects.Graphics;
-  lightShadowSceneGraphics: Phaser.GameObjects.Graphics;
-};
+export type { GameSceneInterface as GameScene };
 
-export let scene: GameScene;
-export let input: PlayerInputs;
-export let player: any;
+export let scene: GameSceneInterface | undefined;
+export let input: PlayerInputs | undefined;
+export let player: PlayerObject | undefined;
 
-export function setGlobals(gameScene: GameScene): void {
+export function setGlobals(gameScene: GameSceneInterface): void {
   scene = gameScene;
   input = gameScene.inputs;
 }
 
-export function setPlayer(playerObj: any): void {
+export function setPlayer(playerObj: PlayerObject): void {
   player = playerObj;
 }
 
 export function clearGlobals(): void {
-  scene = undefined as any;
-  input = undefined as any;
-  player = undefined as any;
+  scene = undefined;
+  input = undefined;
+  player = undefined;
 }

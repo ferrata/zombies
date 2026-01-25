@@ -199,7 +199,7 @@ export class Rain implements IWeather {
             0xf0,
             0xf0,
             false,
-            (_, progress: number) => {
+            (_camera: Phaser.Cameras.Scene2D.Camera, progress: number) => {
               this.scene.reactToLightning(progress);
             }
           );

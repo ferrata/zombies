@@ -1,6 +1,7 @@
 import config from "../game-config";
-import { Instances } from "../core/instances";
-import { lightAwareMixin, LightAwareProps, isLightAware } from "./light-aware.mixin";
+import { Instances, MIXIN_LIGHT_AWARE, MIXIN_LIGHT_SOURCE } from "../core/instances";
+import { LightAwareProps, isLightAware, LightAwareShape } from "./light-aware.mixin";
+import { GameSceneInterface } from "../types/game-scene";
 
 export interface LightSourceConfig {
   emitOnDayLight: boolean;
@@ -43,7 +44,7 @@ export function lightSourceMixin<
 
   // Map existing light-aware objects
   const lightAwareShapes: Phaser.GameObjects.Shape[] = [];
-  for (const lightAwareObj of Instances(lightAwareMixin)) {
+  for (const lightAwareObj of Instances(MIXIN_LIGHT_AWARE)) {
     const shape = lightAwareObj.getLightAwareShape();
     if (shape) lightAwareShapes.push(shape);
   }
@@ -87,18 +88,20 @@ export function lightSourceMixin<
   result.emitLight = function () {
     if (!this.lightRay) return;
 
-    const gameScene = this.scene as any;
-    let mappedObjectUnderLight: any = null;
+    const gameScene = this.scene as GameSceneInterface;
+    let mappedObjectUnderLight: LightAwareShape = null;
 
-    const mappedObjects = this.lightRaycaster.mappedObjects.filter((object: any) => {
+    type MappedObject = Phaser.GameObjects.GameObject & { owner?: LightAwareProps & { body?: MatterJS.BodyType } };
+
+    const mappedObjects = this.lightRaycaster.mappedObjects.filter((object: MappedObject) => {
       if (this.lightConfig.forceLightOver && object instanceof Phaser.GameObjects.Shape) {
-        const ownerBody = (object as any).owner?.body as Phaser.Types.Physics.Matter.MatterBody;
+        const ownerBody = (object as MappedObject).owner?.body;
         if (
           ownerBody &&
-          (ownerBody as any).bounds &&
-          this.scene.matter.intersectPoint(this.lightRay.origin.x, this.lightRay.origin.y, [ownerBody]).length > 0
+          ownerBody.bounds &&
+          this.scene.matter.intersectPoint(this.lightRay!.origin.x, this.lightRay!.origin.y, [ownerBody]).length > 0
         ) {
-          mappedObjectUnderLight = object;
+          mappedObjectUnderLight = object as LightAwareShape;
           return false;
         }
       }
@@ -140,29 +143,30 @@ export function lightSourceMixin<
     gameScene.lightSceneGraphics.fillStyle(0xffffff, 0).fillPoints(intersections);
     gameScene.lightSceneGraphics.fillStyle(this.lightConfig.lightColor, this.lightConfig.lightAlpha).fillPoints(intersections);
 
-    const affectedObjects = initialIntersections.reduce((acc: any[], intersection: any) => {
+    type IntersectionPoint = Phaser.Geom.Point & { object?: MappedObject };
+    const affectedObjects = initialIntersections.reduce((acc: MappedObject[], intersection: IntersectionPoint) => {
       if (intersection.object && acc.indexOf(intersection.object) === -1) {
         acc.push(intersection.object);
       }
       return acc;
     }, []);
 
-    affectedObjects.forEach((object: any) => {
-      const owner = object.owner as LightAwareProps;
+    affectedObjects.forEach((object: MappedObject) => {
+      const owner = object.owner;
       if (owner && isLightAware(owner)) {
         owner.onLightOver(this.lightRay!, initialIntersections, false);
       }
     });
 
     if (mappedObjectUnderLight) {
-      const owner = mappedObjectUnderLight.owner as LightAwareProps;
+      const owner = mappedObjectUnderLight.owner;
       if (owner && isLightAware(owner)) {
         owner.onLightOver(this.lightRay!, initialIntersections, true);
       }
     }
   };
 
-  result.track(lightSourceMixin);
+  result.track(MIXIN_LIGHT_SOURCE);
 
   return result;
 }

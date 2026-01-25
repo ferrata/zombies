@@ -1,35 +1,37 @@
+import { MIXIN_DEBUGGABLE } from "../core/instances";
+
 export interface DebuggableProps {
   hasDebugInfo(): boolean;
-  getDebugInfo(): object;
+  getDebugInfo(): Record<string, unknown>;
   drawDebugPhysics(graphics: Phaser.GameObjects.Graphics): void;
 }
 
-export function isDebuggable(obj: any): obj is DebuggableProps {
-  return obj != null && "hasDebugInfo" in obj && "getDebugInfo" in obj && "drawDebugPhysics" in obj;
+export function isDebuggable(obj: unknown): obj is DebuggableProps {
+  return obj != null && typeof obj === "object" && "hasDebugInfo" in obj && "getDebugInfo" in obj && "drawDebugPhysics" in obj;
 }
 
 export function debuggableMixin<
   T extends Phaser.GameObjects.GameObject & { x: number; y: number; name?: string }
->(obj: T, cfg?: { debugInfo?: () => object }): T & DebuggableProps {
+>(obj: T, cfg?: { debugInfo?: () => Record<string, unknown> }): T & DebuggableProps {
   const result = obj as T & DebuggableProps;
 
   result.hasDebugInfo = function () {
     return true;
   };
 
-  result.getDebugInfo = function () {
+  result.getDebugInfo = function (): Record<string, unknown> {
     if (cfg?.debugInfo) {
       return cfg.debugInfo();
     }
     return {
-      name: (this as any).name ?? "unknown",
+      name: this.name ?? "unknown",
       x: this.x,
       y: this.y,
     };
   };
 
   result.drawDebugPhysics = function (graphics: Phaser.GameObjects.Graphics) {
-    const body = (this as any).body;
+    const body = (this as { body?: MatterJS.BodyType }).body;
     if (body?.bounds) {
       graphics.strokeRect(
         body.bounds.min.x,
@@ -40,7 +42,7 @@ export function debuggableMixin<
     }
   };
 
-  result.track(debuggableMixin);
+  result.track(MIXIN_DEBUGGABLE);
 
   // Emit event so DebugScreenPlugin can pick up objects after mixin is applied
   if (obj.scene) {

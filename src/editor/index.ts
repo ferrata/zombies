@@ -6,6 +6,15 @@ import ModelsPreloadScene from "./scenes/models-preload.scene";
 import ModelsScene from "./scenes/models.scene";
 import { editorState, EditorTab } from "./editor-state";
 
+declare global {
+  interface Window {
+    spineGame?: Phaser.Game;
+    modelsGame?: Phaser.Game;
+    getSpineGame?: () => Phaser.Game | null;
+    getModelsGame?: () => Phaser.Game | null;
+  }
+}
+
 // Spine tab game configuration
 const spineConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.WEBGL,
@@ -79,10 +88,10 @@ function switchTab(tabId: EditorTab) {
   // Initialize game for the tab if needed
   if (tabId === "spine" && !spineGame) {
     spineGame = new Phaser.Game(spineConfig);
-    (window as any).spineGame = spineGame;
+    window.spineGame = spineGame;
   } else if (tabId === "models" && !modelsGame) {
     modelsGame = new Phaser.Game(modelsConfig);
-    (window as any).modelsGame = modelsGame;
+    window.modelsGame = modelsGame;
   }
 
   // Save active tab
@@ -107,5 +116,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // Export game instances for external access
-(window as any).getSpineGame = () => spineGame;
-(window as any).getModelsGame = () => modelsGame;
+window.getSpineGame = () => spineGame;
+window.getModelsGame = () => modelsGame;

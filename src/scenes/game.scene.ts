@@ -14,9 +14,8 @@ import { WeatherConditions } from "../objects/weather.object";
 import "../core/display-object.ext";
 import { setGlobals, setPlayer, clearGlobals } from "../core/globals";
 import { runStepCallbacks, clearStepCallbacks } from "../core/display-object.ext";
-import { clearAllInstances, Instances } from "../core/instances";
-import { lightAwareMixin, getTintColorShift } from "../mixins/light-aware.mixin";
-import { lightSourceMixin } from "../mixins/light-source.mixin";
+import { clearAllInstances, Instances, MIXIN_LIGHT_AWARE, MIXIN_LIGHT_SOURCE } from "../core/instances";
+import { getTintColorShift } from "../mixins/light-aware.mixin";
 
 // New factory functions
 import { createPlayer, PlayerObject } from "../objects/player.object";
@@ -44,7 +43,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
   private field: Phaser.GameObjects.TileSprite;
   private pointer: Pointer;
   private player: PlayerObject;
-  private objects: any[] = [];
+  private objects: Phaser.GameObjects.GameObject[] = [];
   private obstacles: IProjection[] = [];
   private redLight: { light: EmergencyLightObject; isOn: boolean; enabled: boolean };
   private weather: WeatherConditions;
@@ -97,7 +96,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.matter.world.setBounds(0, 0, width, height);
 
     this._inputs = new PlayerInputs(this.input);
-    setGlobals(this as any);
+    setGlobals(this);
 
     this.fieldUnderLight = this.add
       .tileSprite(800, 600, width, height, "background")
@@ -226,11 +225,11 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       console.error("Flashlight is missing");
     });
 
-    this.events.on(Event.OBJECT_PICKED_UP, (item: any) => {
+    this.events.on(Event.OBJECT_PICKED_UP, (item: Phaser.GameObjects.GameObject) => {
       console.info("Picked up", item.name);
     });
 
-    this.events.on(Event.UNKNOWN_OBJECT, (item: any) => {
+    this.events.on(Event.UNKNOWN_OBJECT, (item: Phaser.GameObjects.GameObject) => {
       console.error("Unknown object", item.name);
     });
 
@@ -238,11 +237,11 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       console.error("No object in range");
     });
 
-    this.events.on(Event.OBJECT_TOO_FAR, (item: any) => {
+    this.events.on(Event.OBJECT_TOO_FAR, (item: Phaser.GameObjects.GameObject) => {
       console.error(`${item.name} is too far`);
     });
 
-    this.events.on(Event.OBJECT_STILL_TOO_FAR, (item: any) => {
+    this.events.on(Event.OBJECT_STILL_TOO_FAR, (item: Phaser.GameObjects.GameObject) => {
       console.error(`Can't reach this damn ${item.name}. It is still too far`);
     });
 
@@ -277,7 +276,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
 
     this.events.on(Phaser.Scenes.Events.PRE_RENDER, () => {
       // Reset light effects using new mixin system
-      for (const obj of Instances(lightAwareMixin)) {
+      for (const obj of Instances(MIXIN_LIGHT_AWARE)) {
         obj.onLightOverReset();
       }
       this.player?.onLightOverReset();
@@ -294,7 +293,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
       }
 
       // Emit light from all light sources using new mixin system
-      for (const source of Instances(lightSourceMixin)) {
+      for (const source of Instances(MIXIN_LIGHT_SOURCE)) {
         if (source.isLightEnabled) {
           source.emitLight();
         }
@@ -318,13 +317,13 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.lightShadowSceneGraphics.clear();
 
     // Clear all light source graphics (removes day-mode light cones)
-    for (const source of Instances(lightSourceMixin)) {
+    for (const source of Instances(MIXIN_LIGHT_SOURCE)) {
       source.lightGraphics.clear();
     }
 
     this.field.setTint(config.colors.darkenTintColor);
 
-    for (const obj of Instances(lightAwareMixin)) {
+    for (const obj of Instances(MIXIN_LIGHT_AWARE)) {
       obj.onDarken();
     }
 
@@ -337,13 +336,13 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
     this.lightShadowSceneGraphics.clear();
 
     // Clear all light source graphics (removes night-mode light effects)
-    for (const source of Instances(lightSourceMixin)) {
+    for (const source of Instances(MIXIN_LIGHT_SOURCE)) {
       source.lightGraphics.clear();
     }
 
     this.field.setTint();
 
-    for (const obj of Instances(lightAwareMixin)) {
+    for (const obj of Instances(MIXIN_LIGHT_AWARE)) {
       obj.onLighten();
     }
 
@@ -357,7 +356,7 @@ export default class GameScene extends Phaser.Scene implements IGameScene {
 
     this.field.setTint(getTintColorShift(0xffffff, progress));
 
-    for (const obj of Instances(lightAwareMixin)) {
+    for (const obj of Instances(MIXIN_LIGHT_AWARE)) {
       obj.onLightningOver(progress);
     }
 

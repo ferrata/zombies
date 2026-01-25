@@ -1,3 +1,3 @@
 declare interface Window {
-  SpinePlugin: any;
+  SpinePlugin: typeof Phaser.Plugins.ScenePlugin;
 }

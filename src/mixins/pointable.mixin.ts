@@ -1,5 +1,6 @@
 import config from "../game-config";
 import { Label } from "../objects/label.object";
+import { MIXIN_POINTABLE } from "../core/instances";
 
 export interface PointableProps {
   pointableInfo: string | null;
@@ -12,8 +13,8 @@ export interface PointableProps {
   getInfo(): string;
 }
 
-export function isPointable(obj: any): obj is PointableProps {
-  return obj != null && "showHighlight" in obj && "removeHighlight" in obj;
+export function isPointable(obj: unknown): obj is PointableProps {
+  return obj != null && typeof obj === "object" && "showHighlight" in obj && "removeHighlight" in obj;
 }
 
 export function pointableMixin<
@@ -79,10 +80,10 @@ export function pointableMixin<
   };
 
   result.getInfo = function () {
-    return this.pointableInfo ?? (this as any).name ?? "";
+    return this.pointableInfo ?? this.name ?? "";
   };
 
-  result.track(pointableMixin);
+  result.track(MIXIN_POINTABLE);
 
   return result;
 }

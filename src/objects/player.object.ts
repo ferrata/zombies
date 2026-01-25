@@ -2,11 +2,13 @@ import config from "../game-config";
 import { input } from "../core/globals";
 import { Event } from "../scenes/event";
 import { CasingEmitter } from "./casing-emitter.object";
-import { createMuzzleFlash, MuzzleFlashObject } from "./muzzle-flash.object";
+import { createMuzzleFlash } from "./muzzle-flash.object";
 import PlayerPuppet, { PlayerWeapon } from "./player.puppet";
 import { LightAwareProps, getTintColorShift, LightAwareShape } from "../mixins/light-aware.mixin";
 import { DebuggableProps } from "../mixins/debuggable.mixin";
 import { FlashlightObject } from "./flashlight.object";
+import { GameSceneInterface } from "../types/game-scene";
+import { createSpineListener } from "../types/spine-listener";
 
 enum PlayerWeaponMode {
   NONE = "none",
@@ -33,12 +35,12 @@ export interface PlayerObject extends LightAwareProps, DebuggableProps {
 }
 
 export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaster: Raycaster): PlayerObject {
-  const gameScene = scene as any;
+  const gameScene = scene as GameSceneInterface;
 
   const puppet = new PlayerPuppet(scene, x, y);
   puppet.name = "player";
 
-  (scene as any).physics.world.enable(puppet);
+  gameScene.physics.world.enable(puppet);
   const body = puppet.body as Phaser.Physics.Arcade.Body;
   body.setDrag(1, 1);
 
@@ -48,13 +50,13 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
     .setCircle(bounds.size.x / 3)
     .setCollideWorldBounds(true);
 
-  const matterSpot = (scene as any).matter.add.circle(x, y, 50, {
+  const matterSpot = gameScene.matter.add.circle(x, y, 50, {
     isSensor: true,
     label: "player-spot",
   });
 
-  const lightAwareShape = scene.add.circle(x, y, 50) as LightAwareShape;
-  (lightAwareShape as any).owner = null;
+  const lightAwareShape: LightAwareShape = scene.add.circle(x, y, 50);
+  if (lightAwareShape) lightAwareShape.owner = undefined;
 
   const shadow = puppet.postFX.addShadow(0, 0, 0.1, 0.3, 0x000000, 2, 3);
   puppet.postFX.remove(shadow);
@@ -67,7 +69,7 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
   puppet.idle();
   puppet.selectWeapon(PlayerWeapon.HANDGUN);
 
-  const casingEmitter = new CasingEmitter(scene as any, x, y, "bullet-casings", { from: 0.4, to: 0.3 });
+  const casingEmitter = new CasingEmitter(gameScene, x, y, "bullet-casings", { from: 0.4, to: 0.3 });
   const muzzleFlash = createMuzzleFlash(scene, x, y, raycaster);
 
   puppet.setDepth(config.depths.player);
@@ -242,7 +244,8 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
         return;
       }
 
-      if ((item as any).isOn !== undefined && (item as any).turnOn) {
+      const flashlightCandidate = item as Partial<FlashlightObject>;
+      if (flashlightCandidate.isOn !== undefined && flashlightCandidate.turnOn) {
         takeItem(() => {
           const flashlightItem = item as FlashlightObject;
           // Disable physics and hide the sprite instead of removing from scene
@@ -324,11 +327,10 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
     },
   };
 
-  (lightAwareShape as any).owner = player;
-  puppet.track(() => player);
+  if (lightAwareShape) lightAwareShape.owner = player;
 
   // Map player to muzzle flash so it lights up when firing
-  muzzleFlash.mapLightAwareObject(player as any);
+  muzzleFlash.mapLightAwareObject(player);
 
   function stop() {
     puppet.idle();
@@ -337,7 +339,7 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
 
   function strafeRight(fast: boolean) {
     puppet.strafeRight();
-    (scene as any).physics.velocityFromRotation(
+    gameScene.physics.velocityFromRotation(
       player.rotation + 0.5 * Math.PI,
       fast ? config.player.speed.strafeFast : config.player.speed.strafe,
       body.velocity
@@ -346,7 +348,7 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
 
   function strafeLeft(fast: boolean) {
     puppet.strafeLeft();
-    (scene as any).physics.velocityFromRotation(
+    gameScene.physics.velocityFromRotation(
       player.rotation + 0.5 * Math.PI,
       -(fast ? config.player.speed.strafeFast : config.player.speed.strafe),
       body.velocity
@@ -355,22 +357,22 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
 
   function moveBackward() {
     puppet.walk();
-    (scene as any).physics.velocityFromRotation(player.rotation, -config.player.speed.walk, body.velocity);
+    gameScene.physics.velocityFromRotation(player.rotation, -config.player.speed.walk, body.velocity);
   }
 
   function moveForward() {
     puppet.walk();
-    (scene as any).physics.velocityFromRotation(player.rotation, config.player.speed.walk, body.velocity);
+    gameScene.physics.velocityFromRotation(player.rotation, config.player.speed.walk, body.velocity);
   }
 
   function runBackward() {
     puppet.run();
-    (scene as any).physics.velocityFromRotation(player.rotation, -config.player.speed.run, body.velocity);
+    gameScene.physics.velocityFromRotation(player.rotation, -config.player.speed.run, body.velocity);
   }
 
   function runForward() {
     puppet.run();
-    (scene as any).physics.velocityFromRotation(player.rotation, config.player.speed.run, body.velocity);
+    gameScene.physics.velocityFromRotation(player.rotation, config.player.speed.run, body.velocity);
   }
 
   function shoot() {
@@ -418,8 +420,9 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
     return distance > config.player.reach && distance <= config.player.reachAlmost && angle <= config.player.reachAngle;
   }
 
-  function takeItem(fn: () => any) {
-    const listener: any = {
+  function takeItem(fn: () => Phaser.GameObjects.GameObject | undefined) {
+    let listener: spine.AnimationStateListener2;
+    listener = createSpineListener({
       complete: () => {
         puppet.spine.state.removeListener(listener);
         const item = fn();
@@ -428,18 +431,19 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
           scene.events.emit(Event.OBJECT_PICKED_UP, item);
         }
       },
-    };
+    });
     puppet.spine.state.addListener(listener);
     puppet.interactReach();
   }
 
   function almostTakeItem() {
-    const listener: any = {
+    let listener: spine.AnimationStateListener2;
+    listener = createSpineListener({
       complete: () => {
         puppet.spine.state.removeListener(listener);
         scene.time.delayedCall(150, () => puppet.returnToCurrentState());
       },
-    };
+    });
     puppet.spine.state.addListener(listener);
     puppet.interactReach();
   }
@@ -539,11 +543,13 @@ export function createPlayer(scene: Phaser.Scene, x: number, y: number, raycaste
 
   function getCasingName(): string | undefined {
     const weapon = puppet.getWeapon();
-    return {
+    const casingMap: Record<PlayerWeapon, string | undefined> = {
       [PlayerWeapon.HANDGUN]: "8mm-bullet-case",
       [PlayerWeapon.SHOTGUN]: "12gauge-bullet-case",
       [PlayerWeapon.RIFLE]: "ar-bullet-case",
-    }[weapon];
+      [PlayerWeapon.KNIFE]: undefined,
+    };
+    return casingMap[weapon];
   }
 
   return player;

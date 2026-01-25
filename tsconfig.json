@@ -5,7 +5,8 @@
     "module": "commonjs",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noImplicitAny": true
   },
   "include": ["src/**/*"]
 }
