@@ -99,6 +99,13 @@ export default class GameScene extends Phaser.Scene {
     )?.gameObject
   }
 
+  private removeFromObjects(item: Phaser.GameObjects.GameObject): void {
+    const index = this.objects.indexOf(item)
+    if (index > -1) {
+      this.objects.splice(index, 1)
+    }
+  }
+
   create() {
     const { width, height } = { width: 1600, height: 1200 }
 
@@ -253,6 +260,7 @@ export default class GameScene extends Phaser.Scene {
 
     this.events.on(Event.OBJECT_PICKED_UP, (item: Phaser.GameObjects.GameObject) => {
       console.info('Picked up', item.name)
+      this.removeFromObjects(item)
     })
 
     this.events.on(Event.UNKNOWN_OBJECT, (item: Phaser.GameObjects.GameObject) => {
