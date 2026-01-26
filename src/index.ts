@@ -5,6 +5,7 @@ import DebugScreenPlugin from './plugins/debug-screen.plugin'
 import PhaserRaycaster from 'phaser-raycaster'
 import PreloadScene from './scenes/preload.scene'
 import GameScene from './scenes/game.scene'
+import UIScene from './scenes/ui.scene'
 
 const allowDebug = true
 
@@ -38,7 +39,7 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { y: 0 },
     },
   },
-  scene: [PreloadScene, GameScene],
+  scene: [PreloadScene, GameScene, UIScene],
   plugins: {
     scene: [
       { key: 'DebugScreen', plugin: DebugScreenPlugin, start: true },

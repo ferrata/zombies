@@ -9,6 +9,7 @@ export interface Keys {
   X: Phaser.Input.Keyboard.Key
   C: Phaser.Input.Keyboard.Key
   F: Phaser.Input.Keyboard.Key
+  F8: Phaser.Input.Keyboard.Key
   up: Phaser.Input.Keyboard.Key
   down: Phaser.Input.Keyboard.Key
   left: Phaser.Input.Keyboard.Key
@@ -38,7 +39,7 @@ export default class Inputs {
   constructor(input: Phaser.Input.InputPlugin) {
     this._input = input
     this._keys = this._input.keyboard.addKeys(
-      'W,A,S,D,Z,X,C,F,E,R,up,left,down,right,space,enter,comma,period,zero,one,two,three,four,five,six,seven,eight,nine,shift',
+      'W,A,S,D,Z,X,C,F,E,R,F8,up,left,down,right,space,enter,comma,period,zero,one,two,three,four,five,six,seven,eight,nine,shift',
     ) as Keys
   }
 

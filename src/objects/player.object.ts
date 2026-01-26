@@ -18,6 +18,7 @@ enum PlayerWeaponMode {
 }
 
 export interface PlayerObject extends LightAware, Debuggable {
+  name: string
   puppet: PlayerPuppet
   body: Phaser.Physics.Arcade.Body
   x: number
@@ -89,6 +90,7 @@ export function createPlayer(
   }
 
   const player: PlayerObject = {
+    name: 'player',
     puppet,
     body,
     flashlight: null,
@@ -550,6 +552,21 @@ export function createPlayer(
 
   function getBonePosition(boneName: string): Phaser.Math.Vector2 {
     const bone = puppet.spine.skeleton.findBone(boneName)
+
+    if (gameScene.isPlayerMode) {
+      const boneLocalX = bone.worldX - puppet.spine.skeleton.x
+      const boneLocalY = bone.worldY - puppet.spine.skeleton.y
+
+      const distance = Math.sqrt(boneLocalX * boneLocalX + boneLocalY * boneLocalY)
+      const localAngle = Math.atan2(-boneLocalY, boneLocalX)
+      const worldAngle = localAngle + player.rotation + Math.PI / 2
+
+      return new Phaser.Math.Vector2(
+        body.center.x + Math.cos(worldAngle) * distance,
+        body.center.y + Math.sin(worldAngle) * distance,
+      )
+    }
+
     const boneInnerPosition = new Phaser.Math.Vector2(
       bone.worldX + player.x - puppet.spine.skeleton.x,
       bone.worldY + player.y - puppet.spine.skeleton.y,
@@ -584,6 +601,10 @@ export function createPlayer(
     }
     return casingMap[weapon]
   }
+
+  scene.time.delayedCall(0, () => {
+    scene.events.emit('debuggable-added', player)
+  })
 
   return player
 }

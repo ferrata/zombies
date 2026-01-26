@@ -12,7 +12,7 @@ import { WeatherConditions } from '../objects/weather.object'
 
 // Core imports for new architecture
 import '../core/display-object.ext'
-import { setGlobals, setPlayer, clearGlobals } from '../core/globals'
+import { setGlobals, setPlayer, setUIScene, clearGlobals } from '../core/globals'
 import { runStepCallbacks, clearStepCallbacks } from '../core/display-object.ext'
 import {
   clearAllInstances,
@@ -32,11 +32,16 @@ export function isGameScene(scene: object): scene is GameScene {
   return typeof scene === 'object' && 'getDebugInfo' in scene
 }
 
+type CameraMode = 'map' | 'player'
+
 export default class GameScene extends Phaser.Scene {
   private _inputs: PlayerInputs
   private _isDark: boolean
   private _lightSceneGraphics: Phaser.GameObjects.Graphics
   private _lightShadowSceneGraphics: Phaser.GameObjects.Graphics
+  private _cameraMode: CameraMode = 'map'
+  private _playerAimAngle: number = 0
+  private _pointerDistance: number = 100
 
   private raycasterPlugin: PhaserRaycaster
   private fieldUnderLight: Phaser.GameObjects.TileSprite
@@ -51,6 +56,10 @@ export default class GameScene extends Phaser.Scene {
 
   public get isDark(): boolean {
     return this._isDark
+  }
+
+  public get isPlayerMode(): boolean {
+    return this._cameraMode === 'player'
   }
 
   public get lightSceneGraphics(): Phaser.GameObjects.Graphics {
@@ -98,6 +107,10 @@ export default class GameScene extends Phaser.Scene {
 
     this._inputs = new PlayerInputs(this.input)
     setGlobals(this)
+
+    this.scene.launch('UIScene')
+    const ui = this.scene.get('UIScene')
+    setUIScene(ui)
 
     this.fieldUnderLight = this.add
       .tileSprite(800, 600, width, height, 'background')
@@ -212,9 +225,23 @@ export default class GameScene extends Phaser.Scene {
     this.input.on(
       Phaser.Input.Events.POINTER_MOVE,
       function (pointer: Phaser.Input.Pointer) {
-        if (this.input.mouse.locked) {
+        if (!this.input.mouse.locked) return
+
+        if (this._cameraMode === 'map') {
           this.pointer.x += pointer.movementX
           this.pointer.y += pointer.movementY
+        } else {
+          const sensitivity = 0.003
+          this._playerAimAngle += pointer.movementX * sensitivity
+          const maxDistance = Math.min(
+            this.cameras.main.width,
+            this.cameras.main.height,
+          ) / 2
+          this._pointerDistance = Phaser.Math.Clamp(
+            this._pointerDistance - pointer.movementY,
+            50,
+            maxDistance,
+          )
         }
       },
       this,
@@ -271,6 +298,10 @@ export default class GameScene extends Phaser.Scene {
       if (Phaser.Input.Keyboard.JustDown(this.inputs.keys.eight)) {
         this.weather.toggle()
       }
+
+      if (Phaser.Input.Keyboard.JustDown(this.inputs.keys.F8)) {
+        this.toggleCameraMode()
+      }
     })
 
     this.events.on(Phaser.Scenes.Events.PRE_RENDER, () => {
@@ -306,7 +337,24 @@ export default class GameScene extends Phaser.Scene {
 
   public getDebugInfo(): object {
     return {
+      cameraMode: this._cameraMode,
       weather: this.weather.getDebugInfo(),
+    }
+  }
+
+  private toggleCameraMode() {
+    if (this._cameraMode === 'map') {
+      this._cameraMode = 'player'
+      this._playerAimAngle = this.player.rotation
+      this._pointerDistance = Phaser.Math.Distance.Between(
+        this.player.x,
+        this.player.y,
+        this.pointer.x,
+        this.pointer.y,
+      )
+    } else {
+      this._cameraMode = 'map'
+      this.cameras.main.setRotation(0)
     }
   }
 
@@ -372,12 +420,20 @@ export default class GameScene extends Phaser.Scene {
       this.physics.world.collide(this.player.puppet, obstacles)
     }
 
-    this.player.rotation = Phaser.Math.Angle.Between(
-      this.player.x,
-      this.player.y,
-      this.pointer.x,
-      this.pointer.y,
-    )
+    if (this._cameraMode === 'map') {
+      this.player.rotation = Phaser.Math.Angle.Between(
+        this.player.x,
+        this.player.y,
+        this.pointer.x,
+        this.pointer.y,
+      )
+      this.cameras.main.setRotation(0)
+    } else {
+      this.pointer.x = this.player.x + Math.cos(this._playerAimAngle) * this._pointerDistance
+      this.pointer.y = this.player.y + Math.sin(this._playerAimAngle) * this._pointerDistance
+      this.cameras.main.setRotation(-this._playerAimAngle - Math.PI / 2)
+      this.player.rotation = this._playerAimAngle
+    }
 
     this.cameras.main.startFollow(this.player.puppet)
 

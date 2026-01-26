@@ -44,25 +44,26 @@ export default class Pointer extends Phaser.GameObjects.GameObject {
 
     this.dot.fillColor = withinWorldBounds ? 0xffffff : 0xff0000
 
-    const body = this.scene.physics.overlapRect(this.dot.x, this.dot.y, 1, 1)[0]
-
-    const gameObject = body?.gameObject
-
-    if (isPointable(gameObject) && gameObject.active && gameObject != this.currentlyHighlighted) {
-      this.dot.visible = false
-      if (this.currentlyHighlighted) {
+    if (this.currentlyHighlighted) {
+      const obj = this.currentlyHighlighted as unknown as { x: number; y: number }
+      const dist = Phaser.Math.Distance.Between(this.dot.x, this.dot.y, obj.x, obj.y)
+      if (dist > 50) {
         this.currentlyHighlighted.removeHighlight()
         this.currentlyHighlighted.removeInfo()
+        this.currentlyHighlighted = null
+        this.dot.visible = true
       }
+      return
+    }
+
+    const body = this.scene.physics.overlapRect(this.dot.x, this.dot.y, 1, 1)[0]
+    const gameObject = body?.gameObject
+
+    if (isPointable(gameObject) && gameObject.active) {
+      this.dot.visible = false
       gameObject.showHighlight()
       gameObject.showInfo()
-
       this.currentlyHighlighted = gameObject
-    } else if (!isPointable(gameObject) && this.currentlyHighlighted) {
-      this.currentlyHighlighted.removeHighlight()
-      this.currentlyHighlighted.removeInfo()
-      this.currentlyHighlighted = null
-      this.dot.visible = true
     }
   }
 }

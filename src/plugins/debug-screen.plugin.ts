@@ -2,9 +2,11 @@ import { GameObjects } from 'phaser'
 import config from '../game-config'
 import { Debuggable, isDebuggable } from '../mixins/debuggable.mixin'
 import { isGameScene } from '../scenes/game.scene'
+import { uiScene, player } from '../core/globals'
 
 type DebugInfoLevel = 'all' | 'physics' | 'info' | 'none'
 type DebuggableObject = Debuggable & {
+  name?: string
   active?: boolean
   body?: Phaser.Physics.Arcade.Body
 }
@@ -30,13 +32,17 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
     super(scene, pluginManager, 'DebugScreenPlugin')
 
+    if (scene.scene.key === 'UIScene') return
+
     // enable debug by default for development
     if (process.env.NODE_ENV === 'development') {
       this.debugInfoLevel = 'info'
     }
 
-    this.scene.events.once(Phaser.Scenes.Events.BOOT, () => {
-      this.create()
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      if (!this.sceneDebugInfo && uiScene) {
+        this.create()
+      }
     })
 
     const drawDebugPhysics = this.debugInfoLevel === 'all' || this.debugInfoLevel === 'physics'
@@ -55,14 +61,17 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   }
 
   public create() {
-    this.sceneDebugInfo = new DebugInfoWindow(this.scene, `${this.scene.scene.key}`)
+    if (!uiScene) return
+
+    this.sceneDebugInfo = new DebugInfoWindow(uiScene, `${this.scene.scene.key}`)
       .setScrollFactor(0)
       .setPosition(this.displayBorder, this.displayBorder)
 
-    this.help = new DebugInfoWindow(this.scene, 'Help')
+    this.help = new DebugInfoWindow(uiScene, 'Help')
       .setScrollFactor(0)
       .setText(
         [
+          'F8       toggle camera mode',
           'F9       toggle debug info',
           '8        toggle weather',
           '9        toggle emergency light',
@@ -80,18 +89,19 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       this.displayBorder,
     )
 
-    const registerDebuggable = (object: Phaser.GameObjects.GameObject) => {
-      if (isDebuggable(object) && !this.debugObjects[object.name]) {
+    const registerDebuggable = (object: Phaser.GameObjects.GameObject | DebuggableObject) => {
+      if (isDebuggable(object) && object.name && !this.debugObjects[object.name]) {
         this.debugObjects[object.name] = {
           object: object as DebuggableObject,
-          window: object.hasDebugInfo() ? new DebugInfoWindow(this.scene, object.name) : null,
+          window: object.hasDebugInfo() ? new DebugInfoWindow(uiScene, object.name) : null,
         }
       }
     }
 
-    this.scene.events.on(Phaser.Scenes.Events.ADDED_TO_SCENE, registerDebuggable)
+    this.scene.children.list.forEach(registerDebuggable)
+    if (player) registerDebuggable(player)
 
-    // Also listen for objects that become debuggable after being added to scene
+    this.scene.events.on(Phaser.Scenes.Events.ADDED_TO_SCENE, registerDebuggable)
     this.scene.events.on('debuggable-added', registerDebuggable)
 
     this.scene.events.on(
@@ -140,9 +150,8 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
   }
 
   private drawDebugInfo() {
-    this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene))
-
     const drawDebugInfo = this.debugInfoLevel === 'all' || this.debugInfoLevel === 'info'
+
 
     for (const key in this.debugObjects) {
       const obj = this.debugObjects[key].object
@@ -180,9 +189,26 @@ export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
       }
 
       objectInfo.setDebuggable(object)
+
+      const worldX = (object.body?.position?.x ?? 0) + objectSize.width / 2
+      const worldY = (object.body?.position?.y ?? 0) + objectSize.height / 2
+      const camera = this.scene.cameras.main
+
+      const relX = worldX - camera.worldView.centerX
+      const relY = worldY - camera.worldView.centerY
+      const rot = (camera as unknown as { rotation: number }).rotation
+      const cos = Math.cos(rot)
+      const sin = Math.sin(rot)
+      const rotatedX = relX * cos - relY * sin
+      const rotatedY = relX * sin + relY * cos
+
+      const screenX = camera.width / 2 + rotatedX * camera.zoom
+      const screenY = camera.height / 2 + rotatedY * camera.zoom
+
+      objectInfo.setScrollFactor(0)
       objectInfo.setPosition(
-        (object.body?.position?.x ?? 0) + objectSize.width + 10,
-        (object.body?.position?.y ?? 0) + objectSize.height + 10,
+        screenX + objectSize.width / 2 + 10,
+        screenY + objectSize.height / 2 + 10,
       )
     }
   }

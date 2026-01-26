@@ -1,6 +1,7 @@
 import config from '../game-config'
 import { Label } from '../objects/label.object'
 import { MIXIN_POINTABLE } from '../core/instances'
+import { uiScene, scene } from '../core/globals'
 
 export type Pointable = {
   showHighlight(): void
@@ -56,18 +57,40 @@ export function pointableMixin<
   }
 
   result.showInfo = function () {
-    if (this._label) {
-      this._label.destroy()
+    if (this._label) return
+
+    if (!this.hasInfo() || !uiScene || !scene) return
+
+    this._label = new Label(uiScene, 0, 0, this.getInfo())
+    this._label.setScrollFactor(0)
+    uiScene.add.existing(this._label)
+    this._label.setDepth(config.depths.pointableObject)
+
+    const updatePosition = () => {
+      if (!this._label || !scene) return
+      const worldX = this.x + (this.width ?? 0) / 2 + 10
+      const worldY = this.y - (this.height ?? 0) / 2 - 10
+      const camera = scene.cameras.main
+
+      const relX = worldX - camera.worldView.centerX
+      const relY = worldY - camera.worldView.centerY
+      const rot = (camera as unknown as { rotation: number }).rotation
+      const cos = Math.cos(rot)
+      const sin = Math.sin(rot)
+      const rotatedX = relX * cos - relY * sin
+      const rotatedY = relX * sin + relY * cos
+
+      this._label.setPosition(
+        camera.width / 2 + rotatedX * camera.zoom,
+        camera.height / 2 + rotatedY * camera.zoom,
+      )
     }
 
-    if (!this.hasInfo()) return
-
-    const textX = this.x + (this.width ?? 0) / 2 + 10
-    const textY = this.y - (this.height ?? 0) / 2 - 10
-
-    this._label = new Label(this.scene, textX, textY, this.getInfo())
-    this.scene.add.existing(this._label)
-    this._label.setDepth(config.depths.pointableObject)
+    updatePosition()
+    uiScene.events.on(Phaser.Scenes.Events.UPDATE, updatePosition)
+    this._label.once('destroy', () => {
+      uiScene.events.off(Phaser.Scenes.Events.UPDATE, updatePosition)
+    })
   }
 
   result.removeInfo = function () {
