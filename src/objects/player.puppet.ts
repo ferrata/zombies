@@ -1,6 +1,7 @@
 import SpineContainer from '../types/spine-container'
 
 export enum PlayerWeapon {
+  FLASHLIGHT = 'flashlight',
   HANDGUN = 'handgun',
   SHOTGUN = 'shotgun',
   RIFLE = 'rifle',
@@ -97,7 +98,10 @@ export default class PlayerPuppet extends SpineContainer {
   // --- Actions (one-shot animations that return to current state) ---
 
   shoot(): void {
-    if (this.currentWeapon === PlayerWeapon.KNIFE) {
+    if (
+      this.currentWeapon === PlayerWeapon.KNIFE ||
+      this.currentWeapon === PlayerWeapon.FLASHLIGHT
+    ) {
       return
     }
 
@@ -106,7 +110,10 @@ export default class PlayerPuppet extends SpineContainer {
   }
 
   reload(): void {
-    if (this.currentWeapon === PlayerWeapon.KNIFE) {
+    if (
+      this.currentWeapon === PlayerWeapon.KNIFE ||
+      this.currentWeapon === PlayerWeapon.FLASHLIGHT
+    ) {
       return
     }
 

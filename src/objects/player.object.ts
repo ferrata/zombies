@@ -83,6 +83,7 @@ export function createPlayer(
   muzzleFlash.setDepth(config.depths.player + 1)
 
   const currentWeaponMode: Record<PlayerWeapon, PlayerWeaponMode> = {
+    [PlayerWeapon.FLASHLIGHT]: PlayerWeaponMode.NONE,
     [PlayerWeapon.HANDGUN]: PlayerWeaponMode.SINGLE,
     [PlayerWeapon.SHOTGUN]: PlayerWeaponMode.SINGLE,
     [PlayerWeapon.RIFLE]: PlayerWeaponMode.BURST,
@@ -160,7 +161,7 @@ export function createPlayer(
       }
 
       if (Phaser.Input.Keyboard.JustDown(keys.one)) {
-        this.selectWeapon(PlayerWeapon.KNIFE)
+        toggleKnife()
       }
 
       if (Phaser.Input.Keyboard.JustDown(keys.two)) {
@@ -191,7 +192,7 @@ export function createPlayer(
     attack() {
       const weapon = puppet.getWeapon()
 
-      if (weapon === PlayerWeapon.KNIFE) {
+      if (weapon === PlayerWeapon.KNIFE || weapon === PlayerWeapon.FLASHLIGHT) {
         puppet.meleeAttack()
         return
       }
@@ -399,10 +400,25 @@ export function createPlayer(
       return
     }
 
+    if (puppet.getWeapon() === PlayerWeapon.KNIFE) {
+      toggleKnife()
+      return
+    }
+
     if (player.flashlight.isOff) {
       player.flashlight.turnOn()
     } else {
       player.flashlight.turnOff()
+    }
+  }
+
+  function toggleKnife() {
+    if (puppet.getWeapon() === PlayerWeapon.KNIFE && player.flashlight) {
+      puppet.selectWeapon(PlayerWeapon.FLASHLIGHT)
+      player.flashlight.turnOn()
+    } else {
+      player.flashlight?.turnOff()
+      puppet.selectWeapon(PlayerWeapon.KNIFE)
     }
   }
 
@@ -495,6 +511,7 @@ export function createPlayer(
       [PlayerWeapon.SHOTGUN]: { length: 70, angle: 30 },
       [PlayerWeapon.RIFLE]: { length: 60, angle: 35 },
       [PlayerWeapon.KNIFE]: { length: 0, angle: 0 },
+      [PlayerWeapon.FLASHLIGHT]: { length: 0, angle: 0 },
     }
 
     const { length, angle } = adjustByWeapon[weapon]
@@ -509,6 +526,7 @@ export function createPlayer(
       [PlayerWeapon.SHOTGUN]: { scale: 0.15 },
       [PlayerWeapon.RIFLE]: { scale: 0.13 },
       [PlayerWeapon.KNIFE]: { scale: 0 },
+      [PlayerWeapon.FLASHLIGHT]: { scale: 0 },
     }
 
     const scale = scaleByWeapon[weapon].scale
@@ -529,6 +547,7 @@ export function createPlayer(
       [PlayerWeapon.SHOTGUN]: { frontBone: 'muzzle', rearBone: 'weapon', shift: 60 },
       [PlayerWeapon.RIFLE]: { frontBone: 'muzzle', rearBone: 'weapon', shift: 60 },
       [PlayerWeapon.KNIFE]: { frontBone: 'head', rearBone: 'head', shift: 0 },
+      [PlayerWeapon.FLASHLIGHT]: { frontBone: 'muzzle', rearBone: 'weapon', shift: 0 },
     }
 
     const attachedTo = attachedToByWeapon[weapon]
@@ -598,6 +617,7 @@ export function createPlayer(
       [PlayerWeapon.SHOTGUN]: '12gauge-bullet-case',
       [PlayerWeapon.RIFLE]: 'ar-bullet-case',
       [PlayerWeapon.KNIFE]: undefined,
+      [PlayerWeapon.FLASHLIGHT]: undefined,
     }
     return casingMap[weapon]
   }
