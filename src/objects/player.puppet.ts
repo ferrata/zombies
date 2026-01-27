@@ -151,8 +151,9 @@ export default class PlayerPuppet extends SpineContainer {
     }
 
     if (this.currentLegsState !== legsState) {
+      const oldLegsState = this.currentLegsState
       this.currentLegsState = legsState
-      this.legs.setAnimation(0, legsState, true)
+      this.legs.setMix(oldLegsState, legsState, 0.2).setAnimation(0, legsState, true)
     }
   }
 
