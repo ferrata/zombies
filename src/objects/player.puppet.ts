@@ -91,8 +91,7 @@ export default class PlayerPuppet extends SpineContainer {
       return
     }
 
-    this.currentWeapon = weapon
-    this.spine.setAnimation(0, `${this.currentState}_${weapon}`, true)
+    this.switchToState(this.currentState, weapon)
   }
 
   // --- Actions (one-shot animations that return to current state) ---
@@ -141,14 +140,23 @@ export default class PlayerPuppet extends SpineContainer {
 
   private setCurrentState(state: PlayerState, legsState: PlayerLegsState): void {
     if (this.currentState !== state) {
-      this.currentState = state
-      this.spine.setAnimation(0, `${state}_${this.currentWeapon}`, true)
+      this.switchToState(state, this.currentWeapon)
     }
 
     if (this.currentLegsState !== legsState) {
       this.currentLegsState = legsState
       this.legs.setAnimation(0, legsState, true)
     }
+  }
+
+  private switchToState(state: PlayerState, weapon: PlayerWeapon): void {
+    const oldState = `${this.currentState}_${this.currentWeapon}`
+    const newState = `${state}_${weapon}`
+
+    this.spine.setMix(oldState, newState, 0.2).setAnimation(0, newState, true)
+
+    this.currentState = state
+    this.currentWeapon = weapon
   }
 
   private continueCurrentAnimation(): void {
