@@ -69,7 +69,7 @@ export default {
   },
 
   colors: {
-    darkenTintColor: 0x212121,
+    darkenTintColor: 0x121212,
     darkenShadowTintColor: 0x323232,
     darkenColorMatrixBrightness: 0.2,
   },
