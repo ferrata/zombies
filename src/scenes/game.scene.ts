@@ -42,6 +42,9 @@ export default class GameScene extends Phaser.Scene {
   private _cameraMode: CameraMode = 'map'
   private _playerAimAngle: number = 0
   private _pointerDistance: number = 100
+  private _cameraRotation: number = 0
+  private _targetCameraRotation: number = 0
+  private _isTransitioning: boolean = false
 
   private raycasterPlugin: PhaserRaycaster
   private fieldUnderLight: Phaser.GameObjects.TileSprite
@@ -240,6 +243,11 @@ export default class GameScene extends Phaser.Scene {
         } else {
           const sensitivity = 0.003
           this._playerAimAngle += pointer.movementX * sensitivity
+          this._targetCameraRotation = -this._playerAimAngle - Math.PI / 2
+          if (this._isTransitioning) {
+            this._cameraRotation = this._targetCameraRotation
+            this._isTransitioning = false
+          }
           const maxDistance = Math.min(
             this.cameras.main.width,
             this.cameras.main.height,
@@ -360,10 +368,12 @@ export default class GameScene extends Phaser.Scene {
         this.pointer.x,
         this.pointer.y,
       )
+      this._targetCameraRotation = -this._playerAimAngle - Math.PI / 2
     } else {
       this._cameraMode = 'map'
-      this.cameras.main.setRotation(0)
+      this._targetCameraRotation = 0
     }
+    this._isTransitioning = true
   }
 
   darken() {
@@ -435,13 +445,28 @@ export default class GameScene extends Phaser.Scene {
         this.pointer.x,
         this.pointer.y,
       )
-      this.cameras.main.setRotation(0)
     } else {
       this.pointer.x = this.player.x + Math.cos(this._playerAimAngle) * this._pointerDistance
       this.pointer.y = this.player.y + Math.sin(this._playerAimAngle) * this._pointerDistance
-      this.cameras.main.setRotation(-this._playerAimAngle - Math.PI / 2)
+      this._targetCameraRotation = -this._playerAimAngle - Math.PI / 2
       this.player.rotation = this._playerAimAngle
     }
+
+    if (this._isTransitioning) {
+      const lerpSpeed = 0.1
+      this._cameraRotation = Phaser.Math.Linear(
+        this._cameraRotation,
+        this._targetCameraRotation,
+        lerpSpeed,
+      )
+      if (Math.abs(this._cameraRotation - this._targetCameraRotation) < 0.001) {
+        this._cameraRotation = this._targetCameraRotation
+        this._isTransitioning = false
+      }
+    } else {
+      this._cameraRotation = this._targetCameraRotation
+    }
+    this.cameras.main.setRotation(this._cameraRotation)
 
     this.cameras.main.startFollow(this.player.puppet)
 
