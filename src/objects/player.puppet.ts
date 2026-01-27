@@ -36,10 +36,10 @@ export default class PlayerPuppet extends SpineContainer {
   private legs: SpineGameObject
   private currentState: PlayerState = PlayerState.IDLE
   private currentLegsState: PlayerLegsState = PlayerLegsState.IDLE
-  private currentWeapon: PlayerWeapon = PlayerWeapon.HANDGUN
+  private currentWeapon: PlayerWeapon = PlayerWeapon.KNIFE
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, 'player', `${PlayerState.IDLE}_${PlayerWeapon.HANDGUN}`, true)
+    super(scene, x, y, 'player', `${PlayerState.IDLE}_${PlayerWeapon.KNIFE}`, true)
 
     this.setScale(0.7, 0.7)
 

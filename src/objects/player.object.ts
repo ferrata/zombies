@@ -73,7 +73,7 @@ export function createPlayer(
     .brightness(config.colors.darkenColorMatrixBrightness)
 
   puppet.idle()
-  puppet.selectWeapon(PlayerWeapon.HANDGUN)
+  puppet.selectWeapon(PlayerWeapon.KNIFE)
 
   const casingEmitter = new CasingEmitter(gameScene, x, y, 'bullet-casings', { from: 0.4, to: 0.3 })
   const muzzleFlash = createMuzzleFlash(scene, x, y, raycaster)
