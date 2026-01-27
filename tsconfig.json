@@ -1,6 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2017",
+    "lib": ["ES2017", "dom"],
+    "module": "commonjs",
     "esModuleInterop": true,
-  }
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "noImplicitAny": true
+  },
+  "include": ["src/**/*"]
 }

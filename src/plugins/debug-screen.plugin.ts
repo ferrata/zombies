@@ -1,0 +1,356 @@
+import { GameObjects } from 'phaser'
+import config from '../game-config'
+import { Debuggable, isDebuggable } from '../mixins/debuggable.mixin'
+import { isGameScene } from '../scenes/game.scene'
+import { uiScene, player } from '../core/globals'
+
+type DebugInfoLevel = 'all' | 'physics' | 'info' | 'none'
+type DebuggableObject = Debuggable & {
+  name?: string
+  active?: boolean
+  body?: Phaser.Physics.Arcade.Body
+}
+
+export default class DebugScreenPlugin extends Phaser.Plugins.ScenePlugin {
+  private debugInfoLevel: DebugInfoLevel = 'none'
+  private help: DebugInfoWindow
+  private sceneDebugInfo: DebugInfoWindow
+  private debugGraphics: Phaser.GameObjects.Graphics
+  private debugObjects: {
+    [key: string]: {
+      object: DebuggableObject
+      window: DebugInfoWindow | null
+    }
+  } = {}
+
+  private get debugInfoEnabled(): boolean {
+    return this.debugInfoLevel !== 'none'
+  }
+
+  private readonly displayBorder: number = 10
+
+  constructor(scene: Phaser.Scene, pluginManager: Phaser.Plugins.PluginManager) {
+    super(scene, pluginManager, 'DebugScreenPlugin')
+
+    if (scene.scene.key === 'UIScene') return
+
+    // enable debug by default for development
+    if (process.env.NODE_ENV === 'development') {
+      this.debugInfoLevel = 'info'
+    }
+
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      if (!this.sceneDebugInfo && uiScene) {
+        this.create()
+      }
+    })
+
+    const drawDebugPhysics = this.debugInfoLevel === 'all' || this.debugInfoLevel === 'physics'
+
+    this.scene.events.once(Phaser.Scenes.Events.READY, (event: Phaser.Scenes.Systems) => {
+      this.debugGraphics = event.scene.add.graphics().setDepth(config.depths.debug)
+
+      event.scene.physics.world.createDebugGraphic()
+      event.scene.physics.world.drawDebug = drawDebugPhysics
+
+      if (event.scene.matter) {
+        event.scene.matter.world.createDebugGraphic()
+        event.scene.matter.world.drawDebug = drawDebugPhysics
+      }
+    })
+  }
+
+  public create() {
+    if (!uiScene) return
+
+    this.sceneDebugInfo = new DebugInfoWindow(uiScene, `${this.scene.scene.key}`)
+      .setScrollFactor(0)
+      .setPosition(this.displayBorder, this.displayBorder)
+
+    this.help = new DebugInfoWindow(uiScene, 'Help')
+      .setScrollFactor(0)
+      .setText(
+        [
+          'F8       toggle camera mode',
+          'F9       toggle debug info',
+          '8        toggle weather',
+          '9        toggle emergency light',
+          '0        toggle lights',
+          '1,2,3,4  toggle weapons',
+          'A,W,S,D  move',
+          'E        interact with objects',
+          'SPACE    attack',
+          'SHIFT    run',
+        ].join('\n'),
+      )
+
+    this.help.setPosition(
+      this.scene.game.canvas.width - this.help.width - this.displayBorder,
+      this.displayBorder,
+    )
+
+    const registerDebuggable = (object: Phaser.GameObjects.GameObject | DebuggableObject) => {
+      if (isDebuggable(object) && object.name && !this.debugObjects[object.name]) {
+        this.debugObjects[object.name] = {
+          object: object as DebuggableObject,
+          window: object.hasDebugInfo() ? new DebugInfoWindow(uiScene, object.name) : null,
+        }
+      }
+    }
+
+    this.scene.children.list.forEach(registerDebuggable)
+    if (player) registerDebuggable(player)
+
+    this.scene.events.on(Phaser.Scenes.Events.ADDED_TO_SCENE, registerDebuggable)
+    this.scene.events.on('debuggable-added', registerDebuggable)
+
+    this.scene.events.on(
+      Phaser.Scenes.Events.REMOVED_FROM_SCENE,
+      (object: Phaser.GameObjects.GameObject) => {
+        if (isDebuggable(object)) {
+          this.debugObjects[object.name].window.destroy()
+          delete this.debugObjects[object.name]
+        }
+      },
+    )
+
+    this.scene.events.on(Phaser.Scenes.Events.UPDATE, () => {
+      this.resetDebugGraphics(this.debugInfoLevel)
+      this.drawDebugInfo()
+      this.drawDebugPhysics()
+    })
+    this.scene.events.on(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup())
+    this.scene.events.on(Phaser.Scenes.Events.DESTROY, () => this.cleanup())
+
+    this.scene.input.keyboard.on('keydown-F9', () => {
+      const nextLevel: { [key in DebugInfoLevel]: DebugInfoLevel } = {
+        all: 'physics',
+        physics: 'info',
+        info: 'none',
+        none: 'all',
+      }
+
+      this.debugInfoLevel = nextLevel[this.debugInfoLevel]
+      this.resetDebugGraphics(this.debugInfoLevel)
+    })
+  }
+
+  private resetDebugGraphics(level: DebugInfoLevel) {
+    const drawDebugPhysics = level === 'physics' || level === 'all'
+
+    this.debugGraphics.clear()
+
+    this.scene.physics.world.debugGraphic.clear()
+    this.scene.physics.world.drawDebug = drawDebugPhysics
+
+    if (this.scene.matter) {
+      this.scene.matter.world.debugGraphic.clear()
+      this.scene.matter.world.drawDebug = drawDebugPhysics
+    }
+  }
+
+  private drawDebugInfo() {
+    const drawDebugInfo = this.debugInfoLevel === 'all' || this.debugInfoLevel === 'info'
+
+
+    for (const key in this.debugObjects) {
+      const obj = this.debugObjects[key].object
+      const isActive = obj?.active !== false
+      if (this.debugObjects[key].window) {
+        this.debugObjects[key].window.visible = drawDebugInfo && isActive
+      }
+    }
+
+    if (!this.debugInfoEnabled) {
+      return
+    }
+
+    this.sceneDebugInfo.setDebugInfo(this.getSceneDebugInfo(this.scene))
+
+    for (const key in this.debugObjects) {
+      const object = this.debugObjects[key].object
+      if (!object) {
+        continue
+      }
+
+      // Skip inactive objects
+      if (object.active === false) {
+        continue
+      }
+
+      const objectSize = {
+        width: object.body?.width ?? 0,
+        height: object.body?.height ?? 0,
+      }
+
+      const objectInfo = this.debugObjects[key].window
+      if (!objectInfo) {
+        continue
+      }
+
+      objectInfo.setDebuggable(object)
+
+      const worldX = (object.body?.position?.x ?? 0) + objectSize.width / 2
+      const worldY = (object.body?.position?.y ?? 0) + objectSize.height / 2
+      const camera = this.scene.cameras.main
+
+      const relX = worldX - camera.worldView.centerX
+      const relY = worldY - camera.worldView.centerY
+      const rot = (camera as unknown as { rotation: number }).rotation
+      const cos = Math.cos(rot)
+      const sin = Math.sin(rot)
+      const rotatedX = relX * cos - relY * sin
+      const rotatedY = relX * sin + relY * cos
+
+      const screenX = camera.width / 2 + rotatedX * camera.zoom
+      const screenY = camera.height / 2 + rotatedY * camera.zoom
+
+      objectInfo.setScrollFactor(0)
+      objectInfo.setPosition(
+        screenX + objectSize.width / 2 + 10,
+        screenY + objectSize.height / 2 + 10,
+      )
+    }
+  }
+
+  private drawDebugPhysics() {
+    const drawDebugPhysics = this.debugInfoLevel === 'all' || this.debugInfoLevel === 'physics'
+
+    if (!drawDebugPhysics) {
+      return
+    }
+
+    for (const key in this.debugObjects) {
+      const object = this.debugObjects[key].object
+      if (!object) {
+        console.log('skipping', key)
+        continue
+      }
+
+      object.drawDebugPhysics(this.debugGraphics)
+    }
+  }
+
+  private cleanup() {
+    this.sceneDebugInfo.destroy()
+    this.help.destroy()
+    for (const key in this.debugObjects) {
+      this.debugObjects[key].window?.destroy()
+    }
+  }
+
+  private getSceneDebugInfo(scene: Phaser.Scene): Record<string, unknown> {
+    const info: Record<string, unknown> = {
+      fps: Math.round(scene.game.loop.actualFps),
+    }
+
+    if (isGameScene(scene)) {
+      const debugInfo = scene.getDebugInfo()
+      Object.assign(info, debugInfo)
+    }
+
+    Object.assign(info, {
+      objects: scene.children.length,
+      bodies: scene.physics.world.bodies.size,
+      collisions: scene.physics.world.colliders.length,
+      lights: scene.lights.lights.length,
+      debugInfoLevel: this.debugInfoLevel,
+      debugObjects: Object.keys(this.debugObjects),
+    })
+
+    return info
+  }
+}
+
+class DebugInfoWindow extends Phaser.GameObjects.Container {
+  private background: GameObjects.Rectangle
+  private titleBackground: GameObjects.Rectangle
+  private title: GameObjects.Text
+  private text: GameObjects.Text
+
+  constructor(scene: Phaser.Scene, title: string) {
+    super(scene, 0, 0)
+
+    this.background = this.scene.add.rectangle(0, 0, 0, 0, 0x000000).setAlpha(0.5)
+    this.titleBackground = this.scene.add.rectangle(0, 0, 0, 0, 0x000000).setAlpha(0.5)
+
+    this.title = this.addTextObject(0, 0, title)
+    this.text = this.addTextObject(0, 0, '')
+
+    this.add([this.background, this.titleBackground, this.title, this.text])
+
+    this.scene.add.existing(this)
+    this.setDepth(9999)
+    this.resize()
+  }
+
+  public setDebuggable(debuggable: Debuggable): DebugInfoWindow {
+    const debugInfo = debuggable?.getDebugInfo()
+    if (!debugInfo) {
+      this.setText('no debug info available')
+      return this
+    }
+
+    return this.setDebugInfo(debugInfo)
+  }
+
+  public setDebugInfo(debugInfo: Record<string, unknown>) {
+    const text = this.formatDebugInfo(debugInfo)
+    return this.setText(text)
+  }
+
+  private formatDebugInfo(debugInfo: Record<string, unknown>, indent = 0): string {
+    const maxSpace = Math.max(...Object.keys(debugInfo).map((key) => key.length)) + 2
+    const indentString = indent ? ' '.repeat(indent) : ''
+    return Object.keys(debugInfo)
+      .map(
+        (key) =>
+          `${indentString}${key}${' '.repeat(maxSpace - key.length)}${
+            debugInfo[key] instanceof Object
+              ? '\n' + this.formatDebugInfo(debugInfo[key] as Record<string, unknown>, indent + 4)
+              : String(debugInfo[key])
+          }`,
+      )
+      .join('\n')
+  }
+
+  public setText(text: string): DebugInfoWindow {
+    this.text.setText(text)
+    this.resize()
+    return this
+  }
+
+  private resize() {
+    this.title.setPosition(0, 0)
+    this.text.setPosition(0, this.title.height)
+    this.background.height = this.title.height + this.text.height
+    this.background.width = Math.max(this.title.width, this.text.width)
+    this.titleBackground.setPosition(0, 0)
+    this.titleBackground.height = this.title.height
+    this.titleBackground.width = this.background.width
+
+    this.width = this.background.width
+    this.height = this.background.height
+  }
+
+  private addTextObject(
+    x: number,
+    y: number,
+    text: string,
+    padding: { top: number; bottom: number; left: number; right: number } = {
+      top: 5,
+      bottom: 5,
+      left: 10,
+      right: 10,
+    },
+  ): GameObjects.Text {
+    return this.scene.add.text(x, y, text, {
+      fontFamily: 'monospace',
+      fontSize: '14px',
+      color: '#cccccc',
+      stroke: '#000000',
+      strokeThickness: 0.5,
+      padding: padding,
+    })
+  }
+}
