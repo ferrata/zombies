@@ -193,17 +193,16 @@ export class Rain implements Weather {
       loop: true,
       callback: () => {
         if (Math.random() > 0.98) {
-          const flashTime = Math.random() * 800
-          this.scene.cameras.main.flash(
-            flashTime,
-            0xf0,
-            0xf0,
-            0xf0,
-            false,
-            (_camera: Phaser.Cameras.Scene2D.Camera, progress: number) => {
-              this.scene.reactToLightning(progress)
-            },
-          )
+          this.lightningFlash(Math.random() * 800)
+
+          for (let i = 0; i < Math.random() * 10; i++) {
+            this.scene.time.addEvent({
+              delay: Math.random() * 400,
+              callback: () => {
+                this.lightningFlash(200 + Math.random() * 400)
+              },
+            })
+          }
         }
       },
     })
@@ -215,5 +214,18 @@ export class Rain implements Weather {
     this.rainDrops.stop()
 
     this.lightning?.destroy()
+  }
+
+  private lightningFlash(flashDuration: number) {
+    this.scene.cameras.main.flash(
+      flashDuration,
+      0xf0,
+      0xf0,
+      0xf0,
+      false,
+      (_camera: Phaser.Cameras.Scene2D.Camera, progress: number) => {
+        this.scene.reactToLightning(progress)
+      },
+    )
   }
 }
